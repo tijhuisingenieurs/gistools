@@ -1,0 +1,7 @@
+*.pyc
+*.pyo
+*.zip
+.coverage
+.noseids
+help/build/
+.idea
