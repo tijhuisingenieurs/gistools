@@ -12,12 +12,15 @@ class TLine(LineString):
 
         point (shapely.Point): point to find on or near line
         return: tuple with:
-                vertex before as tuple with: (nr of vertex on line, vertex coordinates, distance on line)
-                vertex after as tuple with: (nr of vertex on line, vertex coordinates, distance on line)
+                vertex before as tuple with: (nr of vertex on line, vertex 
+                    coordinates, distance on line)
+                vertex after as tuple with: (nr of vertex on line, vertex 
+                    coordinates, distance on line)
                 distance of point on line
         """
         if self._length_array is None:
-            self._length_array = [(i, p, self.project(Point(p))) for i, p in enumerate(self.coords)]
+            self._length_array = [(i, p, self.project(Point(p))) 
+                                  for i, p in enumerate(self.coords)]
 
         dist = self.project(point)
 

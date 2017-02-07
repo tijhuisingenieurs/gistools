@@ -3,6 +3,6 @@
 *.zip
 .coverage
 .noseids
-help/build/
 .idea
 .project
+.pydevproject
