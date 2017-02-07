@@ -30,11 +30,14 @@ class TLine(LineString):
         return (vertex_before, vertex_after, dist)
 
     def get_haakselijn(self, point, length):
-        """
+        """ create line trough point on line perpendicular to direction of coordinate set
+        uses get_lin_part
 
-        :param point:
-        :param length:
-        :return:
+        point (shapely.point): point at which to create perpendicular
+        length: length of perpendicular to create
+        return: Tline with 3 vertices (point left, point on line, point right)
         """
+        
+        
 
         pass
