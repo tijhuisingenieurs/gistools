@@ -14,8 +14,6 @@ before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 script:
-  - nosetests gistools.test.test_geometry
-  - nosetests gistools.test.test_collection
   - pytest
 
 notifications:
