@@ -31,19 +31,37 @@ class TestTLine(unittest.TestCase):
         self.assertEqual(line_part[2], 4.0)
 
     def test_haakselijn_op_horizontaal(self):
-        """"test haakselijn on point on line"""
+        """"test haakselijn on point on horizontal line"""
 
         point = Point(2, 1)
         line = TLine([(0, 0), (0, 1), (3, 1), (3, 3)])
         haakselijn = line.get_haakselijn(point, 2.0)
+        
+        self.assertTupleEqual(haakselijn, ((2.0, 2.0), (2.0,1.0), (2.0, 0.0)))
 
-        self.assertTupleEqual(haakselijn, ((2.0, 2.0), (2.0, 0.0)))
+    def test_haakselijn_op_vertikaal(self):
+        """"test haakselijn on point on vertical line"""
+
+        point = Point(3, 2)
+        line = TLine([(0, 0), (0, 1), (3, 1), (3, 3)])
+        haakselijn = line.get_haakselijn(point, 2.0)
+        
+        self.assertTupleEqual(haakselijn, ((2.0, 2.0), (3.0,2.0), (4.0, 2.0)))
 
     def test_haakselijn_op_diagonaal(self):
-        """"test haakselijn on point on line"""
+        """"test haakselijn on point on diagonal line"""
 
         point = Point(2, 2)
         line = TLine([(0, 0), (3, 3), (2, 5)])
         haakselijn = line.get_haakselijn(point, sqrt(8.0))
 
-        self.assertTupleEqual(haakselijn, ((1.0, 3.0), (3.0, 1.0)))
+        self.assertTupleEqual(haakselijn, ((1.0, 3.0), (2.0,2.0), (3.0, 1.0)))
+        
+    def test_segment_richting(self):
+        """"test segment direction on point on line"""
+
+        point = Point(2, 2)
+        line = TLine([(0, 0), (3, 3), (2, 5)])
+        richting = line.get_segment_richting(point)
+
+        self.assertEqual(3,3)
