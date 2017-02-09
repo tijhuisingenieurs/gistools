@@ -1,4 +1,4 @@
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point, LineString, MultiLineString
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class TLine(LineString):
         pass
 
 
-class TMultiLineString(object):
+class TMultiLineString(MultiLineString, TLine):
 
     def __init__(self, coords):
         self._length_array = None
