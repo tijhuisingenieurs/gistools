@@ -2,6 +2,10 @@ from shapely.geometry import Point, LineString
 from math import sqrt
 from sympy.physics.units import length
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class TLine(LineString):
 
     def __init__(self, *args, **kwargs):
@@ -19,6 +23,8 @@ class TLine(LineString):
                     coordinates, distance on line)
                 distance of point on line
         """
+        # todo: make sure function is correct when point is on start vertex
+
         if self._length_array is None:
             self._length_array = [(i, p, self.project(Point(p))) 
                                   for i, p in enumerate(self.coords)]
@@ -109,3 +115,23 @@ class TLine(LineString):
         haakselijn = ((x_start,y_start), (point.x,point.y), (x_eind,y_eind))
         
         return haakselijn
+
+
+class TMultiLineString(object):
+
+    def __init__(self, coords):
+        self._length_array = None
+        self.line_parts = []
+
+        if len(coords) == 0 or len(coords[0]) == 0:
+            logger.warning('line with no or incorrect elements')
+        elif type(coords[0][0]) in [float, int]:
+            # single line
+            self.line_parts.append(TLine(coords))
+        else:
+            # multipart
+            for part in coords:
+                self.line_parts.append(TLine(part))
+
+    def is_multipart(self):
+        return len(self.line_parts) > 1
