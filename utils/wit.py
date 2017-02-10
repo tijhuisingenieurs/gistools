@@ -1,4 +1,5 @@
 from utils.geometry import TLine, TMultiLineString
+from shapely.geometry import Point 
 
         
 def create_leggerpunten(line,TI_waterbr, TI_talulbr, TI_bodembr):
@@ -17,14 +18,14 @@ def create_leggerpunten(line,TI_waterbr, TI_talulbr, TI_bodembr):
         
 
     point = line.get_point_at_percentage(0.5)
-    profiel = TLine(line.get_haakselijn_point(point,TI_waterbr))
+    profiel = TLine(line.get_haakselijn_point(Point(point),TI_waterbr))
         
     nulpunt = list(profiel.coords)[0]    
     eindpunt = list(profiel.coords)[2]
     
 
-    knikpunt_l = list(profiel.get_point_at_distance(TI_talulbr).coords)[0]
-    knikpunt_r = list(profiel.get_point_at_distance((TI_talulbr + TI_bodembr)).coords)[0]
+    knikpunt_l = profiel.get_point_at_distance(TI_talulbr)
+    knikpunt_r = profiel.get_point_at_distance((TI_talulbr + TI_bodembr))
     
     profiel_dict = {'22L':nulpunt,'22L_peil': 0.00,
                     'knik_l': knikpunt_l, 'knik_l_dpt': 0.00,

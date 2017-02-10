@@ -193,7 +193,7 @@ class TLine(LineString):
         point_y = vertex_before[1] + (afstand_segment * delta_y_m)
 
         # point = (delta_x_m, delta_y_m)
-        point = Point(point_x, point_y)
+        point = (point_x, point_y)
 
         return point
 

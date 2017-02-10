@@ -79,7 +79,7 @@ class TestTLine(unittest.TestCase):
         self.assertTupleEqual(segment[1], (3, (2, 4), 6.0))
         self.assertEqual(segment[2], 5.0)
         
-        self.assertEqual(list(point.coords), [(2.0, 3.0)])
+        self.assertEqual(point, (2.0, 3.0))
 
     def test_get_point_at_percentage(self):
         """test create point on line at given % of total line length"""
@@ -93,7 +93,7 @@ class TestTLine(unittest.TestCase):
         self.assertTupleEqual(segment[1], (3, (2, 8), 10.0))
         self.assertEqual(segment[2], 5.0)
         
-        self.assertEqual(list(point.coords), [(2.0, 3.0)])
+        self.assertEqual(point, (2.0, 3.0))
     
 
 class TestTMultiLine(unittest.TestCase):
