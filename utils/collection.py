@@ -109,7 +109,7 @@ class MemCollection(object):
         """Stages a record."""
         self.writerecords([record])
 
-    def save(self):
+    def save(self, filename, meta):
 
         # todo: check fields and append field metadata dynamicaly
         pass

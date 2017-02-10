@@ -25,7 +25,14 @@ class TLine(LineString):
         # todo: make sure function is correct when point is on start vertex
 
         if self._length_array is None:
-            self._length_array = [(i, p, self.project(Point(p))) 
+            if hasattr(self, 'geoms'):
+                coords = []
+                for p in self.geoms:
+                    coords.extend(p.coords)
+                self._length_array = [(i, p, self.project(Point(p)))
+                                      for i, p in enumerate(coords)]
+            else:
+                self._length_array = [(i, p, self.project(Point(p)))
                                   for i, p in enumerate(self.coords)]
 
         dist = afstand
@@ -213,5 +220,6 @@ class TLine(LineString):
 
 class TMultiLineString(MultiLineString, TLine):
 
-    def __init__(self, coords):
-        pass
+    def __init__(self, *args, **kwargs):
+        self._length_array = None
+        super(TMultiLineString, self).__init__(*args, **kwargs)
