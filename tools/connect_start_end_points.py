@@ -1,27 +1,25 @@
-from utils.collection import TCollection
+from shapely.geometry import shape
+from utils.collection import MemCollection
 
 
+def get_start_endpoints(line_col, copy_fields=[]):
+    """ returns MemCollection with start and end points of line"""
 
-def connect_start_endpoints():
+    point_col = MemCollection(geometry_type='Point')
 
-    filename = 'c:/tmp/test.shp'
+    for feature in line_col.filter():
+        line = shape(feature['geometry'])
+        props = {}
+        for field in copy_fields:
+            props[field] = feature['properties'].get(field, None)
 
-    lines = TCollection(filename)
+        point_col.writerecords([
+            {'geometry': {'type': 'Point', 'coordinates': line.coords[0]},
+             'properties': props},
+            {'geometry': {'type': 'Point', 'coordinates': line.coords[-1]},
+             'properties': props}])
 
-    points = TCollection()
-    connecting_lines = TCollection()
-
-    for feature in lines.features:
-        for point in (feature['geometry']['coordinates'][0],
-                      feature['geometry']['coordinates'][-1]):
-
-            points.add({'geometry':{'type': 'Point', 'coordinates': point},
-                        'properties': {'line_id': feature['id']}})
-
-    for point in points:
-        if not point['properties']['matched']:
-            point_polygon = todo
-            points.getfeatures(within=point_polygon)
+    return point_col
 
 
 

@@ -1,25 +1,29 @@
 import sys
-from fiona import Collection
 from rtree import index
 from shapely.geometry import shape
+from collections import OrderedDict
 
 # use fiona collection for 'normal'use
 
 
-class TCollection(list):
-    """class for a temporary file"""
+class MemCollection(object):
+    """Collection with same functions as fiona.collection, but which can be created in memory. Uses
+        rtree to speedup spatial filtering"""
 
     def __init__(self, geometry_type='Point'):
         self.geometry_type = geometry_type
         self._spatial_index = index.Index()
 
+        self.ordered_dict = OrderedDict()
+
     @property
     def schema(self):
-
+        # todo
         pass
 
     @property
     def meta(self):
+        # todo
         pass
 
     def filter(self, *args, **kwds):
@@ -30,21 +34,11 @@ class TCollection(list):
         Positional arguments ``stop`` or ``start, stop[, step]`` allows
         iteration to skip over items or stop at a specific item.
         """
+        selected = self.keys(*args, **kwds)
 
-        start = args.get('start', 0)
-        stop = min(args.get('stop', sys.maxint), len(self))
-        step = args.get('step', 1)
-
-        slice_index = range(start, stop, step)
-
-        bbox = kwds.get('bbox')
-        mask = kwds.get('mask')
-
-        if bbox:
-            bbox_index = self._spatial_index.intersection(bbox)
-
-        # todo: hier verder
-
+        for i in selected:
+            if i in self.ordered_dict:
+                yield self.ordered_dict[i]
 
     def items(self, *args, **kwds):
         """Returns an iterator over FID, record pairs, optionally
@@ -55,9 +49,13 @@ class TCollection(list):
         Positional arguments ``stop`` or ``start, stop[, step]`` allows
         iteration to skip over items or stop at a specific item.
         """
-        pass
+        selected = self.keys(*args, **kwds)
 
-    def keys(self, *args, **kwds):
+        for i in selected:
+            if i in self.ordered_dict:
+                yield (i, self.ordered_dict[i])
+
+    def keys(self, start=0, stop=None, step=1, **kwds):
         """Returns an iterator over FIDs, optionally
         filtered by a test for spatial intersection with the provided
         ``bbox``, a (minx, miny, maxx, maxy) tuple or a geometry
@@ -66,7 +64,26 @@ class TCollection(list):
         Positional arguments ``stop`` or ``start, stop[, step]`` allows
         iteration to skip over items or stop at a specific item.
         """
-        pass
+        selected = set(self.ordered_dict.keys())
+
+        if stop is None:
+            stop = max(selected)
+        elif stop < 0:
+            stop = max(0, max(selected) + stop)
+
+        selected.intersection_update(set(range(start, stop + 1, step)))
+
+        bbox = kwds.get('bbox')
+        mask = kwds.get('mask')
+
+        if bbox:
+            selected = selected.intersection_update(self._spatial_index.intersection(bbox))
+
+        if mask:
+            # todo
+            pass
+
+        return selected
 
     @property
     def bounds(self):
@@ -76,16 +93,31 @@ class TCollection(list):
     def writerecords(self, records):
         """Stages multiple records."""
 
-        # todo: check fields and append dynamicaly
+        if len(self) == 0:
+            nr = 0
+        else:
+            nr = next(reversed(self.ordered_dict)) + 1
 
         for record in records:
-            # todo, do something with the id
+            record['id'] = nr
+            self.ordered_dict[nr] = record
             pnt = shape(record['geometry'])
-            i = 0
-            self._spatial_index.insert(i, pnt.bounds)
-
-        self.extend(records)
+            self._spatial_index.insert(nr, pnt.bounds)
+            nr += 1
 
     def write(self, record):
         """Stages a record."""
         self.writerecords([record])
+
+    def save(self):
+
+        # todo: check fields and append field metadata dynamicaly
+        pass
+
+    def __len__(self):
+
+        return len(self.ordered_dict)
+
+    def __getitem__(self, key):
+
+        return self.ordered_dict[key]
