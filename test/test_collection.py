@@ -1,20 +1,31 @@
 import unittest
-from utils.collection import Collection
+from utils.collection import MemCollection
 import os.path
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
-class TestShapefile(unittest.TestCase):
+class TestMemCollection(unittest.TestCase):
 
-    def test_shapefile_iteration(self):
-        test_shape = os.path.join(test_data_dir, 'rd_line.shp')
-        collection = Collection(test_shape)
+    def setUp(self):
+        self.collection = MemCollection()
 
-        feature = next(collection.features)
-        self.assertEqual(feature['geometry']['type'], 'LineString')
-        self.assertEqual(feature['id'], '0')
-        self.assertDictContainsSubset({'id': 1,
-                                       'name': 'test name 1',
-                                       'value': None},
+        self.collection.write({'geometry': {'type': 'Point', 'coordinates': (4, 4)},
+                          'properties': {'name': 'test 1'}})
+        self.collection.write({'geometry': {'type': 'Point', 'coordinates': (2, 4)},
+                          'properties': {'name': 'test 2'}})
+
+    def test_len(self):
+        self.assertEqual(len(self.collection), 2)
+
+    def test_empty_filter(self):
+
+        feature = next(self.collection.filter())
+        self.assertEqual(feature['geometry']['coordinates'], (4, 4))
+        self.assertEqual(feature['id'], 0)
+        self.assertDictContainsSubset({'name': 'test 1'},
                                       feature['properties'])
+
+
+
+

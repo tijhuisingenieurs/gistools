@@ -98,12 +98,4 @@ class TestTLine(unittest.TestCase):
 
 class TestTMultiLine(unittest.TestCase):
 
-    def test_init_single_line(self):
-        """ test creation of single LineString and function 'is_multipart' """
-        multi_line = TMultiLineString([(0, 0), (0, 2)])
-        self.assertFalse(multi_line.is_multipart())
-
-    def test_init_multi_line(self):
-        """ test creation of multi LineString and function 'is_multipart' """
-        multi_line = TMultiLineString([[(0, 0), (0, 2)], [(1, 0), (1, 2)]])
-        self.assertTrue(multi_line.is_multipart())
+    pass
