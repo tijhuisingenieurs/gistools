@@ -9,6 +9,7 @@ from tools.connect_start_end_points import get_start_endpoints
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
+
 class TestTLine(unittest.TestCase):
 
     def setUp(self):
@@ -21,7 +22,7 @@ class TestTLine(unittest.TestCase):
 
         self.assertEqual(len(point_col), 4)
         self.assertDictEqual(point_col[0]['properties'],
-                              {'id': 1L, 'name': 'test name 1'})
+                             {'id': 1L, 'name': 'test name 1'})
 
     def test_get_start_endpoints_mem_collection(self):
         collection = MemCollection(geometry_type='Linestring')
@@ -39,4 +40,4 @@ class TestTLine(unittest.TestCase):
 
         self.assertEqual(len(point_col), 4)
         self.assertDictEqual(point_col[0]['properties'],
-                              {'id': 1L, 'name': 'test name 1'})
+                             {'id': 1L, 'name': 'test name 1'})
