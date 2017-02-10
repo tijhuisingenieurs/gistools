@@ -65,12 +65,12 @@ class TestTLine(unittest.TestCase):
         line = TLine([(0, 0), (3, 3), (2, 5)])
         richting = line.get_segment_richting_point(point)
 
-        self.assertEqual(3, 3)
+        self.assertTupleEqual(richting, (3.0, 3.0))
 
     def test_get_point_at_distance(self):
         """test create point on line at given distance"""
         
-        line = TLine([(0,0),(0,2),(2,2),(2,4)])
+        line = TLine([(0, 0), (0, 2), (2, 2), (2, 4)])
         afstand = 5
         point = line.get_point_at_distance(afstand)
         segment = line.get_line_part_dist(afstand)
@@ -79,13 +79,12 @@ class TestTLine(unittest.TestCase):
         self.assertTupleEqual(segment[1], (3, (2, 4), 6.0))
         self.assertEqual(segment[2], 5.0)
         
-        self.assertEqual(list(point.coords),[(2.0,3.0)])
+        self.assertEqual(list(point.coords), [(2.0, 3.0)])
 
-    
     def test_get_point_at_percentage(self):
         """test create point on line at given % of total line length"""
         
-        line = TLine([(0,0),(0,2),(2,2),(2,8)])
+        line = TLine([(0, 0), (0, 2), (2, 2), (2, 8)])
         perc = 0.5
         point = line.get_point_at_percentage(perc)
         segment = line.get_line_part_perc(perc)
@@ -94,7 +93,7 @@ class TestTLine(unittest.TestCase):
         self.assertTupleEqual(segment[1], (3, (2, 8), 10.0))
         self.assertEqual(segment[2], 5.0)
         
-        self.assertEqual(list(point.coords),[(2.0,3.0)])
+        self.assertEqual(list(point.coords), [(2.0, 3.0)])
     
 
 class TestTMultiLine(unittest.TestCase):

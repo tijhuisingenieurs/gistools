@@ -1,9 +1,8 @@
 from shapely.geometry import Point, LineString
 from math import sqrt
-from sympy.physics.units import length
 
 import logging
-from sympy.geometry.line import Segment
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,7 +11,6 @@ class TLine(LineString):
     def __init__(self, *args, **kwargs):
         self._length_array = None
         super(TLine, self).__init__(*args, **kwargs)
-        
 
     def get_line_part_dist(self, afstand):
         """ get vertex before and after distance on line
@@ -42,7 +40,7 @@ class TLine(LineString):
         
         return line_part
 
-    def get_line_part_point(self,point):
+    def get_line_part_point(self, point):
         """ get vertex before and after point on line
 
         point (shapely.Point): point to find on or near line
@@ -58,7 +56,7 @@ class TLine(LineString):
     
         return line_part
     
-    def get_line_part_perc(self,perc):
+    def get_line_part_perc(self, perc):
         """ get vertex before and after percentage of line
 
         perc: percentage of total line length.
@@ -88,9 +86,9 @@ class TLine(LineString):
         vertex_before = segment[0][1]
         vertex_after = segment[1][1]
         
-        delta_x = vertex_after[0]-vertex_before[0]
-        delta_y = vertex_after[1]-vertex_before[1]
-        richting = [delta_x,delta_y]
+        delta_x = vertex_after[0] - vertex_before[0]
+        delta_y = vertex_after[1] - vertex_before[1]
+        richting = (delta_x, delta_y)
         
         return richting
         
@@ -106,7 +104,6 @@ class TLine(LineString):
         richting = self.get_segment_richting_dist(afstand)
     
         return richting
-            
     
     def get_haakselijn_point(self, point, length):
         """ create line at distance on line perpendicular to direction of 
@@ -123,38 +120,42 @@ class TLine(LineString):
 #         richting segment = (delta x,delta y)
 #         haakse richting = -delta x / delta y
 
-        if richting[0] <> 0 and richting[1] <> 0 :
-            haakse_richting = -richting[0]/richting[1]
-            if richting[1] > 0:
-                delta_x_links = -0.5 * length / (sqrt(1+(richting[0]/richting[1])**2))
+        if richting[0] != 0.0 and richting[1] != 0.0:
+            haakse_richting = -richting[0] / richting[1]
+            if richting[1] > 0.0:
+                delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
             else:
-                delta_x_links = -0.5 * length / (sqrt(1+(richting[0]/richting[1])**2))
+                delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
             
-            if richting[0] > 0:
-                delta_y_links = abs(haakse_richting)*abs(delta_x_links)
+            if richting[0] > 0.0:
+                delta_y_links = abs(haakse_richting) * abs(delta_x_links)
             else:
-                delta_y_links = -abs(haakse_richting)*abs(delta_x_links)
+                delta_y_links = -abs(haakse_richting) * abs(delta_x_links)
         
-        if richting[1] == 0 and richting[0] <> 0:
-            delta_x_links = 0
-            if richting[0] > 0:
+        elif richting[1] == 0.0 and richting[0] != 0.0:
+            delta_x_links = 0.0
+            if richting[0] > 0.0:
                 delta_y_links = 0.5 * length
             else:
                 delta_y_links = -0.5 * length
         
-        if richting[0] == 0 and richting[1] <> 0:
-            delta_y_links = 0
-            if richting[1] > 0:
+        elif richting[0] == 0.0 and richting[1] != 0.0:
+            delta_y_links = 0.0
+            if richting[1] > 0.0:
                 delta_x_links = -0.5 * length
             else:
-                delta_x_links = 0.5 * length         
+                delta_x_links = 0.5 * length
+        else:
+            logger.warning('Haakselijn on segment of length 0.0 is not possible!')
+            delta_x_links = 0
+            delta_y_links = 0
         
 #         ToDo: wat als er twee punten op elkaar liggen... devision by zero??
 #               kan dit in de praktijk voorkomen? En welk tuple krijg je dan
 #               voor het segment bij een punt op deze punten
 #               Exception inbouwen voor richting[0] == 0 and richting[1] == 0
         
-        delta_x_rechts = - delta_x_links
+        delta_x_rechts = -delta_x_links
         delta_y_rechts = -delta_y_links
         
         x_start = point.x + delta_x_links
@@ -162,13 +163,11 @@ class TLine(LineString):
         x_eind = point.x + delta_x_rechts
         y_eind = point.y + delta_y_rechts
         
-        haakselijn = ((x_start,y_start), (point.x,point.y), (x_eind,y_eind))
+        haakselijn = ((x_start, y_start), (point.x, point.y), (x_eind, y_eind))
         
         return haakselijn
 
-
-    
-    def get_point_at_distance(self,afstand):
+    def get_point_at_distance(self, afstand):
         """ create a point on a line at a given distance from the line origin 
 
         afstand: distance from line origin to create point at
@@ -178,30 +177,28 @@ class TLine(LineString):
         vertex_before = segment[0][1]
         vertex_after = segment[1][1]
         
-        delta_x_segment = vertex_after[0]-vertex_before[0]
-        delta_y_segment = vertex_after[1]-vertex_before[1]
-        
-        richting_segement = [delta_x_segment,delta_y_segment]
+        delta_x_segment = vertex_after[0] - vertex_before[0]
+        delta_y_segment = vertex_after[1] - vertex_before[1]
+
         lengte_segment = segment[1][2] - segment[0][2]
         
-#         bereken verschil in coordinaten voor elke meter langs segment:
+        # bereken verschil in coordinaten voor elke meter langs segment:
         delta_x_m = delta_x_segment / lengte_segment
         delta_y_m = delta_y_segment / lengte_segment
 
-#         bereken restlengte in Segment
+        # bereken restlengte in segment
         afstand_segment = afstand - segment[0][2]   
-       
-          
-#         bepaal coordinaten van het nieuwe punt
+
+        # bepaal coordinaten van het nieuwe punt
         point_x = vertex_before[0] + (afstand_segment * delta_x_m)
         point_y = vertex_before[1] + (afstand_segment * delta_y_m)
          
-#         point = (delta_x_m,delta_y_m)
-        point = Point(point_x,point_y)
+        # point = (delta_x_m, delta_y_m)
+        point = Point(point_x, point_y)
                 
         return point
 
-    def get_point_at_percentage(self,perc):
+    def get_point_at_percentage(self, perc):
         """ create a point on a line at a given percentage of total line length
         from the line origin 
 
