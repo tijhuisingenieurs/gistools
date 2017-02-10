@@ -2,6 +2,8 @@ import unittest
 from utils.collection import MemCollection
 import os.path
 
+import fiona
+
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
@@ -26,6 +28,14 @@ class TestMemCollection(unittest.TestCase):
         self.assertDictContainsSubset({'name': 'test 1'},
                                       feature['properties'])
 
+    def test_save_collection(self):
+        self.collection.save('c:/tmp/test.shp', schema={
+            'geometry': 'Point',
+            'properties': {
+                'name': 'str'
+            }
+        })
 
+        f = fiona.open('c:/tmp/test.shp')
 
-
+        self.assertEqual(len(f), 2)

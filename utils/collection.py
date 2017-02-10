@@ -2,6 +2,7 @@ import sys
 from rtree import index
 from shapely.geometry import shape
 from collections import OrderedDict
+import fiona
 
 # use fiona collection for 'normal'use
 
@@ -109,9 +110,26 @@ class MemCollection(object):
         """Stages a record."""
         self.writerecords([record])
 
-    def save(self, filename, meta):
+    def save(self,
+             filename,
+             crs=None,
+             driver='ESRI Shapefile',
+             schema=None):
+        """
 
-        # todo: check fields and append field metadata dynamicaly
+        """
+
+        f = fiona.open(filename,
+                       'w',
+                       crs=crs,
+                       driver=driver,
+                       schema=schema)
+
+        records = [feat for feat in self.filter()]
+        f.writerecords(records)
+        f.close()
+
+       # todo: check fields and append field metadata dynamicaly
         pass
 
     def __len__(self):

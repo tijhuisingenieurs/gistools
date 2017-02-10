@@ -87,7 +87,6 @@ class TestTools(unittest.TestCase):
         self.assertDictEqual(point_col[0]['properties'],
                              {'id': 1L, 'name': 'test name 1'})
 
-
     def test_get_points_on_line_basic(self):
         collection = MemCollection(geometry_type='MultiLinestring')
 
