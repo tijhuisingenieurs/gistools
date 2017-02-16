@@ -1,4 +1,4 @@
-from utils.geometry import TLine, TMultiLineString
+from gistools.utils.geometry import TLine
 from shapely.geometry import Point 
 
         

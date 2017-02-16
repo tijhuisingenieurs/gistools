@@ -1,10 +1,10 @@
-import sys
 from rtree import index
 from shapely.geometry import shape
-from collections import OrderedDict
 import fiona
 
-# use fiona collection for 'normal'use
+from collections import OrderedDict
+
+# use fiona collection for 'normal' use
 
 
 class MemCollection(object):

@@ -1,11 +1,9 @@
 import unittest
-from shapely.geometry import Point
-from utils.geometry import TLine, TMultiLineString
-from utils.wit import  *
-from math import sqrt
+from gistools.utils.wit import *
+
 
 class TestWit(unittest.TestCase):
-    
+
     def setUp(self):
         pass
 

@@ -3,8 +3,8 @@ import os.path
 
 import fiona
 
-from utils.collection import MemCollection
-from tools.connect_start_end_points import (get_start_endpoints,
+from gistools.utils.collection import MemCollection
+from gistools.tools.connect_start_end_points import (get_start_endpoints,
                                             get_midpoints, get_points_on_line)
 
 

@@ -1,8 +1,7 @@
-from argparse import ArgumentError
-import exceptions
 from shapely.geometry import shape
-from utils.collection import MemCollection
-from utils.geometry import TLine, TMultiLineString
+
+from gistools.utils.collection import MemCollection
+from gistools.utils.geometry import TLine, TMultiLineString
 
 
 def get_start_endpoints(line_col, copy_fields=[]):
@@ -65,9 +64,9 @@ def get_points_on_line(line_col, copy_fields=[],
         for field in copy_fields:
             props[field] = feature['properties'].get(field, None)
 
-        offset_start = feature['properties'].get('min_offset_start_field', min_default_offset_start)
-        offset_end = feature['properties'].get('min_offset_end_field', min_default_offset_end)
-        distance = feature['properties'].get('distance_field', default_distance)
+        offset_start = feature['properties'].get(min_offset_start_field, min_default_offset_start)
+        offset_end = feature['properties'].get(min_offset_end_field, min_default_offset_end)
+        distance = feature['properties'].get(distance_field, default_distance)
 
         nr_full = line.length // distance
         rest_lengte = line.length % distance

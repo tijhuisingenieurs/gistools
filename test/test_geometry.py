@@ -1,6 +1,6 @@
 import unittest
 from shapely.geometry import Point
-from utils.geometry import TLine, TMultiLineString
+from gistools.utils.geometry import TLine, TMultiLineString
 from math import sqrt
 # from generatepointsfromlines import percentage
 

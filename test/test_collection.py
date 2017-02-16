@@ -1,5 +1,5 @@
 import unittest
-from utils.collection import MemCollection
+from gistools.utils.collection import MemCollection
 import os.path
 
 import fiona
