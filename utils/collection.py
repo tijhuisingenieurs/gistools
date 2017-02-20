@@ -67,20 +67,27 @@ class MemCollection(object):
         """
         selected = set(self.ordered_dict.keys())
 
+        # warning: this is not supported by Fiona
         if len(selected) == 0:
-            stop = 0
-        elif stop is None:
-            stop = max(selected)
-        elif stop < 0:
-            stop = max(0, max(selected) + stop)
+            return selected
 
-        selected.intersection_update(set(range(start, stop + 1, step)))
+        if stop is None:
+            stop = max(selected) + 1
+        elif stop < 0:
+            stop = max(0, max(selected) + stop + 1)
+
+        if start is None:
+            start = min(selected)
+        elif start < 0:
+            start = max(0, max(selected) + start + 1)
+
+        selected.intersection_update(set(range(start, stop, step)))
 
         bbox = kwds.get('bbox')
         mask = kwds.get('mask')
 
-        if bbox:
-            selected = selected.intersection_update(self._spatial_index.intersection(bbox))
+        if bbox is not None:
+            selected.intersection_update(set(self._spatial_index.intersection(bbox)))
 
         if mask:
             # todo
