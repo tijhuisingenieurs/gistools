@@ -67,7 +67,9 @@ class MemCollection(object):
         """
         selected = set(self.ordered_dict.keys())
 
-        if stop is None:
+        if len(selected) == 0:
+            stop = 0
+        elif stop is None:
             stop = max(selected)
         elif stop < 0:
             stop = max(0, max(selected) + stop)
@@ -139,3 +141,7 @@ class MemCollection(object):
     def __getitem__(self, key):
 
         return self.ordered_dict[key]
+
+    def __iter__(self):
+
+        return self.filter()

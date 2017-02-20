@@ -39,3 +39,16 @@ class TestMemCollection(unittest.TestCase):
         f = fiona.open('c:/tmp/test.shp')
 
         self.assertEqual(len(f), 2)
+
+    def test_empty_collection(self):
+
+        collection = MemCollection()
+
+        self.assertEqual(len(collection), 0)
+        self.assertListEqual(list(collection.keys()), [])
+        self.assertListEqual(list(collection.items()), [])
+
+    def test_iterate_collection(self):
+
+        self.assertEqual(len(self.collection), 2)
+        self.assertListEqual([c['properties']['name'] for c in self.collection], ['test 1', 'test 2'])
