@@ -238,7 +238,20 @@ class TLine(LineString):
 
         return point
 
+    def get_flipped_line(self):
+        """ flip geometry of line
 
+        return: Tline in flipped direction
+        """
+
+        flipped_line = []
+        
+        for p in self.coords:
+            flipped_line.insert(0, p)
+
+        return flipped_line
+    
+    
 class TMultiLineString(MultiLineString, TLine):
 
     def __init__(self, *args, **kwargs):
