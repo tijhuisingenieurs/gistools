@@ -4,7 +4,7 @@ import os.path
 # import fiona
 
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
+from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line, flip_lines
 
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -69,3 +69,31 @@ class TestDWPTools(unittest.TestCase):
                              {'id': 1, 'name': 'test name 1_p1'})
         self.assertDictEqual(haakselijn_col[3]['properties'],
                              {'id': 4, 'name': 'line 2_p1'})
+        
+        
+    def test_get_flipped_line_singlepart(self):
+        """test flip line"""
+        
+        line_col = MemCollection(geometry_type='MultiLinestring')
+
+        line_col.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                          ((2.0, 2.0), (2.0, 4.0), (4.0, 4.0))]},
+             'properties': {'id': 1, 'name': 'test name 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(1.0, 0.0), (1.0, 3.6)]},
+             'properties': {'id': 2, 'name': 'line 2'}}
+        ])
+
+        flipped_line_col = flip_lines(line_col)
+        
+        self.assertEqual(len(flipped_line_col), 5)
+        self.assertDictEqual(flipped_line_col[0]['geometry'],
+                             {'type': 'LineString',
+                              'coordinates': ([(4.0, 4.0), (2.0, 4.0), (2.0, 2.0)], 
+                                              [(1.0, 1.0), (0.0, 0.0)])})
+        self.assertDictEqual(flipped_line_col[1]['geometry'],
+                             {'type': 'LineString',
+                              'coordinates': ((1.0, 3.6), (1.0, 0.0))})
+        
