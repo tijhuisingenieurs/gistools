@@ -94,7 +94,15 @@ class TestTLine(unittest.TestCase):
         self.assertEqual(segment[2], 5.0)
         
         self.assertEqual(point, (2.0, 3.0))
-    
+
+    def test_get_flipped_line(self):
+        """test flip line"""
+        
+        line = TLine([(0.0, 0.0), (1.0, 1.0), (2.0, 2.0), (2.0, 4.0), (4.0, 4.0)])
+        flipped_line = line.get_flipped_line()
+        
+        self.assertEqual(flipped_line,[(4.0, 4.0), (2.0, 4.0), (2.0, 2.0), (1.0, 1.0), (0.0, 0.0)])
+        
 
 class TestTMultiLine(unittest.TestCase):
 
