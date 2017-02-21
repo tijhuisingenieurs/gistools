@@ -1,8 +1,29 @@
 from math import sqrt
-from shapely.geometry import Point, LineString, MultiLineString
+from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
+                              Polygon, MultiPolygon)
 
 import logging
 logger = logging.getLogger(__name__)
+
+def tshape(geometry):
+
+    geom_type = geometry['type'].lower()
+    coordinates = geometry['coordinates']
+
+    if geom_type == 'linestring':
+        return TLine(coordinates)
+    elif geom_type == 'multilinestring':
+        return TMultiLineString(coordinates)
+    elif geom_type == 'point':
+        return Point(coordinates)
+    elif geom_type == 'multipoint':
+        return MultiPoint(coordinates)
+    elif geom_type == 'polygon':
+        return Polygon(coordinates)
+    elif geom_type == 'multipolygon':
+        return MultiPolygon(coordinates)
+    else:
+        raise ValueError("geometry type '{0}' not supported".format(geom_type))
 
 
 class TLine(LineString):
