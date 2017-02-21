@@ -1,8 +1,6 @@
 import unittest
 import os.path
 
-# import fiona
-
 from gistools.utils.collection import MemCollection
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line, flip_lines
 
@@ -64,12 +62,10 @@ class TestDWPTools(unittest.TestCase):
                              {'type': 'LineString',
                               'coordinates': ((-6.5, 2.4), (1.0, 2.4), (8.5, 2.4))})                                              
 
-
         self.assertDictEqual(haakselijn_col[0]['properties'],
                              {'id': 1, 'name': 'test name 1_p1'})
         self.assertDictEqual(haakselijn_col[3]['properties'],
                              {'id': 4, 'name': 'line 2_p1'})
-        
         
     def test_get_flipped_line_singlepart(self):
         """test flip line"""
@@ -96,4 +92,3 @@ class TestDWPTools(unittest.TestCase):
         self.assertDictEqual(flipped_line_col[1]['geometry'],
                              {'type': 'LineString',
                               'coordinates': ((1.0, 3.6), (1.0, 0.0))})
-        
