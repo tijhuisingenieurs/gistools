@@ -1,7 +1,6 @@
 import unittest
 import os.path
 
-import fiona
 
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import (get_start_endpoints,
@@ -17,6 +16,7 @@ class TestTools(unittest.TestCase):
         pass
 
     def test_get_start_endpoints_shapefile(self):
+        import fiona
         collection = fiona.open(os.path.join(test_data_dir, 'rd_line.shp'))
 
         point_col = get_start_endpoints(collection, ['id', 'name'])

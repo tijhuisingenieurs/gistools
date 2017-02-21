@@ -1,6 +1,6 @@
 from rtree import index
 from shapely.geometry import shape
-import fiona
+
 
 from collections import OrderedDict
 
@@ -127,6 +127,7 @@ class MemCollection(object):
         """
 
         """
+        import fiona
 
         f = fiona.open(filename,
                        'w',

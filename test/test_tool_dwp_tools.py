@@ -35,7 +35,7 @@ class TestDWPTools(unittest.TestCase):
                           'coordinates': [(0.0, 1.5)]},
              'properties': {'id': 1, 'name': 'test name 1_p1'}},
             {'geometry': {'type': 'Point',
-                          'coordinates': [(0.0, 3.0)]},
+                          'coordinates': [(0.0, 2.9)]},
              'properties': {'id': 2, 'name': 'test name 1_p2'}},                                
             {'geometry': {'type': 'Point',
                           'coordinates': [(0.0, 4.3)]},
@@ -53,16 +53,16 @@ class TestDWPTools(unittest.TestCase):
         self.assertEqual(len(haakselijn_col), 5)
         self.assertDictEqual(haakselijn_col[0]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': [(-7.5, 1.5), (0.0, 1.5), (7.5, 1.5)]})
+                              'coordinates': ((-7.5, 1.5), (0.0, 1.5), (7.5, 1.5))})
         self.assertDictEqual(haakselijn_col[1]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': [(-7.5, 3.5), (0.0, 3.5), (7.5, 3.5)]})
+                              'coordinates': ((-7.5, 2.9), (0.0, 2.9), (7.5, 2.9))})
         self.assertDictEqual(haakselijn_col[3]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': [(-6.5, 1.2), (1.0, 1.2), (8.5, 1.2)]})
+                              'coordinates': ((-6.5, 1.2), (1.0, 1.2), (8.5, 1.2))})
         self.assertDictEqual(haakselijn_col[4]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': [(-6.5, 2.4), (1.0, 2.4), (8.5, 2.4)]})                                              
+                              'coordinates': ((-6.5, 2.4), (1.0, 2.4), (8.5, 2.4))})                                              
 
 
         self.assertDictEqual(haakselijn_col[0]['properties'],
