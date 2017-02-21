@@ -103,6 +103,8 @@ class MemCollection(object):
     def writerecords(self, records):
         """Stages multiple records."""
 
+        if type(records) != list:
+            raise ValueError('list expected, got {0}'.format(type(records)))
         if len(self) == 0:
             nr = 0
         else:
