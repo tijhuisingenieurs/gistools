@@ -67,7 +67,7 @@ class TestDWPTools(unittest.TestCase):
         self.assertDictEqual(haakselijn_col[3]['properties'],
                              {'id': 4, 'name': 'line 2_p1'})
         
-    def test_get_flipped_line_singlepart(self):
+    def test_get_flipped_line(self):
         """test flip line"""
         
         line_col = MemCollection(geometry_type='MultiLinestring')
@@ -84,11 +84,11 @@ class TestDWPTools(unittest.TestCase):
 
         flipped_line_col = flip_lines(line_col)
         
-        self.assertEqual(len(flipped_line_col), 5)
+        self.assertEqual(len(flipped_line_col), 2)
         self.assertDictEqual(flipped_line_col[0]['geometry'],
-                             {'type': 'LineString',
-                              'coordinates': ([(4.0, 4.0), (2.0, 4.0), (2.0, 2.0)], 
-                                              [(1.0, 1.0), (0.0, 0.0)])})
+                             {'type': 'MultiLineString',
+                              'coordinates': [[(4.0, 4.0), (2.0, 4.0), (2.0, 2.0)], 
+                                              [(1.0, 1.0), (0.0, 0.0)]]})
         self.assertDictEqual(flipped_line_col[1]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': ((1.0, 3.6), (1.0, 0.0))})
+                              'coordinates': [(1.0, 3.6), (1.0, 0.0)]})
