@@ -40,11 +40,18 @@ def flip_lines(collection):
     for feature in collection.filter():
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
+            check = 'Tline'
         else:
             line = TMultiLineString(feature['geometry']['coordinates'])     
+            check = 'TMultiLineString'
         
-        line.get_flipped_line()
+        flipped_line = line.get_flipped_line()
         
-        line['geometry']['coordinates'] = l.coords
-        
+        if check == 'TMultiLineString':
+            line['geometry']['coordinates'] = []
+            for l in flipped_line.filter():
+                line['geometry']['coordinates'].extend(l.coords)
+        else:
+            line['geometry']['coordinates'] = flipped_line.coords
+    
     return collection

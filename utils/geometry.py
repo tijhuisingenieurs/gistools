@@ -246,9 +246,16 @@ class TLine(LineString):
 
         flipped_line = []
         
-        for p in self.coords:
-            flipped_line.insert(0, p)
-
+        if hasattr(self, 'geoms'):
+            coords = []
+            for geom in self.geoms:
+                coords.insert(0,geom.coords)
+            flipped_line.insert(0,coords)
+            
+        else:
+            for p in self.coords:
+                flipped_line.insert(0, p)        
+        
         return flipped_line
     
     
