@@ -1,14 +1,13 @@
 import unittest
 
 from gistools.utils.collection import MemCollection
-from gistools.tools.clean import get_end_points
+from gistools.tools.clean import get_end_points, connect_lines
+from gistools.utils.geometry import tshape
 
 
 class TestEndPoints(unittest.TestCase):
 
     def setUp(self):
-
-        self.col = MemCollection()
 
         self.lines = [{
             'geometry': {'type': 'LineString', 'coordinates': [(1, 5), (5, 5)]},
@@ -102,3 +101,52 @@ class TestEndPoints(unittest.TestCase):
 
         end_points = get_end_points(memcol, 'lid')
         self.assertEqual(len(end_points), 3)
+
+class TestConnectLines(unittest.TestCase):
+
+    def setUp(self):
+
+        self.lines = [{
+            'geometry': {'type': 'LineString', 'coordinates': [(-10, 0), (10, 0)]},
+            'properties': {'lid': 1, 'name': 'refline'}
+        }, {
+            'geometry': {'type': 'LineString', 'coordinates': [(1, 0), (1, 5)]},
+            'properties': {'lid': 2, ' name': 'touches'}
+        }, {
+            'geometry': {'type': 'LineString', 'coordinates': [(4, -1), (4, 4)]},
+            'properties': {'lid': 3, 'name': 'crosses'}
+        }, {
+            'geometry': {'type': 'LineString', 'coordinates': [(2, 9), (5, 9)]},
+            'properties': {'lid': 4, 'name': 'extend touches'}
+        }]
+
+        self.col = MemCollection()
+        self.col.writerecords(self.lines)
+
+    def test_function(self):
+
+        one = tshape(self.lines[0]['geometry'])
+        touch_line = tshape(self.lines[1]['geometry'])
+        cross_line = tshape(self.lines[2]['geometry'])
+        extend_line = tshape(self.lines[3]['geometry'])
+
+        self.assertTrue(one.touches(touch_line))
+        self.assertFalse(cross_line.touches(touch_line))
+        self.assertFalse(one.touches(cross_line))
+
+        self.assertTrue(one.crosses(cross_line))
+        self.assertFalse(cross_line.crosses(touch_line))
+        self.assertFalse(one.crosses(touch_line))
+
+    def test_add_vertex_add_connection(self):
+
+        col = MemCollection()
+        col.writerecords(self.lines[:2])
+
+        lines = connect_lines(col,
+                            line_id_field='lid')
+
+        self.assertEqual(len(lines[0]['geometry']['coordinates']), 3)
+        self.assertListEqual(lines[1]['properties']['linked_start'], [0])
+
+

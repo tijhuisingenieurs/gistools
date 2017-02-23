@@ -32,6 +32,17 @@ class TLine(LineString):
         self._length_array = None
         super(TLine, self).__init__(*args, **kwargs)
 
+    def add_vertex_add_point(self, point):
+        """ add vertex add point """
+
+        vertex_before, vertex_after, dist = self.get_line_part_point(point)
+
+        coords = self.coords[:]
+        coords.insert(vertex_after[0], point.coords[0])
+
+        return TLine(coords)
+
+
     def get_line_part_dist(self, afstand):
         """ get vertex before and after distance on line
 
