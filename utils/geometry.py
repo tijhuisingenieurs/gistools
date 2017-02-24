@@ -3,7 +3,7 @@ from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def tshape(geometry):
 
@@ -58,11 +58,18 @@ class TLine(LineString):
 
         dist = afstand
 
+        vertex_before = None 
+        vertex_after = None
+
         for p in self._length_array:
             if dist <= p[2]:
                 vertex_before = self._length_array[p[0] - 1]
                 vertex_after = p
                 break
+        
+        if vertex_before is None:
+            log.warning("No vertex found at distance {0} for line {1}".format(dist, str(self)))
+        
         line_part = (vertex_before, vertex_after, dist)
 
         return line_part
@@ -173,7 +180,7 @@ class TLine(LineString):
             else:
                 delta_x_links = 0.5 * length
         else:
-            logger.warning('Haakselijn on segment of length 0.0 is not possible!')
+            log.warning('Haakselijn on segment of length 0.0 is not possible!')
             delta_x_links = 0
             delta_y_links = 0
 
