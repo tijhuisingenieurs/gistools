@@ -57,6 +57,24 @@ class TestTLine(unittest.TestCase):
         haakselijn = line.get_haakselijn_point(point, sqrt(8.0))
 
         self.assertTupleEqual(haakselijn, ((1.0, 3.0), (2.0, 2.0), (3.0, 1.0)))
+        
+    def test_haakselijn_op_horizontaal_boundary(self):
+        """test haakselijn on point on horizontal line"""
+
+        point = Point(3, 3)
+        line = TLine([(0, 0), (0, 1), (3, 1), (3, 3)])
+        haakselijn = line.get_haakselijn_point(point, 2.0)
+
+        self.assertTupleEqual(haakselijn, ((2.0, 3.0), (3.0, 3.0), (4.0, 3.0)))
+        
+    def test_haakselijn_punt_buiten_lijn(self):
+        """test haakselijn on point on horizontal line"""
+
+        point = Point(2, 0)
+        line = TLine([(0, 0), (0, 1), (3, 1), (3, 3)])
+        haakselijn = line.get_haakselijn_point(point, 2.0)
+
+        self.assertTupleEqual(haakselijn, ((2.0, 1.0), (2.0, 0.0), (2.0, -1.0)))
 
     def test_segment_richting(self):
         """test segment direction on point on line"""
@@ -66,6 +84,15 @@ class TestTLine(unittest.TestCase):
         richting = line.get_segment_richting_point(point)
 
         self.assertTupleEqual(richting, (3.0, 3.0))
+    
+    def test_segment_richting_boundary(self):
+        """test segment direction on point at boundary of line"""
+
+        point = Point(3, 5)
+        line = TLine([(0, 0), (3, 3), (3, 5)])
+        richting = line.get_segment_richting_point(point)
+
+        self.assertTupleEqual(richting, (0.0, 2.0))
 
     def test_get_point_at_distance(self):
         """test create point on line at given distance"""

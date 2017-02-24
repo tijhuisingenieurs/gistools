@@ -11,7 +11,7 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
 
     haakselijn_col = MemCollection(geometry_type='LineString')
 
-    for feature in line_col.filter():
+    for feature in line_col:
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
         else:
@@ -19,12 +19,13 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
 
         length = feature['properties'].get(length_field, default_length)
 
-        for p in point_col:
-            props = {}
-            for field in copy_fields:
-                props[field] = p['properties'].get(field, None)
+        for p in point_col.filter(bbox=line.bounds):
                 
-            if line.contains(Point(p['geometry']['coordinates'])):
+            if line.intersects(Point(p['geometry']['coordinates'])):
+                props = {}
+                for field in copy_fields:
+                    props[field] = p['properties'].get(field, None)
+                
                 haakselijn_col.writerecords([
                     {'geometry': {'type': 'LineString', 
                                   'coordinates': line.get_haakselijn_point(Point(p['geometry']['coordinates']),
