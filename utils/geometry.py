@@ -182,7 +182,7 @@ class TLine(LineString):
             if richting[1] > 0.0:
                 delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
             else:
-                delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
+                delta_x_links = 0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
 
             if richting[0] > 0.0:
                 delta_y_links = abs(haakse_richting) * abs(delta_x_links)

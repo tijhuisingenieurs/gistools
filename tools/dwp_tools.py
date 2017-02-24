@@ -21,7 +21,7 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
 
         for p in point_col.filter(bbox=line.bounds):
                 
-            if line.intersects(Point(p['geometry']['coordinates'])):
+            if line.almost_intersect_with_point(Point(p['geometry']['coordinates'])):
                 props = {}
                 for field in copy_fields:
                     props[field] = p['properties'].get(field, None)
