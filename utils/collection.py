@@ -20,12 +20,12 @@ class MemCollection(object):
     @property
     def schema(self):
         # todo
-        pass
+        return
 
     @property
     def meta(self):
         # todo
-        pass
+        return
 
     def filter(self, *args, **kwds):
         """Returns an iterator over records, but filtered by a test for
@@ -141,8 +141,7 @@ class MemCollection(object):
         f.writerecords(records)
         f.close()
 
-       # todo: check fields and append field metadata dynamicaly
-        pass
+        # todo: check fields and append field metadata dynamicaly
 
     def __len__(self):
 
