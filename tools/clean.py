@@ -1,8 +1,8 @@
+from copy import copy
 from shapely.geometry import Polygon
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import tshape, TLine, Point
-
 
 
 def get_end_points(lines,
@@ -89,16 +89,16 @@ def get_end_points(lines,
         if len(cluster_ids) > 0:
             x = 0
             y = 0
-            for id in cluster_ids:
-                x += points[id]['geometry']['coordinates'][0]
-                y += points[id]['geometry']['coordinates'][1]
+            for ids in cluster_ids:
+                x += points[ids]['geometry']['coordinates'][0]
+                y += points[ids]['geometry']['coordinates'][1]
 
-            x = x / len(cluster_ids)
-            y = y / len(cluster_ids)
+            x /= len(cluster_ids)
+            y /= len(cluster_ids)
 
-            line_ids = [str(points[id]['properties']['line_id']) for id in cluster_ids]
+            line_ids = [str(points[ids]['properties']['line_id']) for ids in cluster_ids]
 
-            line_starts = [str(int(points[id]['properties']['start'])) for id in cluster_ids]
+            line_starts = [str(int(points[ids]['properties']['start'])) for ids in cluster_ids]
 
             point_sum.write({
                 'geometry': {'type': 'Point',
@@ -136,15 +136,18 @@ def connect_lines(lines,
 
     implemented cases:
     1) add vertex when line touches other line
+    6) split line on connection
 
     :return:
     """
+    for feature in lines:
+        feature['properties']['linked_start'] = []
+        feature['properties']['linked_end'] = []
+        feature['properties']['link_loc'] = []
+
 
     for feature in lines:
         line = tshape(feature['geometry'])
-
-        feature['properties']['linked_start'] = []
-        feature['properties']['linked_end'] = []
 
         start_pnt = Point(line.coords[0])
         end_pnt = Point(line.coords[-1])
@@ -157,8 +160,6 @@ def connect_lines(lines,
 
         extended_line_start_angle = Polygon()
         extended_line_end_angle = Polygon()
-
-
 
         # if extend_with_angle_degrees is None:
         #     extend_line_start = TLine()
@@ -175,61 +176,78 @@ def connect_lines(lines,
 
             # check if endpoint is on other line
 
-            if cand_line.contains(start_pnt):
+            if cand_line.intersects(start_pnt):
                 # online, but not on start or end
                 feature['properties']['linked_start'].append(candidate['id'])
+                candidate['properties']['link_loc'].append(start_pnt.coords[0])
 
                 if start_pnt.coords not in cand_line.coords:
                     # add vertex to line
-                    cand_line = cand_line.add_vertex_add_point(start_pnt)
-                    candidate['geometry']['coordinates'] = cand_line.coords
-            elif cand_line.contains(start_pnt):
-                # on start or end_point (multilinestring?)
-                feature['properties']['linked_start'].append(candidate['id'])
+                    cand_line = cand_line.add_vertex_at_point(start_pnt)
+                    candidate['geometry']['coordinates'] = cand_line.coordinates
 
-            if cand_line.contains(end_pnt):
+            if cand_line.intersects(end_pnt):
                 feature['properties']['linked_end'].append(candidate['id'])
+                candidate['properties']['link_loc'].append(end_pnt.coords[0])
 
-                if start_pnt.coords not in cand_line.coords:
+                if end_pnt.coords not in cand_line.coords:
                     # add vertex to line
-                    cand_line = cand_line.add_vertex_add_point(start_pnt)
-                    candidate['geometry']['coordinates'] = cand_line.coords
-            elif cand_line.contains(end_pnt):
-                # on start or end_point (multilinestring?)
-                feature['properties']['linked_end'].append(candidate['id'])
+                    cand_line = cand_line.add_vertex_at_point(end_pnt)
+                    candidate['geometry']['coordinates'] = cand_line.coordinates
 
+    del cand_line, candidate, start_line, start_pnt
 
-                    # check if line crosses other line
-            # if line.crosses(candidate):
-            #     pass
-            #
-            # # check of line crosses or touches other line when extended, with and without angle
-            # if extend_with_angle_degrees is None:
-            #     if extend_line_start.crosses(cand_line):
-            #         pass
-            #     elif extend_line_start.touches(cand_line):
-            #         pass
-            #
-            #     if extend_line_end.crosses(cand_line):
-            #         pass
-            #     elif extend_line_end.touches(cand_line):
-            #         pass
+    if split_line_at_connection:
+        output_lines = MemCollection()
+        for feature in lines:
+
+            line = tshape(feature['geometry'])
+
+            # sort split_points on distance:
+            split_points = sorted(feature['properties']['link_loc'],
+                                  key=lambda loc: line.project(Point(loc)))
+
+            start_vertex = 0
+            nr = None
+            for i, split_point in enumerate(split_points):
+                end_vertex = feature['geometry']['coordinates'].index(split_point)
+                line_part = {
+                    'geometry': {
+                        'type': feature['geometry']['type'],
+                        'coordinates': feature['geometry']['coordinates'][start_vertex:end_vertex+1]},
+                    'properties': copy(feature['properties'])
+                }
+                line_part['properties']['part'] = i
+                output_lines.write(line_part)
+                start_vertex = end_vertex
+                nr = i + 1
+
+            # last part
+            line_part = {
+                'geometry': {
+                    'type': feature['geometry']['type'],
+                    'coordinates': feature['geometry']['coordinates'][start_vertex:]},
+                'properties': copy(feature['properties'])
+            }
+            line_part['properties']['part'] = nr
+            output_lines.write(line_part)
+
+        return output_lines
+
     return lines
 
-
-
-
-
-
-
-        # add vertex if needed or split line
-
-
-        # adjust line geometry to connect correctly
-
-
-
-
-
-
-
+    # check if line crosses other line
+    # if line.crosses(candidate):
+    #     pass
+    #
+    # # check of line crosses or touches other line when extended, with and without angle
+    # if extend_with_angle_degrees is None:
+    #     if extend_line_start.crosses(cand_line):
+    #         pass
+    #     elif extend_line_start.touches(cand_line):
+    #         pass
+    #
+    #     if extend_line_end.crosses(cand_line):
+    #         pass
+    #     elif extend_line_end.touches(cand_line):
+    #         pass

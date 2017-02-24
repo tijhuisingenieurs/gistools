@@ -32,16 +32,28 @@ class TLine(LineString):
         self._length_array = None
         super(TLine, self).__init__(*args, **kwargs)
 
-    def add_vertex_add_point(self, point):
-        """ add vertex add point """
+    def add_vertex_at_point(self, point):
+        """ add vertex at point """
 
         vertex_before, vertex_after, dist = self.get_line_part_point(point)
 
         coords = self.coords[:]
         coords.insert(vertex_after[0], point.coords[0])
-
         return TLine(coords)
 
+    @property
+    def coordinates(self):
+        """representation in the format of ((x, y),(x, y))"""
+        return tuple([pnt for pnt in self.coords])
+
+    def almost_intersect_with_point(self, other, decimals=6):
+
+        if self.intersects(other):
+            return True
+        elif self.distance(other) < 10**-decimals:
+            return True
+        else:
+            return False
 
     def get_line_part_dist(self, afstand):
         """ get vertex before and after distance on line
@@ -211,30 +223,32 @@ class TLine(LineString):
         afstand: distance from line origin to create point at
         return: point (shapely.point)
         """
-        segment = self.get_line_part_dist(afstand)
-        vertex_before = segment[0][1]
-        vertex_after = segment[1][1]
 
-        delta_x_segment = vertex_after[0] - vertex_before[0]
-        delta_y_segment = vertex_after[1] - vertex_before[1]
-
-        lengte_segment = segment[1][2] - segment[0][2]
-
-        # bereken verschil in coordinaten voor elke meter langs segment:
-        delta_x_m = delta_x_segment / lengte_segment
-        delta_y_m = delta_y_segment / lengte_segment
-
-        # bereken restlengte in segment
-        afstand_segment = afstand - segment[0][2]
-
-        # bepaal coordinaten van het nieuwe punt
-        point_x = vertex_before[0] + (afstand_segment * delta_x_m)
-        point_y = vertex_before[1] + (afstand_segment * delta_y_m)
-
-        # point = (delta_x_m, delta_y_m)
-        point = (point_x, point_y)
-
-        return point
+        return self.interpolate(afstand).coords[0]
+        # segment = self.get_line_part_dist(afstand)
+        # vertex_before = segment[0][1]
+        # vertex_after = segment[1][1]
+        #
+        # delta_x_segment = vertex_after[0] - vertex_before[0]
+        # delta_y_segment = vertex_after[1] - vertex_before[1]
+        #
+        # lengte_segment = segment[1][2] - segment[0][2]
+        #
+        # # bereken verschil in coordinaten voor elke meter langs segment:
+        # delta_x_m = delta_x_segment / lengte_segment
+        # delta_y_m = delta_y_segment / lengte_segment
+        #
+        # # bereken restlengte in segment
+        # afstand_segment = afstand - segment[0][2]
+        #
+        # # bepaal coordinaten van het nieuwe punt
+        # point_x = vertex_before[0] + (afstand_segment * delta_x_m)
+        # point_y = vertex_before[1] + (afstand_segment * delta_y_m)
+        #
+        # # point = (delta_x_m, delta_y_m)
+        # point = (point_x, point_y)
+        #
+        # return point
 
     def get_point_at_percentage(self, perc):
         """ create a point on a line at a given percentage of total line length

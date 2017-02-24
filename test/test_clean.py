@@ -138,7 +138,7 @@ class TestConnectLines(unittest.TestCase):
         self.assertFalse(cross_line.crosses(touch_line))
         self.assertFalse(one.crosses(touch_line))
 
-    def test_add_vertex_add_connection(self):
+    def test_add_vertex_at_connection(self):
 
         col = MemCollection()
         col.writerecords(self.lines[:2])
@@ -146,7 +146,20 @@ class TestConnectLines(unittest.TestCase):
         lines = connect_lines(col,
                             line_id_field='lid')
 
+        self.assertEqual(len(lines), 2)
         self.assertEqual(len(lines[0]['geometry']['coordinates']), 3)
         self.assertListEqual(lines[1]['properties']['linked_start'], [0])
 
+    def test_split_at_connection(self):
 
+        col = MemCollection()
+        col.writerecords(self.lines[:2])
+
+        lines = connect_lines(col,
+                              line_id_field='lid',
+                              split_line_at_connection=True)
+
+
+        parts = [f['properties']['part'] for f in lines]
+        self.assertEqual(len(lines), 3)
+        self.assertListEqual(parts, [0, 1, None])
