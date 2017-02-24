@@ -45,11 +45,7 @@ def flip_lines(collection):
             line = TMultiLineString(feature['geometry']['coordinates'])     
             check = 'TMultiLineString'
         
-        print 'Gevonden lijnobject: ', line
-        
         flipped_line = line.get_flipped_line()
-        
-        print 'Geflipte versie lijnobject', flipped_line
 
         feature['geometry']['coordinates'] = flipped_line
             

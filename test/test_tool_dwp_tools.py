@@ -87,8 +87,8 @@ class TestDWPTools(unittest.TestCase):
         self.assertEqual(len(flipped_line_col), 2)
         self.assertDictEqual(flipped_line_col[0]['geometry'],
                              {'type': 'MultiLineString',
-                              'coordinates': [[(4.0, 4.0), (2.0, 4.0), (2.0, 2.0)], 
-                                              [(1.0, 1.0), (0.0, 0.0)]]})
+                              'coordinates': [((4.0, 4.0), (2.0, 4.0), (2.0, 2.0)), 
+                                              ((1.0, 1.0), (0.0, 0.0))]})
         self.assertDictEqual(flipped_line_col[1]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': [(1.0, 3.6), (1.0, 0.0)]})
+                              'coordinates': ((1.0, 3.6), (1.0, 0.0))})

@@ -247,14 +247,10 @@ class TLine(LineString):
         flipped_line = []      
         
         if hasattr(self, 'geoms'):            
-            for geom in self.geoms:
-                coords = []
-                for p in geom.coords:
-                    coords.insert(0, p)
-                flipped_line.insert(0, coords)                                                
+            for geom in reversed(self.geoms):
+                flipped_line.append(tuple([p for p in reversed(geom.coords)]))                                                
         else:
-            for p in self.coords:
-                flipped_line.insert(0, p)        
+            flipped_line = tuple([p for p in reversed(self.coords)])      
         
         return flipped_line
     
