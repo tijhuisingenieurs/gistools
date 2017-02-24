@@ -101,7 +101,7 @@ class TestTLine(unittest.TestCase):
         line = TLine([(0.0, 0.0), (1.0, 1.0), (2.0, 2.0), (2.0, 4.0), (4.0, 4.0)])
         flipped_line = line.get_flipped_line()
         
-        self.assertEqual(flipped_line,[(4.0, 4.0), (2.0, 4.0), (2.0, 2.0), (1.0, 1.0), (0.0, 0.0)])
+        self.assertEqual(flipped_line,((4.0, 4.0), (2.0, 4.0), (2.0, 2.0), (1.0, 1.0), (0.0, 0.0)))
         
 
 class TestTMultiLine(unittest.TestCase):

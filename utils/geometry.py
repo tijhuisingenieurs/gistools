@@ -244,11 +244,14 @@ class TLine(LineString):
         return: Tline in flipped direction
         """
 
-        flipped_line = []
+        flipped_line = []      
         
-        for p in self.coords:
-            flipped_line.insert(0, p)
-
+        if hasattr(self, 'geoms'):            
+            for geom in reversed(self.geoms):
+                flipped_line.append(tuple([p for p in reversed(geom.coords)]))                                                
+        else:
+            flipped_line = tuple([p for p in reversed(self.coords)])      
+        
         return flipped_line
     
     

@@ -37,14 +37,16 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
 def flip_lines(collection):
     """ returns MemCollection with flipped lines"""    
     
-    for feature in collection.filter():
+    for feature in collection:
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
+            check = 'Tline'
         else:
             line = TMultiLineString(feature['geometry']['coordinates'])     
+            check = 'TMultiLineString'
         
-        line.get_flipped_line()
-        
-        line['geometry']['coordinates'] = l.coords
-        
+        flipped_line = line.get_flipped_line()
+
+        feature['geometry']['coordinates'] = flipped_line
+            
     return collection
