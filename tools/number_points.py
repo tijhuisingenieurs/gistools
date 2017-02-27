@@ -24,7 +24,7 @@ def number_points_on_line(lines,
         for point in points.filter(bbox=line_shape.bounds):
             pnt = Point(point['geometry']['coordinates'])
 
-            if line_shape.intersects(pnt):
+            if line_shape.almost_intersect_with_point(pnt):
                 point['dist'] = line_shape.project(pnt)
                 pnts_on_line.append(point)
 
@@ -35,7 +35,9 @@ def number_points_on_line(lines,
             pnts_on_line.reverse()
 
         for point in pnts_on_line:
-            point['properties'][point_number_field] = i
-            i += 1
+            # check if number already set in cae point is om multiple lines
+            if point['properties'][point_number_field] is None:
+                point['properties'][point_number_field] = i
+                i += 1
 
     return points
