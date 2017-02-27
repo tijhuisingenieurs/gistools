@@ -57,7 +57,34 @@ class TestTLine(unittest.TestCase):
         haakselijn = line.get_haakselijn_point(point, sqrt(8.0))
 
         self.assertTupleEqual(haakselijn, ((1.0, 3.0), (2.0, 2.0), (3.0, 1.0)))
-        
+
+    def test_haakselijn_op_horizontaal_reversed(self):
+        """test haakselijn on point on horizontal line"""
+
+        point = Point(2, 1)
+        line = TLine([(3, 3), (3, 1), (0, 1), (0, 0)])
+        haakselijn = line.get_haakselijn_point(point, 2.0)
+
+        self.assertTupleEqual(haakselijn, ((2.0, 0.0), (2.0, 1.0), (2.0, 2.0)))
+
+    def test_haakselijn_op_vertikaal_reversed(self):
+        """test haakselijn on point on vertical line"""
+
+        point = Point(3, 2)
+        line = TLine([(3, 3), (3, 1), (0, 1), (0, 0)])
+        haakselijn = line.get_haakselijn_point(point, 2.0)
+
+        self.assertTupleEqual(haakselijn, ((4.0, 2.0), (3.0, 2.0), (2.0, 2.0)))
+
+    def test_haakselijn_op_diagonaal_reversed(self):
+        """test haakselijn on point on diagonal line"""
+
+        point = Point(2, 2)
+        line = TLine([(2, 5), (3, 3), (0, 0)])
+        haakselijn = line.get_haakselijn_point(point, sqrt(8.0))
+
+        self.assertTupleEqual(haakselijn, ((3.0, 1.0), (2.0, 2.0), (1.0, 3.0)))
+                
     def test_haakselijn_op_horizontaal_boundary(self):
         """test haakselijn on point on horizontal line"""
 
