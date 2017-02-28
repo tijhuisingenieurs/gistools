@@ -47,9 +47,8 @@ def get_midpoints(line_col, copy_fields=[]):
     return point_col
 
 def get_points_on_line(line_col, copy_fields=[],
-                       default_distance=100.0, min_default_offset_start=0.0, min_default_offset_end=0.0,
-                       distance_field=None, min_offset_start_field=None,
-                       min_offset_end_field=None):
+                       default_distance=100.0, min_default_offset_start=0.0,
+                       distance_field=None, min_offset_start_field=None):
     """ returns MemCollection with points on line with special logic"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -64,27 +63,66 @@ def get_points_on_line(line_col, copy_fields=[],
         for field in copy_fields:
             props[field] = feature['properties'].get(field, None)
 
-        offset_start = feature['properties'].get(min_offset_start_field, min_default_offset_start)
-        offset_end = feature['properties'].get(min_offset_end_field, min_default_offset_end)
-        distance = feature['properties'].get(distance_field, default_distance)
+        # afstand en offset bepalen
+        distance = int(feature['properties'].get(distance_field, default_distance))
+        offset_start = int(feature['properties'].get(min_offset_start_field, min_default_offset_start))
+        
+        # afspraak: offset alleen van toepassing indien kleiner dan 0.5 * distance
+        if offset_start >= 0.5 * distance:
+            offset_start = 0
 
+        # aantal benodigde profielen bepalen
         nr_full = line.length // distance
         rest_lengte = line.length % distance
+        rest_lengte_offset = (line.length - offset_start) % distance
+        if rest_lengte_offset == rest_lengte:
+            rest_lengte_offset = 0
+        
+        nr = nr_full
+        
+        # Maximaal 10% overschrijding van vereiste onderlinge afstand, anders
+        # een extra punt nodig
+        if rest_lengte >= 0.1 * distance:
+            nr = nr + 1
 
-        if rest_lengte >= 0.5 * distance:
-            nr = nr_full + 1
-        else:
-            nr = nr_full
-        offset_max_length = line.length - offset_end
-
+        # Bij gebruik offset nog een extra p indien nodig
+        if offset_start > 0 and rest_lengte_offset > 0.5 * distance:
+            nr = nr + 1                   
+                 
+        # slechts 1 punt indien lijn korter dan vereiste onderlinge afstand      
+        if line.length < distance:
+            nr = 1
+            
         for i in range(0, int(nr)):
-            if i == int(nr_full):
-                dist = line.length - 0.5 * rest_lengte
+            if i == int(nr_full):           
+            # hoe om te gaan met het laatste punt
+                if rest_lengte == 0 and rest_lengte_offset == 0:
+                    # als het precies past
+                    if offset_start > 0:
+                        dist = offset_start + (i * distance)
+                    else:
+                        dist = (0.5 + i) * distance
+                elif rest_lengte < 0.1 * distance and rest_lengte_offset > 0:
+                    # als de offset ervoor zorgt dat de 10% norm mogelijk 
+                    # alsnog wordt overschreden (meer niet gegarandeerd)
+                    # TODO: kijken of dit nog netter uitgewerkt kan worden
+                    dist = line.length - 0.5 * rest_lengte_offset     
+                elif rest_lengte_offset > 0 and line.length > distance:
+                    # als de restlengte meer dan 10% overschrijding van de 
+                    # afstand bedraagt en extra wordt beinvloed door de offset
+                    dist = line.length - 0.5 * (rest_lengte + distance - offset_start)
+                else:
+                    # als er maar 1 punt te genereren is, of de restlengte
+                    # meer dan 10% overschrijding van de afstand bedraagt
+                    dist = line.length - 0.5 * rest_lengte    
+                    
             else:
-                dist = (0.5 + i) * distance
-
-            dist = max(dist, offset_start)
-            dist = min(dist, offset_max_length)
+                if offset_start > 0:
+                    # doortellen met veelvoud van afstand vanaf offset
+                    dist = offset_start + (i * distance) 
+                else:
+                    # doortellen met veelvoud van afstand vanaf 0.5 * afstand
+                    dist = (0.5 + i) * distance 
 
             point_col.writerecords([
                 {'geometry': {'type': 'Point',
