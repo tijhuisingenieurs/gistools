@@ -119,3 +119,75 @@ class TestTools(unittest.TestCase):
                              {'id': 1L, 'name': 'test name 1'})
         self.assertDictEqual(point_col[7]['properties'],
                              {'id': 2L, 'name': 'line 2'})
+        
+    def test_get_points_on_line_with_offset(self):
+        collection = MemCollection(geometry_type='MultiLinestring')
+
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (0.0, 80.0)),
+                                          ((0.0, 90.0), (0.0, 170.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (90.0, 0.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}}
+        ])
+
+        point_col = get_points_on_line(collection, ['id', 'name'],
+                                       default_distance=20.0, 
+                                       min_default_offset_start=5.0, 
+                                       distance_field=None, 
+                                       min_offset_start_field=None)
+
+        # line 1 krijgt 9 punten getekend
+        # line 2 krijgt 5 punten getekend
+        
+        self.assertEqual(len(point_col), 14)
+        self.assertDictEqual(point_col[0]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 5.0)})
+        self.assertDictEqual(point_col[1]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 25.0)})
+        self.assertDictEqual(point_col[2]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 45.0)})
+        self.assertDictEqual(point_col[3]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 65.0)})                
+        self.assertDictEqual(point_col[4]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 95.0)})
+        self.assertDictEqual(point_col[5]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 115.0)})                
+        self.assertDictEqual(point_col[6]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 135.0)})
+        self.assertDictEqual(point_col[7]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 155.0)})                
+        self.assertDictEqual(point_col[8]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 162.5)})    
+            
+        self.assertDictEqual(point_col[9]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (5.0, 0.0)})
+        self.assertDictEqual(point_col[10]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (25.0, 0.0)})
+        self.assertDictEqual(point_col[11]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (45.0, 0.0)})       
+        self.assertDictEqual(point_col[12]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (65.0, 0.0)})       
+        self.assertDictEqual(point_col[13]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (77.5, 0.0)})  
+
+        self.assertDictEqual(point_col[0]['properties'],
+                             {'id': 1L, 'name': 'line 1'})
+        self.assertDictEqual(point_col[9]['properties'],
+                             {'id': 2L, 'name': 'line 2'})

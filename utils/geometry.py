@@ -3,7 +3,7 @@ from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def tshape(geometry):
 
@@ -81,11 +81,18 @@ class TLine(LineString):
 
         dist = afstand
 
+        vertex_before = None 
+        vertex_after = None
+
         for p in self._length_array:
             if dist <= p[2]:
                 vertex_before = self._length_array[p[0] - 1]
                 vertex_after = p
                 break
+        
+        if vertex_before is None:
+            log.warning("No vertex found at distance {0} for line {1}".format(dist, str(self)))
+        
         line_part = (vertex_before, vertex_after, dist)
 
         return line_part
@@ -175,7 +182,7 @@ class TLine(LineString):
             if richting[1] > 0.0:
                 delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
             else:
-                delta_x_links = -0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
+                delta_x_links = 0.5 * length / (sqrt(1 + (richting[0] / richting[1])**2))
 
             if richting[0] > 0.0:
                 delta_y_links = abs(haakse_richting) * abs(delta_x_links)
@@ -196,7 +203,7 @@ class TLine(LineString):
             else:
                 delta_x_links = 0.5 * length
         else:
-            logger.warning('Haakselijn on segment of length 0.0 is not possible!')
+            log.warning('Haakselijn on segment of length 0.0 is not possible!')
             delta_x_links = 0
             delta_y_links = 0
 
@@ -269,11 +276,14 @@ class TLine(LineString):
         return: Tline in flipped direction
         """
 
-        flipped_line = []
+        flipped_line = []      
         
-        for p in self.coords:
-            flipped_line.insert(0, p)
-
+        if hasattr(self, 'geoms'):            
+            for geom in reversed(self.geoms):
+                flipped_line.append(tuple([p for p in reversed(geom.coords)]))                                                
+        else:
+            flipped_line = tuple([p for p in reversed(self.coords)])      
+        
         return flipped_line
     
     
