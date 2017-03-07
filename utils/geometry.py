@@ -55,6 +55,12 @@ class TLine(LineString):
         else:
             return False
 
+    @property
+    def vertexes(self):
+        """returns list with vertexes, without link information
+        (same for multi geoemtries as single geometries"""
+        return [p for p in self.coords]
+
     def get_line_part_dist(self, afstand):
         """ get vertex before and after distance on line
 
@@ -292,3 +298,33 @@ class TMultiLineString(MultiLineString, TLine):
     def __init__(self, *args, **kwargs):
         self._length_array = None
         super(TMultiLineString, self).__init__(*args, **kwargs)
+
+    def add_vertex_at_point(self, point):
+        """ add vertex at point """
+
+        vertex_before, vertex_after, dist = self.get_line_part_point(point)
+        nr = 0
+
+        new_line = []
+
+        for line in self.geoms:
+            coords = line.coords[:]
+            if vertex_after[0] > nr and vertex_after[0] <= nr + len(coords):
+                coords.insert(vertex_after[0]-nr, point.coords[0])
+            new_line.append(coords)
+        return TMultiLineString(new_line)
+
+    @property
+    def coordinates(self):
+        """representation in the format of ((x, y),(x, y))"""
+        output = []
+        for line in self.geoms:
+            output.append(tuple([pnt for pnt in line.coords]))
+
+        return tuple(output)
+
+    @property
+    def vertexes(self):
+        """returns list with vertexes, without link information
+        (same for multi geoemtries as single geometries"""
+        return [p for p in [l.coords for l in self.geoms]]
