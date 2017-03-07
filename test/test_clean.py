@@ -148,7 +148,7 @@ class TestConnectLines(unittest.TestCase):
 
         self.assertEqual(len(lines), 2)
         self.assertEqual(len(lines[0]['geometry']['coordinates']), 3)
-        self.assertListEqual(lines[1]['properties']['linked_start'], [0])
+        self.assertListEqual(lines[1]['properties']['link_start'], [0])
 
     def test_split_at_connection(self):
 
