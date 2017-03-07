@@ -141,16 +141,21 @@ def connect_lines(lines,
     :return:
     """
     for feature in lines:
-        feature['properties']['linked_start'] = []
-        feature['properties']['linked_end'] = []
+        feature['properties']['link_start'] = []
+        feature['properties']['link_end'] = []
         feature['properties']['link_loc'] = []
 
 
     for feature in lines:
         line = tshape(feature['geometry'])
+        multi_geom = feature['geometry']['type'].lower() == 'multilinestring'
 
-        start_pnt = Point(line.coords[0])
-        end_pnt = Point(line.coords[-1])
+        if multi_geom:
+            start_pnt = Point(line.geoms[0].coords[0])
+            end_pnt = Point(line.geoms[-1].coords[-1])
+        else:
+            start_pnt = Point(line.coords[0])
+            end_pnt = Point(line.coords[-1])
 
         start_line = TLine()
         end_line = TLine()
@@ -177,25 +182,25 @@ def connect_lines(lines,
             # check if endpoint is on other line
 
             if cand_line.intersects(start_pnt):
-                # online, but not on start or end
-                feature['properties']['linked_start'].append(candidate['id'])
+                # on line
+                feature['properties']['link_start'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(start_pnt.coords[0])
 
-                if start_pnt.coords not in cand_line.coords:
+                if start_pnt.coords not in cand_line.vertexes:
                     # add vertex to line
                     cand_line = cand_line.add_vertex_at_point(start_pnt)
                     candidate['geometry']['coordinates'] = cand_line.coordinates
 
             if cand_line.intersects(end_pnt):
-                feature['properties']['linked_end'].append(candidate['id'])
+                feature['properties']['link_end'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(end_pnt.coords[0])
 
-                if end_pnt.coords not in cand_line.coords:
+                if end_pnt.coords not in cand_line.vertexes:
                     # add vertex to line
                     cand_line = cand_line.add_vertex_at_point(end_pnt)
                     candidate['geometry']['coordinates'] = cand_line.coordinates
 
-    del cand_line, candidate, start_line, start_pnt
+    # del cand_line, candidate, start_line, start_pnt
 
     if split_line_at_connection:
         output_lines = MemCollection()
