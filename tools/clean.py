@@ -8,6 +8,17 @@ from gistools.utils.geometry import tshape, TLine, Point
 def get_end_points(lines,
                    line_id_field='id',
                    max_delta=0.01):
+    """Get endpoints of lines and the number of lines that end in the same point
+
+    lines (collection of MultiLineString of LineString): Input
+    line_id_field (string): Name of property/ field which could be used for logging of connected ids of the line
+    max_delta (float): max distance between endpoints to make it one connected endpoint
+    return (point collection): collection of endpoints with the properties:
+        - line_count: number of connected fields
+        - line_ids: comma separated list of ids of lines that are connected
+        - line_starts: comma separated list of identification if it is the start point (1) or endpoint (0)
+            of the connected lines
+    """
 
     points = MemCollection()
     point_sum = MemCollection()
