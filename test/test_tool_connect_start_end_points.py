@@ -9,12 +9,20 @@ from gistools.tools.connect_start_end_points import (get_start_endpoints,
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
+def check_import_fiona():
+    try:
+        import fiona
+        return True
+    except ImportError, e:
+        return False
+
 
 class TestTools(unittest.TestCase):
 
     def setUp(self):
         pass
 
+    @unittest.skipIf(not check_import_fiona(), "could not import fiona")
     def test_get_start_endpoints_shapefile(self):
         import fiona
         collection = fiona.open(os.path.join(test_data_dir, 'rd_line.shp'))
