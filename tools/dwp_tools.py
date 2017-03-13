@@ -1,8 +1,9 @@
 from shapely.geometry import shape, Point, LineString, MultiLineString
+import arcpy
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
-
+from gistools.utils.wit import  vul_leggerwaarden, create_leggerpunten, update_leggerpunten_diepten
 
 def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
                                        default_length=15.0, length_field=None):
@@ -41,13 +42,95 @@ def flip_lines(collection):
     for feature in collection:
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
-            check = 'Tline'
         else:
             line = TMultiLineString(feature['geometry']['coordinates'])     
-            check = 'TMultiLineString'
         
         flipped_line = line.get_flipped_line()
 
         feature['geometry']['coordinates'] = flipped_line
             
     return collection
+
+def get_leggerprofiel(line_col):
+    """ returns MemCollections with points for profile """
+    
+    records = [] 
+    
+    for feature in line_col:
+        line_id = feature['properties'].get('line_id', None)
+        name = feature['properties'].get('name', None)
+        
+        arcpy.AddMessage('Bezig met berekenen van profielpunt voor ' + name)
+        
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TMultiLineString(feature['geometry']['coordinates'])     
+    
+        legger_col = {}
+        
+        legger_col['waterpeil'] = feature['properties'].get('waterpeil', 0)
+        legger_col['waterdiepte'] = feature['properties'].get('waterdiepte', 0)
+        legger_col['breedte_wa'] = feature['properties'].get('breedte_wa', 0)
+        legger_col['bodemhoogte'] = feature['properties'].get('bodemhoogte', 0)
+        legger_col['bodembreedte'] = feature['properties'].get('bodembreedte', 0)
+        legger_col['talud_l'] = feature['properties'].get('talud_l', 0)
+        legger_col['talud_r'] = feature['properties'].get('talud_r', 0)
+        legger_col['peiljaar'] = feature['properties'].get('peiljaar', 0)
+        
+#         Berekenen leggerwaarden        
+        ti_velden_col = vul_leggerwaarden(legger_col)
+    
+#         Berekenen locatie leggerpunten
+        profiel_dict = create_leggerpunten(line, line_id, name, ti_velden_col['ti_waterbr'], ti_velden_col['ti_talulbr'], ti_velden_col['ti_knkbodr'])
+    
+#         Berekenen waarden leggerpunten            
+        legger_point_dict = update_leggerpunten_diepten(profiel_dict, ti_velden_col)
+        legger_point_dict['peiljaar'] = legger_col['peiljaar']
+        
+        legger_point_dict_22L = legger_point_dict.copy()
+        legger_point_dict_22L['puntcode'] = 22
+        legger_point_dict_22L['volgnr'] = 1
+        legger_point_dict_22L['z_waarde'] = legger_point_dict_22L['L22_peil']
+        
+        legger_point_dict_99L = legger_point_dict.copy()
+        legger_point_dict_99L['puntcode'] = 99
+        legger_point_dict_99L['volgnr'] = 2
+        legger_point_dict_99L['z_waarde'] = legger_point_dict_22L['knik_l_dpt']
+                
+        legger_point_dict_99R = legger_point_dict.copy()
+        legger_point_dict_99R['puntcode'] = 99
+        legger_point_dict_99R['volgnr'] = 3
+        legger_point_dict_99R['z_waarde'] = legger_point_dict_22L['knik_r_dpt']
+                
+        legger_point_dict_22R = legger_point_dict.copy()
+        legger_point_dict_22R['puntcode'] = 22
+        legger_point_dict_22R['volgnr'] = 4
+        legger_point_dict_22R['z_waarde'] = legger_point_dict_22L['R22_peil']
+            
+#         Vullen point collection voor deze lijn    
+        legger_point_col = MemCollection(geometry_type='Point')       
+        
+        records.append({'geometry': {'type': 'Point',
+                                     'coordinates': [(legger_point_dict['L22'][0], legger_point_dict['L22'][1])]},
+                       'properties': legger_point_dict_22L})
+        
+        records.append({'geometry': {'type': 'Point',
+                                     'coordinates': [(legger_point_dict['knik_l'][0], legger_point_dict['knik_l'][1])]},
+                       'properties': legger_point_dict_99L})
+        
+        records.append({'geometry': {'type': 'Point',
+                                     'coordinates': [(legger_point_dict['knik_r'][0], legger_point_dict['knik_r'][1])]},
+                       'properties': legger_point_dict_99R})
+        
+        records.append({'geometry': {'type': 'Point',
+                                     'coordinates': [(legger_point_dict['R22'][0], legger_point_dict['R22'][1])]},
+                       'properties': legger_point_dict_22R})
+    
+    legger_point_col.writerecords(records)
+    
+    return legger_point_col
+
+
+
+    
