@@ -133,6 +133,11 @@ def connect_lines(lines,
                   split_line_at_connection=False
                   ):
     """ Tool which makes sure lines connect correctly.
+    lines (collection of LineString or MultiLineString): Input collection
+    ...
+    split_line_at_connection (bool): split the lines on crosssections with other lines.
+
+
     The tool has serveral options:
     1) Tool makes sure a connected line has a vertex on the connection
     2) Tool makes sure that when there is a small 'overshoot' this overshoot is removed
@@ -149,7 +154,6 @@ def connect_lines(lines,
     1) add vertex when line touches other line
     6) split line on connection
 
-    :return:
     """
     for feature in lines:
         feature['properties']['link_start'] = []
