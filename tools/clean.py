@@ -201,6 +201,8 @@ def connect_lines(lines,
                 feature['properties']['link_start'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(start_pnt.coords[0])
 
+                a = cand_line.vertexes
+
                 if start_pnt.coords not in cand_line.vertexes:
                     # add vertex to line
                     cand_line = cand_line.add_vertex_at_point(start_pnt)
@@ -227,26 +229,27 @@ def connect_lines(lines,
             split_points = sorted(feature['properties']['link_loc'],
                                   key=lambda loc: line.project(Point(loc)))
 
-            start_vertex = 0
             nr = None
             for i, split_point in enumerate(split_points):
-                end_vertex = feature['geometry']['coordinates'].index(split_point)
+
+                vertex_nr = line.vertexes.index(split_point)
+                first_line_part, line = line.split_at_vertex(vertex_nr)
+
                 line_part = {
                     'geometry': {
                         'type': feature['geometry']['type'],
-                        'coordinates': feature['geometry']['coordinates'][start_vertex:end_vertex+1]},
+                        'coordinates': first_line_part.coordinates},
                     'properties': copy(feature['properties'])
                 }
                 line_part['properties']['part'] = i
                 output_lines.write(line_part)
-                start_vertex = end_vertex
                 nr = i + 1
 
             # last part
             line_part = {
                 'geometry': {
                     'type': feature['geometry']['type'],
-                    'coordinates': feature['geometry']['coordinates'][start_vertex:]},
+                    'coordinates': line.coordinates},
                 'properties': copy(feature['properties'])
             }
             line_part['properties']['part'] = nr
