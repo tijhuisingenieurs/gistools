@@ -33,7 +33,11 @@ class TLine(LineString):
         super(TLine, self).__init__(*args, **kwargs)
 
     def add_vertex_at_point(self, point):
-        """ add vertex at point """
+        """ add vertex at point on the line
+
+        point (Point): Shapely point on a position on the line which will be added
+        returns: new TLine with vertex
+        """
 
         vertex_before, vertex_after, dist = self.get_line_part_point(point)
 
@@ -41,12 +45,43 @@ class TLine(LineString):
         coords.insert(vertex_after[0], point.coords[0])
         return TLine(coords)
 
+    def split_at_vertex(self, vertex_nr):
+        """ split line at vertex nr
+
+        vertex_nr: vertex nr where line will be split
+        returns (tuple of TLines): the to splitted line parts
+
+        note: if line is plit at first or last point of the line, an geometry is returned containing
+        a geometry with the same start and endpoint (is that the required behavoir, or better raise an exception?)
+        """
+
+        coords = self.coords[:]
+        if vertex_nr == 0:
+            first_line = (coords[0], coords[0])
+            second_line = coords
+            log.warning('line split on first point of line, create line with same start and end point')
+        elif vertex_nr == len(coords)-1:
+            first_line = coords
+            second_line = (coords[-1], coords[-1])
+            log.warning('line split on last point of line, create line with same start and end point')
+        else:
+            first_line = coords[:vertex_nr+1]
+            second_line = coords[vertex_nr:]
+
+        return TLine(first_line), TLine(second_line)
+
     @property
     def coordinates(self):
         """representation in the format of ((x, y),(x, y))"""
         return tuple([pnt for pnt in self.coords])
 
     def almost_intersect_with_point(self, other, decimals=6):
+        """Test intersection taking an small possible error in account
+
+        other (shapely geometry): other geometry to test intersection
+        decimals (int): decimals in precision to take into account
+        return (bool): if other geometry intersects
+        """
 
         if self.intersects(other):
             return True
@@ -54,6 +89,12 @@ class TLine(LineString):
             return True
         else:
             return False
+
+    @property
+    def vertexes(self):
+        """returns list with vertexes, without link information
+        (same for multi geoemtries as single geometries"""
+        return [p for p in self.coords]
 
     def get_line_part_dist(self, afstand):
         """ get vertex before and after distance on line
@@ -292,3 +333,78 @@ class TMultiLineString(MultiLineString, TLine):
     def __init__(self, *args, **kwargs):
         self._length_array = None
         super(TMultiLineString, self).__init__(*args, **kwargs)
+
+    def add_vertex_at_point(self, point):
+        """ add vertex at point """
+
+        vertex_before, vertex_after, dist = self.get_line_part_point(point)
+        nr = 0
+
+        new_line = []
+
+        for line in self.geoms:
+            coords = line.coords[:]
+            if vertex_after[0] > nr and vertex_after[0] <= nr + len(coords):
+                coords.insert(vertex_after[0]-nr, point.coords[0])
+            nr += len(coords)
+            new_line.append(coords)
+        return TMultiLineString(new_line)
+
+    def split_at_vertex(self, vertex_nr):
+        """ split line at vertex nr
+
+        vertex_nr: vertex nr where line will be split
+        returns (tuple of TLines): the to splitted line parts
+        add_multipart_point
+
+        note: if line is plit at first or last point of the line of line part, a geometry is returned containing
+        a geometry with the same start and endpoint (is that the required behavoir, or better raise an exception?)
+        """
+
+        nr = 0
+
+        first_line = []
+        second_line = []
+
+        new_line = first_line
+
+        for line in self.geoms:
+            coords = line.coords[:]
+            if vertex_nr >= nr and vertex_nr < nr + len(coords):
+                # for now, make extra linepart with 2 the same vertexes
+                if vertex_nr == nr:
+                    new_line.append((coords[0], coords[0]))
+                    new_line = second_line
+                    new_line.append(coords)
+                elif vertex_nr == nr + len(coords)-1:
+                    new_line.append(coords)
+                    new_line = second_line
+                    new_line.append((coords[-1], coords[-1]))
+                else:
+                    new_line.append(coords[:vertex_nr-nr+1])
+                    new_line = second_line
+                    new_line.append(coords[vertex_nr-nr:])
+            else:
+                new_line.append(coords)
+            nr += len(coords)
+        return TMultiLineString(first_line), TMultiLineString(second_line)
+
+    @property
+    def coordinates(self):
+        """representation in the format of ((x, y),(x, y))"""
+        output = []
+        for line in self.geoms:
+            output.append(tuple([pnt for pnt in line.coords]))
+
+        return tuple(output)
+
+    @property
+    def vertexes(self):
+        """returns list with vertexes, without link information
+        (same for multi geometries as single geometries"""
+        if not hasattr(self, '_vertexes'):
+            self._vertexes = []
+            for l in self.geoms:
+                for p in l.coords:
+                    self._vertexes.append(p)
+        return self._vertexes

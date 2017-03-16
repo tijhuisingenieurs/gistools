@@ -155,9 +155,101 @@ class TestTLine(unittest.TestCase):
         line = TLine([(0.0, 0.0), (1.0, 1.0), (2.0, 2.0), (2.0, 4.0), (4.0, 4.0)])
         flipped_line = line.get_flipped_line()
         
-        self.assertEqual(flipped_line,((4.0, 4.0), (2.0, 4.0), (2.0, 2.0), (1.0, 1.0), (0.0, 0.0)))
-        
+        self.assertEqual(flipped_line, ((4.0, 4.0), (2.0, 4.0), (2.0, 2.0), (1.0, 1.0), (0.0, 0.0)))
+
+    def test_get_vertexes(self):
+
+        line = TLine([(-10, 0), (-4, 0), (-3, 0), (10, 0)])
+
+        vertexes = line.vertexes
+
+        self.assertListEqual(vertexes, [(-10, 0), (-4, 0), (-3, 0), (10, 0)])
+
+    def test_get_coordinates(self):
+        line = TLine([(-10, 0), (-4, 0), (-3, 0), (10, 0)])
+
+        coordinates = line.coordinates
+
+        self.assertTupleEqual(coordinates, ((-10, 0), (-4, 0), (-3, 0), (10, 0)))
+
+    def test_add_vertex_at_point(self):
+        """ test TLine.add_vertex_at_point"""
+
+        line = TLine([(-10, 0), (10, 0)])
+
+        new_line = line.add_vertex_at_point(Point(0, 0))
+        self.assertTupleEqual(new_line.coordinates, ((-10, 0), (0, 0), (10, 0)))
+
+    def test_split_line_at_vertex(self):
+        """ test TMultiLineString.split_at_vertex"""
+
+        line = TLine([(-10, 0), (-6, 0), (10, 0)])
+
+        first_line, second_line = line.split_at_vertex(1)
+        self.assertTupleEqual(first_line.coordinates, ((-10, 0), (-6, 0)))
+        self.assertTupleEqual(second_line.coordinates, ((-6, 0), (10, 0)))
+
+        first_line, second_line = line.split_at_vertex(0)
+        self.assertTupleEqual(first_line.coordinates, ((-10, 0), (-10, 0)))
+        self.assertTupleEqual(second_line.coordinates, ((-10, 0), (-6, 0), (10, 0)))
+
+        first_line, second_line = line.split_at_vertex(2)
+        self.assertTupleEqual(first_line.coordinates, ((-10, 0), (-6, 0), (10, 0)))
+        self.assertTupleEqual(second_line.coordinates, ((10, 0), (10, 0)))
+
 
 class TestTMultiLine(unittest.TestCase):
 
-    pass
+    def test_get_vertexes(self):
+
+        line = TMultiLineString([((-10, 0), (-4, 0)), ((-3, 0), (10, 0))])
+
+        vertexes = line.vertexes
+
+        self.assertListEqual(vertexes, [(-10, 0), (-4, 0), (-3, 0), (10, 0)])
+
+    def test_get_coordinates(self):
+
+        line = TMultiLineString([((-10, 0), (-4, 0)), ((-3, 0), (10, 0))])
+
+        coordinates = line.coordinates
+
+        self.assertTupleEqual(coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (10, 0))))
+
+    def test_add_vertex_at_point(self):
+        """ test TMultiLineString.add_vertex_at_point"""
+
+        line = TMultiLineString([((-10, 0), (-4, 0)), ((-3, 0), (10, 0))])
+
+        new_line = line.add_vertex_at_point(Point(-6, 0))
+        self.assertTupleEqual(new_line.coordinates, (((-10, 0), (-6, 0), (-4, 0)), ((-3, 0), (10, 0))))
+
+        new_line = line.add_vertex_at_point(Point(0, 0))
+        self.assertTupleEqual(new_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))))
+
+    def test_split_line_at_vertex(self):
+        """ test TMultiLineString.split_at_vertex"""
+
+        line = TMultiLineString([((-10, 0), (-6, 0), (-4, 0)), ((-3, 0), (10, 0))])
+        first_line, second_line = line.split_at_vertex(1)
+
+        self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-6, 0)), ))
+        self.assertTupleEqual(second_line.coordinates, (((-6, 0), (-4, 0)), ((-3, 0), (10, 0))))
+
+        line = TMultiLineString([((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))])
+
+        first_line, second_line = line.split_at_vertex(3)
+        self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0))))
+        self.assertTupleEqual(second_line.coordinates, (((0, 0), (10, 0)), ))
+
+        first_line, second_line = line.split_at_vertex(2)
+        self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (-3, 0))))
+        self.assertTupleEqual(second_line.coordinates, (((-3, 0), (0, 0), (10, 0)), ))
+
+        first_line, second_line = line.split_at_vertex(0)
+        self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-10, 0)), ))
+        self.assertTupleEqual(second_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))))
+
+        first_line, second_line = line.split_at_vertex(4)
+        self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))))
+        self.assertTupleEqual(second_line.coordinates, (((10, 0), (10, 0)), ))
