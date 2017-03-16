@@ -8,6 +8,17 @@ from gistools.utils.geometry import tshape, TLine, Point
 def get_end_points(lines,
                    line_id_field='id',
                    max_delta=0.01):
+    """Get endpoints of lines and the number of lines that end in the same point
+
+    lines (collection of MultiLineString of LineString): Input
+    line_id_field (string): Name of property/ field which could be used for logging of connected ids of the line
+    max_delta (float): max distance between endpoints to make it one connected endpoint
+    return (point collection): collection of endpoints with the properties:
+        - line_count: number of connected fields
+        - line_ids: comma separated list of ids of lines that are connected
+        - line_starts: comma separated list of identification if it is the start point (1) or endpoint (0)
+            of the connected lines
+    """
 
     points = MemCollection()
     point_sum = MemCollection()
@@ -122,6 +133,11 @@ def connect_lines(lines,
                   split_line_at_connection=False
                   ):
     """ Tool which makes sure lines connect correctly.
+    lines (collection of LineString or MultiLineString): Input collection
+    ...
+    split_line_at_connection (bool): split the lines on crosssections with other lines.
+
+
     The tool has serveral options:
     1) Tool makes sure a connected line has a vertex on the connection
     2) Tool makes sure that when there is a small 'overshoot' this overshoot is removed
@@ -138,7 +154,6 @@ def connect_lines(lines,
     1) add vertex when line touches other line
     6) split line on connection
 
-    :return:
     """
     for feature in lines:
         feature['properties']['link_start'] = []
@@ -186,6 +201,8 @@ def connect_lines(lines,
                 feature['properties']['link_start'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(start_pnt.coords[0])
 
+                a = cand_line.vertexes
+
                 if start_pnt.coords not in cand_line.vertexes:
                     # add vertex to line
                     cand_line = cand_line.add_vertex_at_point(start_pnt)
@@ -212,26 +229,27 @@ def connect_lines(lines,
             split_points = sorted(feature['properties']['link_loc'],
                                   key=lambda loc: line.project(Point(loc)))
 
-            start_vertex = 0
             nr = None
             for i, split_point in enumerate(split_points):
-                end_vertex = feature['geometry']['coordinates'].index(split_point)
+
+                vertex_nr = line.vertexes.index(split_point)
+                first_line_part, line = line.split_at_vertex(vertex_nr)
+
                 line_part = {
                     'geometry': {
                         'type': feature['geometry']['type'],
-                        'coordinates': feature['geometry']['coordinates'][start_vertex:end_vertex+1]},
+                        'coordinates': first_line_part.coordinates},
                     'properties': copy(feature['properties'])
                 }
                 line_part['properties']['part'] = i
                 output_lines.write(line_part)
-                start_vertex = end_vertex
                 nr = i + 1
 
             # last part
             line_part = {
                 'geometry': {
                     'type': feature['geometry']['type'],
-                    'coordinates': feature['geometry']['coordinates'][start_vertex:]},
+                    'coordinates': line.coordinates},
                 'properties': copy(feature['properties'])
             }
             line_part['properties']['part'] = nr

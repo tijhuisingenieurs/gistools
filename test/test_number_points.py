@@ -36,7 +36,7 @@ class TestNumberPoints(unittest.TestCase):
             'properties': {'pid': 5, 'nr': 1, 'correct': 0}
         }])
 
-        number_points_on_line(lines, points, line_direction_field='direction')
+        number_points_on_line(lines, points, line_direction_field='direction', start_number=0)
 
         nrs = {p['properties']['pid']: p['properties']['nr'] for p in points}
         correct_nrs = {p['properties']['pid']: p['properties']['correct'] for p in points}
