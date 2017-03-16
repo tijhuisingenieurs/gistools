@@ -60,8 +60,6 @@ def get_leggerprofiel(line_col):
         line_id = feature['properties'].get('line_id', None)
         name = feature['properties'].get('name', None)
         
-        arcpy.AddMessage('Bezig met berekenen van profielpunt voor ' + name)
-        
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
         else:
@@ -91,22 +89,26 @@ def get_leggerprofiel(line_col):
         legger_point_dict_22L = legger_point_dict.copy()
         legger_point_dict_22L['puntcode'] = 22
         legger_point_dict_22L['volgnr'] = 1
+        legger_point_dict_22L['afstand'] = 0
         legger_point_dict_22L['z_waarde'] = legger_point_dict_22L['L22_peil']
         
         legger_point_dict_99L = legger_point_dict.copy()
         legger_point_dict_99L['puntcode'] = 99
         legger_point_dict_99L['volgnr'] = 2
-        legger_point_dict_99L['z_waarde'] = legger_point_dict_22L['knik_l_dpt']
+        legger_point_dict_99L['afstand'] = legger_point_dict_99L['ti_talulbr']
+        legger_point_dict_99L['z_waarde'] = legger_point_dict_99L['knik_l_dpt']
                 
         legger_point_dict_99R = legger_point_dict.copy()
         legger_point_dict_99R['puntcode'] = 99
         legger_point_dict_99R['volgnr'] = 3
-        legger_point_dict_99R['z_waarde'] = legger_point_dict_22L['knik_r_dpt']
+        legger_point_dict_99R['afstand'] = legger_point_dict_99R['ti_knkbodr']        
+        legger_point_dict_99R['z_waarde'] = legger_point_dict_99R['knik_r_dpt']
                 
         legger_point_dict_22R = legger_point_dict.copy()
         legger_point_dict_22R['puntcode'] = 22
         legger_point_dict_22R['volgnr'] = 4
-        legger_point_dict_22R['z_waarde'] = legger_point_dict_22L['R22_peil']
+        legger_point_dict_22R['afstand'] = legger_point_dict_22R['ti_waterbr']        
+        legger_point_dict_22R['z_waarde'] = legger_point_dict_22R['R22_peil']
             
 #         Vullen point collection voor deze lijn    
         legger_point_col = MemCollection(geometry_type='Point')       

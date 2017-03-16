@@ -85,7 +85,10 @@ def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr)
                     'L22':nulpunt,'L22_peil': 0.00,
                     'knik_l': knikpunt_l, 'knik_l_dpt': 0.00,
                     'knik_r': knikpunt_r, 'knik_r_dpt': 0.00,
-                    'R22':eindpunt, 'R22_peil': 0.00}
+                    'R22':eindpunt, 'R22_peil': 0.00,
+                    'ti_talulbr': ti_talulbr,
+                    'ti_knkbodr': ti_knkbodr,
+                    'ti_waterbr': ti_waterbr}
     
     return profiel_dict
     
