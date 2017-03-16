@@ -52,6 +52,9 @@ class TestWit(unittest.TestCase):
                               'L22': (-5.0, 5.0), ':L22_peil': -1.00,
                               'knik_l': (-2.0, 5.0), 'knik_l_dpt': -3.0,
                               'knik_r': (3.0, 5.0), 'knik_r_dpt': -3.0,
-                              'R22': (5.0, 5.0), 'R22_peil': -1.0})
+                              'R22': (5.0, 5.0), 'R22_peil': -1.0,
+                              'ti_talulbr': 2.0,
+                              'ti_knkbodr': 7.0,
+                              'ti_waterbr': 9.0})
         
         
