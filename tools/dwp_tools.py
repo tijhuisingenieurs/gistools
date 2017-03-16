@@ -1,5 +1,4 @@
 from shapely.geometry import shape, Point, LineString, MultiLineString
-import arcpy
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString

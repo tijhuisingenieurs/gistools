@@ -54,7 +54,7 @@ def vul_leggerwaarden(legger_col):
                  'ti_talurbr': ti_talurbr,
                  'ti_knkbodr': ti_knkbodr}   
 
-    return ti_velden
+    return ti_velden
             
 def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr):
     """ create point of profile based on theoretical profile of waterway
