@@ -113,7 +113,7 @@ def get_leggerprofiel(line_col):
         legger_point_dict_22R['z_waarde'] = legger_point_dict_22R['R22_peil']
             
         # Vullen point collection voor deze lijn
-        legger_point_col = MemCollection(geometry_type='Point')       
+              
         
         records.append({'geometry': {'type': 'Point',
                                      'coordinates': [(legger_point_dict['L22'][0], legger_point_dict['L22'][1])]},
@@ -131,6 +131,7 @@ def get_leggerprofiel(line_col):
                                      'coordinates': [(legger_point_dict['R22'][0], legger_point_dict['R22'][1])]},
                        'properties': legger_point_dict_22R})
     
+    legger_point_col = MemCollection(geometry_type='Point') 
     legger_point_col.writerecords(records)
     
     return legger_point_col

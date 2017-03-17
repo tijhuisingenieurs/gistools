@@ -79,7 +79,6 @@ def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr)
     knikpunt_l = profiel.get_point_at_distance(ti_talulbr)
     knikpunt_r = profiel.get_point_at_distance(ti_knkbodr)
     
-    profiel_dict = OrderedDict()
     profiel_dict = {'line_id': line_id, 'name': name,
                     'L22': nulpunt, 'L22_peil': 0.00,
                     'knik_l': knikpunt_l, 'knik_l_dpt': 0.00,
