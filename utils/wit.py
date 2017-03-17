@@ -13,15 +13,14 @@ def vul_leggerwaarden(legger_col):
     returns dictonary ti_velden with assigned values
     """
     
-#     Vullen ti_velden dictionary met bronwaarden
+    # Vullen ti_velden dictionary met bronwaarden
     ti_waterp = legger_col['waterpeil']
     ti_diepte = legger_col['waterdiepte']
     ti_waterbr = legger_col['breedte_wa']
     ti_bodemh = legger_col['bodemhoogte']
     ti_bodembr = legger_col['bodembreedte']
-    
-    
-#     berekenen van ontbrekende bronwaarden    
+
+    # berekenen van ontbrekende bronwaarden
     if ti_diepte == 0 or ti_diepte is None:
         # bodembreedte legger van toepassing
         ti_diepte = ti_waterp - ti_bodemh
@@ -43,19 +42,20 @@ def vul_leggerwaarden(legger_col):
     
     ti_knkbodr = ti_talulbr + ti_bodembr
     
-#     Vullen dictionary ti_velden
+    # Vullen dictionary ti_velden
     ti_velden = OrderedDict()
     ti_velden = {'ti_waterp': ti_waterp, 
-                 'ti_diepte' : ti_diepte,
-                 'ti_waterbr' : ti_waterbr,
-                 'ti_bodemh' : ti_bodemh,
-                 'ti_bodembr' : ti_bodembr,
-                 'ti_talulbr' : ti_talulbr,
+                 'ti_diepte': ti_diepte,
+                 'ti_waterbr': ti_waterbr,
+                 'ti_bodemh': ti_bodemh,
+                 'ti_bodembr': ti_bodembr,
+                 'ti_talulbr': ti_talulbr,
                  'ti_talurbr': ti_talurbr,
                  'ti_knkbodr': ti_knkbodr}   
 
     return ti_velden
-            
+
+
 def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr):
     """ create point of profile based on theoretical profile of waterway
     line: line representation of waterway
@@ -75,23 +75,23 @@ def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr)
         
     nulpunt = list(profiel.coords)[0]    
     eindpunt = list(profiel.coords)[2]
-    
 
     knikpunt_l = profiel.get_point_at_distance(ti_talulbr)
-    knikpunt_r = profiel.get_point_at_distance((ti_knkbodr))
+    knikpunt_r = profiel.get_point_at_distance(ti_knkbodr)
     
     profiel_dict = OrderedDict()
     profiel_dict = {'line_id': line_id, 'name': name,
-                    'L22':nulpunt,'L22_peil': 0.00,
+                    'L22': nulpunt, 'L22_peil': 0.00,
                     'knik_l': knikpunt_l, 'knik_l_dpt': 0.00,
                     'knik_r': knikpunt_r, 'knik_r_dpt': 0.00,
-                    'R22':eindpunt, 'R22_peil': 0.00,
+                    'R22': eindpunt, 'R22_peil': 0.00,
                     'ti_talulbr': ti_talulbr,
                     'ti_knkbodr': ti_knkbodr,
                     'ti_waterbr': ti_waterbr}
     
     return profiel_dict
-    
+
+
 def update_leggerpunten_diepten(profiel_dict, ti_velden_col):    
     """ append correct depths to leggerpunten in profiel_dict
     
@@ -107,5 +107,3 @@ def update_leggerpunten_diepten(profiel_dict, ti_velden_col):
     profiel_dict['R22_peil'] = ti_velden_col['ti_waterp']
     
     return profiel_dict
-    
-
