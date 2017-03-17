@@ -9,6 +9,7 @@ test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 # TODO: uitzoeken hoe OrderedDict goed af te dwingen in genereren van dict en in AssertDictEqual
 
+
 class TestDWPTools(unittest.TestCase):
 
     def setUp(self):
@@ -107,24 +108,24 @@ class TestDWPTools(unittest.TestCase):
                             'name': 'test name 1',
                             'peiljaar': '2010',
                             'waterpeil': -1.0,
-                            'waterdiepte' : 2.0,
+                            'waterdiepte': 2.0,
                             'breedte_wa': 9.0,
                             'bodemhoogte': None,
-                            'bodembreedte' : None,
+                            'bodembreedte': None,
                             'talud_l': 1.0,
-                            'talud_r' : 1.0}},
+                            'talud_r': 1.0}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(10.0, 0.0), (10.0, 3.6)]},
              'properties': {'id': 2, 
                             'name': 'line 2',
                             'peiljaar': '2010',
                             'waterpeil': -1.0,
-                            'waterdiepte' : None,
+                            'waterdiepte': None,
                             'breedte_wa': None,
                             'bodemhoogte': -2.0,
-                            'bodembreedte' : 14.0,
+                            'bodembreedte': 14.0,
                             'talud_l': 3.0,
-                            'talud_r' : 3.0 }}
+                            'talud_r': 3.0}}
         ])
         
         legger_point_col = get_leggerprofiel(line_col)
@@ -156,6 +157,3 @@ class TestDWPTools(unittest.TestCase):
         self.assertDictEqual(legger_point_col[7]['geometry'],
                              {'type': 'Point',
                               'coordinates': [(20.0, 1.8)]})
-        
-
-        
