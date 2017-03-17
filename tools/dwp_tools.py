@@ -1,8 +1,9 @@
-from shapely.geometry import shape, Point, LineString, MultiLineString
+from shapely.geometry import Point
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
-from gistools.utils.wit import  vul_leggerwaarden, create_leggerpunten, update_leggerpunten_diepten
+from gistools.utils.wit import vul_leggerwaarden, create_leggerpunten, update_leggerpunten_diepten
+
 
 def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
                                        default_length=15.0, length_field=None):
@@ -50,6 +51,7 @@ def flip_lines(collection):
             
     return collection
 
+
 def get_leggerprofiel(line_col):
     """ returns MemCollections with points for profile """
     
@@ -64,24 +66,25 @@ def get_leggerprofiel(line_col):
         else:
             line = TMultiLineString(feature['geometry']['coordinates'])     
     
-        legger_col = {}
-        
-        legger_col['waterpeil'] = feature['properties'].get('waterpeil', 0)
-        legger_col['waterdiepte'] = feature['properties'].get('waterdiepte', 0)
-        legger_col['breedte_wa'] = feature['properties'].get('breedte_wa', 0)
-        legger_col['bodemhoogte'] = feature['properties'].get('bodemhoogte', 0)
-        legger_col['bodembreedte'] = feature['properties'].get('bodembreedte', 0)
-        legger_col['talud_l'] = feature['properties'].get('talud_l', 0)
-        legger_col['talud_r'] = feature['properties'].get('talud_r', 0)
-        legger_col['peiljaar'] = feature['properties'].get('peiljaar', 0)
-        
-#         Berekenen leggerwaarden        
+        legger_col = {
+            'waterpeil': feature['properties'].get('waterpeil', 0),
+            'waterdiepte': feature['properties'].get('waterdiepte', 0),
+            'breedte_wa': feature['properties'].get('breedte_wa', 0),
+            'bodemhoogte': feature['properties'].get('bodemhoogte', 0),
+            'bodembreedte': feature['properties'].get('bodembreedte', 0),
+            'talud_l': feature['properties'].get('talud_l', 0),
+            'talud_r': feature['properties'].get('talud_r', 0),
+            'peiljaar': feature['properties'].get('peiljaar', 0)
+        }
+
+        # Berekenen leggerwaarden
         ti_velden_col = vul_leggerwaarden(legger_col)
     
-#         Berekenen locatie leggerpunten
-        profiel_dict = create_leggerpunten(line, line_id, name, ti_velden_col['ti_waterbr'], ti_velden_col['ti_talulbr'], ti_velden_col['ti_knkbodr'])
+        # Berekenen locatie leggerpunten
+        profiel_dict = create_leggerpunten(line, line_id, name, ti_velden_col['ti_waterbr'],
+                                           ti_velden_col['ti_talulbr'], ti_velden_col['ti_knkbodr'])
     
-#         Berekenen waarden leggerpunten            
+        # Berekenen waarden leggerpunten
         legger_point_dict = update_leggerpunten_diepten(profiel_dict, ti_velden_col)
         legger_point_dict['peiljaar'] = legger_col['peiljaar']
         
@@ -109,7 +112,7 @@ def get_leggerprofiel(line_col):
         legger_point_dict_22R['afstand'] = legger_point_dict_22R['ti_waterbr']        
         legger_point_dict_22R['z_waarde'] = legger_point_dict_22R['R22_peil']
             
-#         Vullen point collection voor deze lijn    
+        # Vullen point collection voor deze lijn
         legger_point_col = MemCollection(geometry_type='Point')       
         
         records.append({'geometry': {'type': 'Point',
@@ -131,7 +134,3 @@ def get_leggerprofiel(line_col):
     legger_point_col.writerecords(records)
     
     return legger_point_col
-
-
-
-    
