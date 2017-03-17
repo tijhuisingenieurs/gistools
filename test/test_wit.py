@@ -9,7 +9,7 @@ class TestWit(unittest.TestCase):
 
     def test_vul_leggerwaarden(self):
         """test create values of theoretical profiel"""
-        # Nog te definiëren voor utils.wit.py vul_leggerwaarden function
+        # Nog te definieren voor utils.wit.py vul_leggerwaarden function
         # graag laten staan zodat ik het niet vergeet :)
         
         pass
