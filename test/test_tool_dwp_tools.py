@@ -7,8 +7,6 @@ from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line, flip_li
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
-# TODO: uitzoeken hoe OrderedDict goed af te dwingen in genereren van dict en in AssertDictEqual
-
 
 class TestDWPTools(unittest.TestCase):
 

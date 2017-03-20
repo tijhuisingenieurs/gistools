@@ -1,6 +1,5 @@
 from gistools.utils.geometry import TLine
 from shapely.geometry import Point 
-from collections import OrderedDict
 
 
 def vul_leggerwaarden(legger_col):
@@ -43,8 +42,7 @@ def vul_leggerwaarden(legger_col):
     ti_knkbodr = ti_talulbr + ti_bodembr
     
     # Vullen dictionary ti_velden
-    ti_velden = OrderedDict()
-    ti_velden = {'ti_waterp': ti_waterp, 
+    ti_velden = {'ti_waterp': ti_waterp,
                  'ti_diepte': ti_diepte,
                  'ti_waterbr': ti_waterbr,
                  'ti_bodemh': ti_bodemh,
@@ -79,7 +77,6 @@ def create_leggerpunten(line, line_id, name, ti_waterbr, ti_talulbr, ti_knkbodr)
     knikpunt_l = profiel.get_point_at_distance(ti_talulbr)
     knikpunt_r = profiel.get_point_at_distance(ti_knkbodr)
     
-    profiel_dict = OrderedDict()
     profiel_dict = {'line_id': line_id, 'name': name,
                     'L22': nulpunt, 'L22_peil': 0.00,
                     'knik_l': knikpunt_l, 'knik_l_dpt': 0.00,
