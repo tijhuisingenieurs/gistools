@@ -8,11 +8,31 @@ class TestWit(unittest.TestCase):
         pass
 
     def test_vul_leggerwaarden(self):
-        """test create values of theoretical profiel"""
-        # Nog te definieren voor utils.wit.py vul_leggerwaarden function
-        # graag laten staan zodat ik het niet vergeet :)
+        """test create values of theoretical profiel"""        
         
-        pass
+        legger_col = {
+            'waterpeil': -2.0,
+            'waterdiepte': 1.0,
+            'breedte_wa': 4.0,
+            'bodemhoogte': 0.0,
+            'bodembreedte': 0.0,
+            'talud_l': 1.0,
+            'talud_r': 1.0,
+            'peiljaar': 2010
+        }
+        
+        ti_velden = vul_leggerwaarden(legger_col)
+        
+        self.assertDictEqual(ti_velden,
+                              {'ti_waterp': -2.0,
+                               'ti_diepte': 1.0,
+                               'ti_waterbr': 4.0, 
+                               'ti_bodemh': -3.0,
+                               'ti_bodembr': 2.0,
+                               'ti_talulbr': 1.0,
+                               'ti_talurbr': 1.0,
+                               'ti_knkbodr': 3.0})  
+
 
     def test_create_leggerpunten(self):
         """test create points of theoretical profiel"""

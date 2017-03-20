@@ -91,7 +91,7 @@ def get_leggerprofiel(line_col):
         legger_point_dict_22L = legger_point_dict.copy()
         legger_point_dict_22L['puntcode'] = 22
         legger_point_dict_22L['volgnr'] = 1
-        legger_point_dict_22L['afstand'] = 0
+        legger_point_dict_22L['afstand'] = 0.0
         legger_point_dict_22L['z_waarde'] = legger_point_dict_22L['L22_peil']
         
         legger_point_dict_99L = legger_point_dict.copy()

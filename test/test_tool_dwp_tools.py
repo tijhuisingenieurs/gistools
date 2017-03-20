@@ -96,13 +96,14 @@ class TestDWPTools(unittest.TestCase):
     def test_get_leggerprofiel(self):
         """test generate theoretical profile points"""
         
+        self.maxDiff = None
         line_col = MemCollection(geometry_type='MultiLinestring')
 
         line_col.writerecords([
             {'geometry': {'type': 'MultiLineString',
                           'coordinates': [((0.0, 0.0), (0.0, 10.0)),
                                           ((0.0, 12.0), (12.0, 12.0))]},
-             'properties': {'id': 1,
+             'properties': {'line_id': 1,
                             'name': 'test name 1',
                             'peiljaar': '2010',
                             'waterpeil': -1.0,
@@ -114,7 +115,7 @@ class TestDWPTools(unittest.TestCase):
                             'talud_r': 1.0}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(10.0, 0.0), (10.0, 3.6)]},
-             'properties': {'id': 2, 
+             'properties': {'line_id': 2, 
                             'name': 'line 2',
                             'peiljaar': '2010',
                             'waterpeil': -1.0,
@@ -130,6 +131,36 @@ class TestDWPTools(unittest.TestCase):
         
         self.assertEqual(len(legger_point_col), 8)
         
+        self.assertDictEqual(legger_point_col[0]['properties'],
+                             {'line_id': 1, 'name': 'test name 1',
+                              'L22': (1.0, 16.5), 'L22_peil': -1.0,
+                              'knik_l': (1.0, 14.5), 'knik_l_dpt': -3.0,
+                              'knik_r': (1.0, 9.5), 'knik_r_dpt': -3.0,
+                              'R22': (1.0, 7.5), 'R22_peil': -1.0,
+                              'ti_talulbr': 2.0,
+                              'ti_knkbodr': 7.0,
+                              'ti_waterbr': 9.0,
+                              'peiljaar': '2010',
+                              'puntcode': 22,
+                              'volgnr': 1,
+                              'afstand': 0.0,
+                              'z_waarde': -1.0 })
+        
+        self.assertDictEqual(legger_point_col[2]['properties'],
+                     {'line_id': 1, 'name': 'test name 1',
+                      'L22': (1.0, 16.5), 'L22_peil': -1.0,
+                      'knik_l': (1.0, 14.5), 'knik_l_dpt': -3.0,
+                      'knik_r': (1.0, 9.5), 'knik_r_dpt': -3.0,
+                      'R22': (1.0, 7.5), 'R22_peil': -1.0,
+                      'ti_talulbr': 2.0,
+                      'ti_knkbodr': 7.0,
+                      'ti_waterbr': 9.0,
+                      'peiljaar': '2010',
+                      'puntcode': 99,
+                      'volgnr': 3,
+                      'afstand': 7.0,
+                      'z_waarde': -3.0 })
+        
         self.assertDictEqual(legger_point_col[0]['geometry'],
                              {'type': 'Point',
                               'coordinates': [(1.0, 16.5)]})
@@ -142,6 +173,36 @@ class TestDWPTools(unittest.TestCase):
         self.assertDictEqual(legger_point_col[3]['geometry'],
                              {'type': 'Point',
                               'coordinates': [(1.0, 7.5)]})
+        
+        self.assertDictEqual(legger_point_col[4]['properties'],
+                             {'line_id': 2, 'name': 'line 2',
+                              'L22': (0.0, 1.8), 'L22_peil': -1.0,
+                              'knik_l': (3.0, 1.8), 'knik_l_dpt': -2.0,
+                              'knik_r': ((17.0, 1.8)), 'knik_r_dpt': -2.0,
+                              'R22': ((20.0, 1.8)), 'R22_peil': -1.0,
+                              'ti_talulbr': 3.0,
+                              'ti_knkbodr': 17.0,
+                              'ti_waterbr': 20.0,
+                              'peiljaar': '2010',
+                              'puntcode': 22,
+                              'volgnr': 1,
+                              'afstand': 0.0,
+                              'z_waarde': -1.0 })
+        
+        self.assertDictEqual(legger_point_col[6]['properties'],
+                             {'line_id': 2, 'name': 'line 2',
+                              'L22': (0.0, 1.8), 'L22_peil': -1.0,
+                              'knik_l': (3.0, 1.8), 'knik_l_dpt': -2.0,
+                              'knik_r': ((17.0, 1.8)), 'knik_r_dpt': -2.0,
+                              'R22': ((20.0, 1.8)), 'R22_peil': -1.0,
+                              'ti_talulbr': 3.0,
+                              'ti_knkbodr': 17.0,
+                              'ti_waterbr': 20.0,
+                              'peiljaar': '2010',
+                              'puntcode': 99,
+                              'volgnr': 3,
+                              'afstand': 17.0,
+                              'z_waarde': -2.0 })
         
         self.assertDictEqual(legger_point_col[4]['geometry'],
                              {'type': 'Point',
