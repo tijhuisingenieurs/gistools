@@ -1,6 +1,5 @@
 from gistools.utils.geometry import TLine
 from shapely.geometry import Point 
-from collections import OrderedDict
 
 
 def vul_leggerwaarden(legger_col):
@@ -43,8 +42,7 @@ def vul_leggerwaarden(legger_col):
     ti_knkbodr = ti_talulbr + ti_bodembr
     
     # Vullen dictionary ti_velden
-    ti_velden = OrderedDict()
-    ti_velden = {'ti_waterp': ti_waterp, 
+    ti_velden = {'ti_waterp': ti_waterp,
                  'ti_diepte': ti_diepte,
                  'ti_waterbr': ti_waterbr,
                  'ti_bodemh': ti_bodemh,
