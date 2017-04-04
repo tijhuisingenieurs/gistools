@@ -65,8 +65,8 @@ def get_points_on_line(line_col, copy_fields=[],
             props[field] = feature['properties'].get(field, None)
 
         # afstand en offset bepalen
-        distance = int(feature['properties'].get(distance_field, default_distance))
-        offset_start = int(feature['properties'].get(min_offset_start_field, min_default_offset_start))
+        distance = float(feature['properties'].get(distance_field, default_distance))
+        offset_start = float(feature['properties'].get(min_offset_start_field, min_default_offset_start))
         
         # afspraak: offset alleen van toepassing indien kleiner dan 0.5 * distance
         if offset_start >= 0.5 * distance:
