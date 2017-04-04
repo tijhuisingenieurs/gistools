@@ -48,7 +48,8 @@ def get_midpoints(line_col, copy_fields=[]):
 
 def get_points_on_line(line_col, copy_fields=[],
                        default_distance=100.0, min_default_offset_start=0.0,
-                       distance_field=None, min_offset_start_field=None):
+                       distance_field=None, min_offset_start_field=None, 
+                       use_rest = True):
     """ returns MemCollection with points on line with special logic"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -80,19 +81,22 @@ def get_points_on_line(line_col, copy_fields=[],
         
         nr = nr_full
         
-        # Maximaal 10% overschrijding van vereiste onderlinge afstand, anders
-        # een extra punt nodig
-        if rest_lengte >= 0.1 * distance:
-            nr = nr + 1
-
-        # Bij gebruik offset nog een extra p indien nodig
-        if offset_start > 0 and rest_lengte_offset > 0.5 * distance:
-            nr = nr + 1                   
-                 
+        # indien extra punt nodig is op de restlengte
+        if use_rest is True:
+            
+            # Maximaal 10% overschrijding van vereiste onderlinge afstand, anders
+            # een extra punt nodig
+            if rest_lengte >= 0.1 * distance:
+                nr = nr + 1
+    
+            # Bij gebruik offset nog een extra p indien nodig
+            if offset_start > 0 and rest_lengte_offset > 0.5 * distance:
+                nr = nr + 1                   
+                     
         # slechts 1 punt indien lijn korter dan vereiste onderlinge afstand      
         if line.length < distance:
             nr = 1
-            
+                
         for i in range(0, int(nr)):
             if i == int(nr_full):           
             # hoe om te gaan met het laatste punt
