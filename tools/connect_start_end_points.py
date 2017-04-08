@@ -1,4 +1,5 @@
 from shapely.geometry import shape
+from math import floor
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
@@ -66,6 +67,8 @@ def get_points_on_line(line_col, copy_fields=[],
 
         # afstand en offset bepalen
         distance = float(feature['properties'].get(distance_field, default_distance))
+        # round distance down to 2 decimals to get correct nr of points later on
+        distance = floor(distance *100)/100
         offset_start = float(feature['properties'].get(min_offset_start_field, min_default_offset_start))
         
         # afspraak: offset alleen van toepassing indien kleiner dan 0.5 * distance
