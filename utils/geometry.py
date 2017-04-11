@@ -346,9 +346,16 @@ class TLine(LineString):
         start_y = coords[0][1]
         end_x = coords[-1][0]
         end_y = coords[-1][1]
-        
-        line_angle = abs(round(degrees(atan2((end_x - start_x),(end_y - start_y))),1))
-            
+
+        if start_x == end_x:
+            line_angle = 0
+        elif start_y == end_y:
+            line_angle = 90
+        else:
+            line_angle = round(degrees(atan2((end_x - start_x),(end_y - start_y))),1)
+            if line_angle < 0:
+                line_angle = 180 + line_angle
+                           
         return line_angle 
     
 class TMultiLineString(MultiLineString, TLine):

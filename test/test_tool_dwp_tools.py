@@ -223,60 +223,98 @@ class TestDWPTools(unittest.TestCase):
 
     def test_get_line_angles(self):
         """test calculate angles of lines"""   
-             
+              
         collection = MemCollection(geometry_type='MultiLinestring')
-
+ 
         collection.writerecords([
             {'geometry': {'type': 'MultiLineString',
                           'coordinates': [((0.0, 0.0), (1.0, 1.0)),
                                               ((2.0, 2.0), (3.0, 3.0))]},
-             'properties': {'id': 1L, 'name': 'line 1'}},
+             'properties': {'id': 1L, 'name': 'angle line 1'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (103.553, 250.0)]},
-             'properties': {'id': 2L, 'name': 'line 2'}},
+             'properties': {'id': 2L, 'name': 'angle line 2'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (250.0, 103.553)]},
-             'properties': {'id': 3L, 'name': 'line 3'}},
+             'properties': {'id': 3L, 'name': 'angle line 3'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (250.0, 0.0)]},
-             'properties': {'id': 4L, 'name': 'line 4'}},
+             'properties': {'id': 4L, 'name': 'angle line 4'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (250.0, -250.0)]},
-             'properties': {'id': 5L, 'name': 'line 5'}},
+             'properties': {'id': 5L, 'name': 'angle line 5'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (-250.0, -250.0)]},
-             'properties': {'id': 6L, 'name': 'line 6'}},
+             'properties': {'id': 6L, 'name': 'angle line 6'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (-250.0, 250.0)]},
-             'properties': {'id': 7L, 'name': 'line 7'}}
+             'properties': {'id': 7L, 'name': 'angle line 7'}}
         ])
-        
+         
         angle_col = get_angles(collection)
-        
+         
         self.assertDictEqual(angle_col[0]['properties'],
-                             {'id': 1L, 'name': 'line 1',
+                             {'id': 1L, 'name': 'angle line 1',
                                              'feature_angle': 45.0 })
         self.assertDictEqual(angle_col[1]['properties'],
-                             {'id': 2L, 'name': 'line 2',
+                             {'id': 2L, 'name': 'angle line 2',
                                              'feature_angle': 22.5})
         self.assertDictEqual(angle_col[2]['properties'],
-                             {'id': 3L, 'name': 'line 3',
+                             {'id': 3L, 'name': 'angle line 3',
                                              'feature_angle': 67.5 })
         self.assertDictEqual(angle_col[3]['properties'],
-                             {'id': 4L, 'name': 'line 4',
+                             {'id': 4L, 'name': 'angle line 4',
                                              'feature_angle': 90.0})
         self.assertDictEqual(angle_col[4]['properties'],
-                             {'id': 5L, 'name': 'line 5',
+                             {'id': 5L, 'name': 'angle line 5',
                                              'feature_angle': 135.0 })
         self.assertDictEqual(angle_col[5]['properties'],
-                             {'id': 6L, 'name': 'line 6',
-                                             'feature_angle': 135.0})
-        self.assertDictEqual(angle_col[6]['properties'],
-                             {'id': 7L, 'name': 'line 7',
+                             {'id': 6L, 'name': 'angle line 6',
                                              'feature_angle': 45.0})
-    
-    def test_get_global_intersect_angles(self):
-        """test calculate angles of intersection of lines"""   
+        self.assertDictEqual(angle_col[6]['properties'],
+                             {'id': 7L, 'name': 'angle line 7',
+                                             'feature_angle': 135.0})
+     
+ 
+    def test_get_intersecting_segments(self):
+        """test get line segments that intersect"""
+         
+        collection1 = MemCollection(geometry_type='MultiLinestring')
+        collection2 = MemCollection(geometry_type='MultiLinestring')
+  
+        collection1.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (2.0, 3.0))]},
+             'properties': {'id': 1L, 'name': 'testsegments line 1a'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(-25.0, 0.0), (0.0, 0.0), (-103.553, -250.0)]},
+             'properties': {'id': 2L, 'name': 'testsegments line 2a'}}
+        ])
+          
+        collection2.writerecords([
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.5, 0.0), (0.5, 100.0)]},
+             'properties': {'id': 1L, 'name': 'testsegments line 1b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 2.5), (500.0, 2.5)]},
+             'properties': {'id': 2L, 'name': 'testsegments line 2b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(-20.0, -1.0), (-20.0, 1.0)]},
+             'properties': {'id': 3L, 'name': 'testsegments line 3b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, -0.5), (-500.0, -0.5)]},
+             'properties': {'id': 4L, 'name': 'testsegments line 4b'}}                                  
+        ])
+         
+         
+        line_parts_col1 = get_intersecting_segments(collection1, collection2)
+        line_parts_col2 = get_intersecting_segments(collection2, collection1)
+         
+        pass
+
+    def test_get_local_intersect_angles(self):
+        """test calculate angles of intersection of lines at segment"""   
               
         collection1 = MemCollection(geometry_type='MultiLinestring')
         collection2 = MemCollection(geometry_type='MultiLinestring')
@@ -284,24 +322,66 @@ class TestDWPTools(unittest.TestCase):
         collection1.writerecords([
             {'geometry': {'type': 'MultiLineString',
                           'coordinates': [((0.0, 0.0), (1.0, 1.0)),
-                                              ((2.0, 2.0), (3.0, 3.0))]},
-             'properties': {'id': 1L, 'name': 'line 1'}},
+                                              ((2.0, 2.0), (2.0, 3.0))]},
+             'properties': {'id': 1L, 'name': 'testlocal line 1a'}},
             {'geometry': {'type': 'LineString',
-                          'coordinates': [(0.0, 0.0), (103.553, 250.0)]},
-             'properties': {'id': 2L, 'name': 'line 2'}}
+                          'coordinates': [(-25.0, 0.0), (0.0, 0.0), (-103.553, -250.0)]},
+             'properties': {'id': 2L, 'name': 'testlocal line 2a'}}
         ])
          
         collection2.writerecords([
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.5, 0.0), (0.5, 100.0)]},
-             'properties': {'id': 1L, 'name': 'line 1'}},
+             'properties': {'id': 1L, 'name': 'testlocal line 1b'}},
             {'geometry': {'type': 'LineString',
-                          'coordinates': [(0.0, 0.5), (500.0, 0.5)]},
-             'properties': {'id': 2L, 'name': 'line 2'}}
+                          'coordinates': [(0.0, 2.5), (500.0, 2.5)]},
+             'properties': {'id': 2L, 'name': 'testlocal line 2b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(-20.0, -1.0), (-20.0, 1.0)]},
+             'properties': {'id': 3L, 'name': 'testlocal line 3b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, -0.5), (-500.0, -0.5)]},
+             'properties': {'id': 4L, 'name': 'testlocal line 4b'}}                                  
         ])
          
-        angle_col = get_global_intersect_angles(collection1, collection2)
+        angle_col = get_local_intersect_angles(collection1, collection2)
          
+        self.assertDictEqual(angle_col[0]['properties'],
+                             {'crossangle': 45.0 })
+        self.assertDictEqual(angle_col[1]['properties'],
+                             {'crossangle': 90.0 })
+        self.assertDictEqual(angle_col[2]['properties'],
+                             {'crossangle': 90.0 })
+        self.assertDictEqual(angle_col[3]['properties'],
+                             {'crossangle': 67.5 })
+    
+    def test_get_global_intersect_angles(self):
+        """test calculate angles of intersection of lines"""   
+               
+        collection1 = MemCollection(geometry_type='MultiLinestring')
+        collection2 = MemCollection(geometry_type='MultiLinestring')
+  
+        collection1.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (3.0, 3.0))]},
+             'properties': {'id': 1L, 'name': 'testglobal line 1a'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (103.553, 250.0)]},
+             'properties': {'id': 2L, 'name': 'testglobal line 2a'}}
+        ])
+          
+        collection2.writerecords([
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.5, 0.0), (0.5, 100.0)]},
+             'properties': {'id': 1L, 'name': 'testglobal line 1b'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.5), (500.0, 0.5)]},
+             'properties': {'id': 2L, 'name': 'testglobal line 2b'}}
+        ])
+          
+        angle_col = get_global_intersect_angles(collection1, collection2)
+          
         self.assertDictEqual(angle_col[0]['properties'],
                              {'crossangle': 45.0 })
         self.assertDictEqual(angle_col[1]['properties'],
