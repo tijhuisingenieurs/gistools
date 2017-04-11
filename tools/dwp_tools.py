@@ -1,9 +1,11 @@
+import logging
 from shapely.geometry import Point
 
-from gistools.utils.collection import MemCollection
-from gistools.utils.geometry import TLine, TMultiLineString
+from gistools.utils.collection import MemCollection, OrderedDict
+from gistools.utils.geometry import TLine, TMultiLineString, tshape
 from gistools.utils.wit import vul_leggerwaarden, create_leggerpunten, update_leggerpunten_diepten
 
+log = logging.getLogger(__file__)
 
 def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
                                        default_length=15.0, length_field=None):
@@ -20,8 +22,8 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
 
         length = feature['properties'].get(length_field, default_length)
 
-        for p in point_col.filter(bbox=line.bounds):
-                
+        for p in point_col.filter(bbox=line.bounds, precision=10**-6):
+            log.warning('filter')
             if line.almost_intersect_with_point(Point(p['geometry']['coordinates'])):
                 props = {}
                 for field in copy_fields:
@@ -134,3 +136,150 @@ def get_leggerprofiel(line_col):
     legger_point_col.writerecords(records)
     
     return legger_point_col
+
+
+def get_angles(line_col):
+    """ get angle of line in degrees, between start and endpoint of line
+    North = 0 degrees, East = 90 degrees
+    
+    return; linecollection with extra property 'feature_angle'
+    """
+    
+    for feature in line_col:
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TMultiLineString(feature['geometry']['coordinates'])   
+
+        feature['properties']['feature_angle'] = line.get_line_angle()
+        
+    return line_col
+
+
+
+
+def get_global_intersect_angles(line_col1, line_col2):
+    """ get angle of intersection in degrees, between two lines
+    direction of lines from start to end point, not segment direction
+    North = 0 degrees, East = 90 degrees
+     
+    return collection of intersection points, with a property containing
+    the angle between the intersecting lines in the direction of the lines
+    """
+     
+    point_col = MemCollection(geometry_type='Point')
+
+    records = []
+        
+    line_col1_angles = get_angles(line_col1)
+    line_col2_angles = get_angles(line_col2)
+     
+    for line1 in line_col1_angles:
+        if type(line1['geometry']['coordinates'][0][0]) != tuple:
+            line1_shape = TLine(line1['geometry']['coordinates'])
+        else:
+            line1_shape = TMultiLineString(line1['geometry']['coordinates']) 
+         
+        for line2 in line_col2_angles.filter(bbox=line1_shape.bounds, precision=10**-6):
+            if type(line2['geometry']['coordinates'][0][0]) != tuple:
+                line2_shape = TLine(line2['geometry']['coordinates'])
+            else:
+                line2_shape = TMultiLineString(line2['geometry']['coordinates']) 
+             
+            if line1_shape.intersects(line2_shape):
+                 
+                max_angle = max(line1['properties'].get('feature_angle'), 
+                                line2['properties'].get('feature_angle'))
+                min_angle = min(line1['properties'].get('feature_angle'), 
+                                line2['properties'].get('feature_angle'))
+                crossangle = max_angle - min_angle
+                 
+                intersect_point = line1_shape.intersection(line2_shape)
+                
+                if intersect_point.geom_type != 'Point':
+                    message = 'Intersectie op meerdere plekken, boundingbox = ' + str(intersect_point.bounds)
+                    log.warning(message)
+                    message = 'Voor lijn ' + str(line1['geometry']['coordinates']) + ' en lijn '+ str(line2['geometry']['coordinates'])
+                    log.warning(message)
+                else:
+                    props = {}        
+                    props['crossangle'] = crossangle
+                    
+                    # todo: get id's from lines (as with clean tools)
+                    records.append({'geometry': {'type': 'Point',
+                                         'coordinates': (intersect_point.x, intersect_point.y) },
+        
+                           'properties': props})
+            
+    point_col.writerecords(records)
+
+    return point_col 
+
+def get_vertices_with_index(line_col, id_field):
+    """ get Point at each vertex on line, and assign index number
+    
+    input = line MemCollection
+    return collection of points with line id and index number"""
+    
+    
+    records = []
+    
+    for feature in line_col:
+        coords = []
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            coords = feature['geometry']['coordinates']
+        else:
+            for part in feature['geometry']['coordinates']:
+                  for l in part:
+                      coords.append(l)
+
+        i = 0
+        
+        for p in coords:
+            i = i + 1
+            props = {}        
+            props['line_id'] = feature['properties'].get(id_field, None)
+            props['vertex_nr'] = i          
+            
+            records.append({'geometry': {'type': 'Point',
+                                     'coordinates': p},
+                       'properties': props})
+            
+    point_col = MemCollection(geometry_type='Point') 
+    point_col.writerecords(records)
+    
+    return point_col
+    
+def get_index_number_from_points(line_col, point_col, index_field):
+    """ append index number from point as attribute to line
+    
+    input = line MemCollection to append index to
+            point MemCollection with attribute with index number (index_field)
+    retun = line MemCollection with extra attribute"""
+    
+    records = []
+    
+    for feature in line_col:
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TMultiLineString(feature['geometry']['coordinates'])   
+              
+        for p in point_col.filter(bbox=line.bounds, precision=10**-6):
+            pnt = Point(p['geometry']['coordinates'])
+    
+            if line.almost_intersect_with_point(pnt):
+                props = OrderedDict()
+                props['line_id'] = p['properties'].get('line_id')
+                props['volgnr'] = p['properties'].get('vertex_nr')
+                 
+                records.append({'geometry': {'type': line.type,
+                                     'coordinates': line.coordinates},
+                       'properties': props})
+                
+     
+    indexed_line_col = MemCollection(geometry_type=line.type) 
+    indexed_line_col.writerecords(records)
+    
+    return indexed_line_col
+   

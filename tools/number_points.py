@@ -34,7 +34,7 @@ def number_points_on_line(lines,
         line_shape = tshape(line['geometry'])
         pnts_on_line = []
 
-        for point in points.filter(bbox=line_shape.bounds):
+        for point in points.filter(bbox=line_shape.bounds, precision=10**-6):
             pnt = Point(point['geometry']['coordinates'])
 
             if line_shape.almost_intersect_with_point(pnt):

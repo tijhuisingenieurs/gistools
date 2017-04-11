@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, degrees, atan2
 from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 
@@ -83,6 +83,7 @@ class TLine(LineString):
         return (bool): if other geometry intersects
         """
 
+        log.warning(self.distance(other))
         if self.intersects(other):
             return True
         elif self.distance(other) < 10**-decimals:
@@ -327,6 +328,28 @@ class TLine(LineString):
         
         return flipped_line
     
+    def get_line_angle(self):
+        """ get angle of line in degrees, between start and endpoint of line
+        North = 0 degrees, East = 90 degrees
+        
+        return: value of angel
+        """
+
+        coords = []
+        if hasattr(self, 'geoms'):
+            for p in self.geoms:
+                coords.extend(p.coords)
+        else:
+            coords = self.coords    
+
+        start_x = coords[0][0]
+        start_y = coords[0][1]
+        end_x = coords[-1][0]
+        end_y = coords[-1][1]
+        
+        line_angle = abs(round(degrees(atan2((end_x - start_x),(end_y - start_y))),1))
+            
+        return line_angle 
     
 class TMultiLineString(MultiLineString, TLine):
 

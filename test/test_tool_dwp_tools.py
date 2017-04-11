@@ -2,7 +2,11 @@ import unittest
 import os.path
 
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line, flip_lines, get_leggerprofiel
+from  gistools.tools.dwp_tools import *
+
+# import get_haakselijnen_on_points_on_line, flip_lines, 
+# get_leggerprofiel, get_angles, get_global_intersect_angles, get_vertices_with_index,
+# get_index_number_from_points
 
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -216,3 +220,221 @@ class TestDWPTools(unittest.TestCase):
         self.assertDictEqual(legger_point_col[7]['geometry'],
                              {'type': 'Point',
                               'coordinates': [(20.0, 1.8)]})
+
+    def test_get_line_angles(self):
+        """test calculate angles of lines"""   
+             
+        collection = MemCollection(geometry_type='MultiLinestring')
+
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (3.0, 3.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (103.553, 250.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (250.0, 103.553)]},
+             'properties': {'id': 3L, 'name': 'line 3'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (250.0, 0.0)]},
+             'properties': {'id': 4L, 'name': 'line 4'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (250.0, -250.0)]},
+             'properties': {'id': 5L, 'name': 'line 5'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (-250.0, -250.0)]},
+             'properties': {'id': 6L, 'name': 'line 6'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (-250.0, 250.0)]},
+             'properties': {'id': 7L, 'name': 'line 7'}}
+        ])
+        
+        angle_col = get_angles(collection)
+        
+        self.assertDictEqual(angle_col[0]['properties'],
+                             {'id': 1L, 'name': 'line 1',
+                                             'feature_angle': 45.0 })
+        self.assertDictEqual(angle_col[1]['properties'],
+                             {'id': 2L, 'name': 'line 2',
+                                             'feature_angle': 22.5})
+        self.assertDictEqual(angle_col[2]['properties'],
+                             {'id': 3L, 'name': 'line 3',
+                                             'feature_angle': 67.5 })
+        self.assertDictEqual(angle_col[3]['properties'],
+                             {'id': 4L, 'name': 'line 4',
+                                             'feature_angle': 90.0})
+        self.assertDictEqual(angle_col[4]['properties'],
+                             {'id': 5L, 'name': 'line 5',
+                                             'feature_angle': 135.0 })
+        self.assertDictEqual(angle_col[5]['properties'],
+                             {'id': 6L, 'name': 'line 6',
+                                             'feature_angle': 225.0})
+        self.assertDictEqual(angle_col[6]['properties'],
+                             {'id': 7L, 'name': 'line 7',
+                                             'feature_angle': 315.0})
+    
+    def test_get_global_intersect_angles(self):
+        """test calculate angles of intersection of lines"""   
+              
+        collection1 = MemCollection(geometry_type='MultiLinestring')
+        collection2 = MemCollection(geometry_type='MultiLinestring')
+ 
+        collection1.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (3.0, 3.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (103.553, 250.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}}
+        ])
+         
+        collection2.writerecords([
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.5, 0.0), (0.5, 100.0)]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.5), (500.0, 0.5)]},
+             'properties': {'id': 2L, 'name': 'line 2'}}
+        ])
+         
+        angle_col = get_global_intersect_angles(collection1, collection2)
+         
+        self.assertDictEqual(angle_col[0]['properties'],
+                             {'crossangle': 45.0 })
+        self.assertDictEqual(angle_col[1]['properties'],
+                             {'crossangle': 45.0 })
+        self.assertDictEqual(angle_col[2]['properties'],
+                             {'crossangle': 22.5 })
+        self.assertDictEqual(angle_col[3]['properties'],
+                             {'crossangle': 67.5 })
+
+    def test_get_vertices_with_index(self):
+        """test get vertex index number """
+
+        collection = MemCollection(geometry_type='MultiLinestring')
+
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (5.0, 5.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (0.0, 20.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (10.0, 10.0), (10.0, 20.0), (30.0, 30.0)]},
+             'properties': {'id': 3L, 'name': 'line 3'}}
+        ])
+                                 
+        vertex_col = get_vertices_with_index(collection, 'id')
+        
+        p = vertex_col[0]
+        
+        self.assertEqual(p['geometry']['coordinates'][0], 0.0)
+        
+        self.assertDictEqual(vertex_col[0]['properties'],
+                             {'line_id': 1L, 'vertex_nr': 1})
+        self.assertDictEqual(vertex_col[0]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 0.0)})  
+        
+        self.assertDictEqual(vertex_col[1]['properties'],
+                             {'line_id': 1L, 'vertex_nr': 2})
+        self.assertDictEqual(vertex_col[1]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (1.0, 1.0)}) 
+                                 
+        self.assertDictEqual(vertex_col[2]['properties'],
+                             {'line_id': 1L, 'vertex_nr': 3})
+        self.assertDictEqual(vertex_col[2]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (2.0, 2.0)})                                
+
+        self.assertDictEqual(vertex_col[3]['properties'],
+                             {'line_id': 1L, 'vertex_nr': 4})
+        self.assertDictEqual(vertex_col[3]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (5.0, 5.0)})      
+        
+        self.assertDictEqual(vertex_col[4]['properties'],
+                             {'line_id': 2L, 'vertex_nr': 1})
+        self.assertDictEqual(vertex_col[4]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 0.0)})                                        
+       
+        self.assertDictEqual(vertex_col[5]['properties'],
+                             {'line_id': 2L, 'vertex_nr': 2})
+        self.assertDictEqual(vertex_col[5]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 10.0)}) 
+                                 
+        self.assertDictEqual(vertex_col[7]['properties'],
+                             {'line_id': 3L, 'vertex_nr': 1})
+        self.assertDictEqual(vertex_col[7]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 0.0)})         
+
+        self.assertDictEqual(vertex_col[8]['properties'],
+                             {'line_id': 3L, 'vertex_nr': 2})
+        self.assertDictEqual(vertex_col[8]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 10.0)})  
+                        
+        self.assertDictEqual(vertex_col[9]['properties'],
+                             {'line_id': 3L, 'vertex_nr': 3})
+        self.assertDictEqual(vertex_col[9]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (10.0, 10.0)})   
+
+        self.assertDictEqual(vertex_col[10]['properties'],
+                             {'line_id': 3L, 'vertex_nr': 4})
+        self.assertDictEqual(vertex_col[10]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (10.0, 20.0)})       
+        
+        
+    def test_get_index_number_from_points(self):
+        """test append vertex index number to lines """
+
+        line_col = MemCollection(geometry_type='MultiLinestring')
+
+        line_col.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (1.0, 1.0)),
+                                              ((2.0, 2.0), (5.0, 5.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (0.0, 20.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (10.0, 20.0), (30.0, 30.0)]},
+             'properties': {'id': 3L, 'name': 'line 3'}}
+        ])    
+        
+        point_col = MemCollection(geometry_type='MultiPoint')
+                
+        point_col.writerecords([
+            {'geometry': {'type': 'Point',
+                          'coordinates': (0.5, 0.5)},
+             'properties': {'line_id': 1L, 'vertex_nr': 1}},                               
+            {'geometry': {'type': 'Point',
+                          'coordinates': (0.0, 15.0)},
+             'properties': {'line_id': 1L, 'vertex_nr': 2}},
+            {'geometry': {'type': 'Point',
+                          'coordinates': (5.0, 15.0)},
+             'properties': {'line_id': 1L, 'vertex_nr': 3}}                                
+        ])
+        
+        
+        index_line_col = get_index_number_from_points(line_col, point_col, 'vertex_nr')     
+        
+        self.assertDictEqual(index_line_col[0]['properties'],
+                             {'line_id': 1L, 'volgnr': 1 })
+        self.assertDictEqual(index_line_col[1]['properties'],
+                             {'line_id': 1L, 'volgnr': 2 })
+        self.assertDictEqual(index_line_col[2]['properties'],
+                             {'line_id': 1L, 'volgnr': 3 })
+        

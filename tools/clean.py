@@ -188,7 +188,7 @@ def connect_lines(lines,
         #     extend_line_start = Polygon()
         #     extend_line_start = Polygon()
 
-        for candidate in lines.filter(bbox=line.bounds):
+        for candidate in lines.filter(bbox=line.bounds, precision=10**-6):
             if candidate['id'] == feature['id']:
                 continue
 
