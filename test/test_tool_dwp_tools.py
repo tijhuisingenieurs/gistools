@@ -270,10 +270,10 @@ class TestDWPTools(unittest.TestCase):
                                              'feature_angle': 135.0 })
         self.assertDictEqual(angle_col[5]['properties'],
                              {'id': 6L, 'name': 'line 6',
-                                             'feature_angle': 225.0})
+                                             'feature_angle': 135.0})
         self.assertDictEqual(angle_col[6]['properties'],
                              {'id': 7L, 'name': 'line 7',
-                                             'feature_angle': 315.0})
+                                             'feature_angle': 45.0})
     
     def test_get_global_intersect_angles(self):
         """test calculate angles of intersection of lines"""   
