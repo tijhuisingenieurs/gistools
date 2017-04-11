@@ -84,9 +84,17 @@ class MemCollection(object):
         selected.intersection_update(set(range(start, stop, step)))
 
         bbox = kwds.get('bbox')
+        bbox_precision = kwds.get('precision', 0.0)
         mask = kwds.get('mask')
 
         if bbox is not None:
+            bbox = (
+                bbox[0] - bbox_precision,
+                bbox[1] - bbox_precision,
+                bbox[2] + bbox_precision,
+                bbox[3] + bbox_precision,
+            )
+            
             selected.intersection_update(set(self._spatial_index.intersection(bbox)))
 
         if mask:
