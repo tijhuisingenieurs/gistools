@@ -209,27 +209,6 @@ def get_intersecting_segments(line_col1, line_col2):
     line_parts_col.writerecords(records)
     
     return line_parts_col 
-        
-
-def get_local_intersect_angles(line_col1, line_col2):
-    """ get angle of intersection in degrees, between two lines
-    direction of lines from start to end point, not segment direction
-    North = 0 degrees, East = 90 degrees
-     
-    return collection of intersection points, with a property containing
-    the angle between the intersecting lines in the direction of the lines
-    """
-     
-    point_col = MemCollection(geometry_type='Point')
-    records = []
-
-    line1_parts_col= get_intersecting_segments(line_col1,line_col2 )
-    line2_parts_col= get_intersecting_segments(line_col2,line_col1 )
-
-    
-    point_col = get_global_intersect_angles(line1_parts_col,line2_parts_col)
-    
-    return point_col
 
 
 def get_global_intersect_angles(line_col1, line_col2):
@@ -289,6 +268,27 @@ def get_global_intersect_angles(line_col1, line_col2):
     point_col.writerecords(records)
 
     return point_col 
+
+
+def get_local_intersect_angles(line_col1, line_col2):
+    """ get angle of intersection in degrees, between two lines
+    direction of lines from start to end point, not segment direction
+    North = 0 degrees, East = 90 degrees
+     
+    return collection of intersection points, with a property containing
+    the angle between the intersecting lines in the direction of the lines
+    """
+     
+    point_col = MemCollection(geometry_type='Point')
+    records = []
+
+    line1_parts_col= get_intersecting_segments(line_col1,line_col2 )
+    line2_parts_col= get_intersecting_segments(line_col2,line_col1 )
+
+    
+    point_col = get_global_intersect_angles(line1_parts_col,line2_parts_col)
+    
+    return point_col
 
 def get_vertices_with_index(line_col, id_field):
     """ get Point at each vertex on line, and assign index number
