@@ -226,69 +226,11 @@ def get_local_intersect_angles(line_col1, line_col2):
     line1_parts_col= get_intersecting_segments(line_col1,line_col2 )
     line2_parts_col= get_intersecting_segments(line_col2,line_col1 )
 
-    line_col1_angles = get_angles(line1_parts_col)
-    line_col2_angles = get_angles(line2_parts_col)
     
-    records = []
-     
-    for line1 in line_col1_angles:
-        if type(line1['geometry']['coordinates'][0][0]) != tuple:
-            line1_shape = TLine(line1['geometry']['coordinates'])
-        else:
-            line1_shape = TMultiLineString(line1['geometry']['coordinates']) 
-         
-        message = 'line uit shape 1...' + str(line1['geometry']['coordinates'])
-        log.warning(message)
-        message = 'hoek uit shape 1...' + str(line1['properties'].get('feature_angle'))
-        log.warning(message)  
-        
-        for line2 in line_col2_angles.filter(bbox=line1_shape.bounds, precision=10**-6):
-            if type(line2['geometry']['coordinates'][0][0]) != tuple:
-                line2_shape = TLine(line2['geometry']['coordinates'])
-            else:
-                line2_shape = TMultiLineString(line2['geometry']['coordinates']) 
-            
-            message = 'line uit shape 2...' + str(line2['geometry']['coordinates'])
-            log.warning(message)
-            message = 'hoek uit shape 2...' + str(line2['properties'].get('feature_angle'))
-            log.warning(message)  
-         
-            if line1_shape.intersects(line2_shape):  
-                
-                message = 'lijnen intersecteren' 
-                log.warning(message)
-                                       
-                max_angle = max(line1['properties'].get('feature_angle'), 
-                                line2['properties'].get('feature_angle'))
-                min_angle = min(line1['properties'].get('feature_angle'), 
-                                line2['properties'].get('feature_angle'))
-                crossangle = max_angle - min_angle
-                
-                message = 'max_angle = ' + str(max_angle) + ' min_angle = ' + str(min_angle) 
-                log.warning(message)
-                message = 'crossangle = ' + str(crossangle)
-                log.warning(message)
-                
-                intersect_point = line1_shape.intersection(line2_shape)
-                
-                if intersect_point.geom_type != 'Point':
-                    message = 'Intersectie op meerdere plekken, boundingbox = ' + str(intersect_point.bounds)
-                    log.warning(message)
-                    message = 'Voor lijn ' + str(line1['geometry']['coordinates']) + ' en lijn '+ str(line2['geometry']['coordinates'])
-                    log.warning(message)
-                else:
-                    props = {}        
-                    props['crossangle'] = crossangle
-                    
-                    # todo: get id's from lines (as with clean tools)
-                    records.append({'geometry': {'type': 'Point',
-                                         'coordinates': (intersect_point.x, intersect_point.y)},
-        
-                           'properties': props})
-            
-    point_col.writerecords(records)
+    point_col = get_global_intersect_angles(line1_parts_col,line2_parts_col)
     
-    return point_col 
+    return point_col
+
 
 def get_global_intersect_angles(line_col1, line_col2):
     """ get angle of intersection in degrees, between two lines
@@ -338,6 +280,7 @@ def get_global_intersect_angles(line_col1, line_col2):
                     props['crossangle'] = crossangle
                     
                     # todo: get id's from lines (as with clean tools)
+                    log.info('..intersection ok..')
                     records.append({'geometry': {'type': 'Point',
                                          'coordinates': (intersect_point.x, intersect_point.y) },
         
