@@ -4,7 +4,8 @@ import os.path
 
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import (get_start_endpoints,
-                                            get_midpoints, get_points_on_line)
+                                            get_midpoints, get_points_on_line,
+                                            get_points_on_line_random)
 
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -199,3 +200,37 @@ class TestTools(unittest.TestCase):
                              {'id': 1L, 'name': 'line 1'})
         self.assertDictEqual(point_col[9]['properties'],
                              {'id': 2L, 'name': 'line 2'})
+        
+    def test_get_points_on_line_random(self):
+        collection = MemCollection(geometry_type='MultiLinestring')
+
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (0.0, 10.0)),
+                                          ((0.0, 20.0), (0.0, 30.0))]},
+             'properties': {'id': 1L, 'name': 'line 1', 'offset': 2.0}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (20.0, 0.0)]},
+             'properties': {'id': 2L, 'name': 'line 2', 'offset': 2.0}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (20.0, 20.0)]},
+             'properties': {'id': 3L, 'name': 'line 3', 'offset': 2.5}}
+            ])     
+        
+        point_col = get_points_on_line_random(collection, ['id', 'name'],
+                                       default_offset=0.75, 
+                                       offset_field= 'offset')                         
+                                 
+        self.assertEqual(len(point_col), 3)
+
+        self.assertGreaterEqual(point_col[0]['geometry']['coordinates'][1],2.0)
+        self.assertLessEqual(point_col[0]['geometry']['coordinates'][1],28.0)
+     
+        self.assertGreaterEqual(point_col[1]['geometry']['coordinates'][0],2.0)
+        self.assertLessEqual(point_col[1]['geometry']['coordinates'][0],18.0)
+        
+        self.assertGreaterEqual(point_col[2]['geometry']['coordinates'][0],1.76)
+        self.assertLessEqual(point_col[2]['geometry']['coordinates'][0],18.24)
+        self.assertGreaterEqual(point_col[2]['geometry']['coordinates'][1],1.76)
+        self.assertLessEqual(point_col[2]['geometry']['coordinates'][1],18.24)  
+        
