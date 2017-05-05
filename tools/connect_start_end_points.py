@@ -1,5 +1,6 @@
 from shapely.geometry import shape
 from math import floor
+import random
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
@@ -204,3 +205,35 @@ def get_points_on_line_amount(line_col, copy_fields=[], default_amount=10.0, amo
              'properties': props}])
     
     return point_col
+
+def get_points_on_line_random(line_col, copy_fields=[], default_offset=0.75, offset_field=None):
+    """ returns MemCollection with specified amount of points on line at equal distance"""
+    
+    point_col = MemCollection(geometry_type='Point')
+    
+    for feature in line_col.filter():
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TMultiLineString(feature['geometry']['coordinates'])
+
+        props = {}
+        for field in copy_fields:
+            props[field] = feature['properties'].get(field, None)
+    
+        # afstand bepalen
+        offset = feature['properties'].get(offset_field, default_offset)
+        if offset > line.length:
+            offset = 0.25 * line.length
+            
+        random_afstand = random.uniform(offset, line.length - offset)
+        
+        point_col.writerecords([
+        {'geometry': {'type': 'Point',
+                      'coordinates': line.get_point_at_distance(random_afstand)},
+         'properties': props}])
+
+    return point_col
+    
+    
+    
