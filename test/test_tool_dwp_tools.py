@@ -512,9 +512,9 @@ class TestDWPTools(unittest.TestCase):
         index_line_col = get_index_number_from_points(line_col, point_col, 'vertex_nr')     
         
         self.assertDictEqual(index_line_col[0]['properties'],
-                             {'line_id': 1L, 'volgnr': 1 })
+                             {'bronlijn': 999999,'line_id': 1L, 'volgnr': 1 })
         self.assertDictEqual(index_line_col[1]['properties'],
-                             {'line_id': 1L, 'volgnr': 2 })
+                             {'bronlijn': 999999,'line_id': 1L, 'volgnr': 2 })
         self.assertDictEqual(index_line_col[2]['properties'],
-                             {'line_id': 1L, 'volgnr': 3 })
+                             {'bronlijn': 999999,'line_id': 1L, 'volgnr': 3 })
         

@@ -360,8 +360,8 @@ def get_index_number_from_points(line_col, point_col, index_field):
                 message3 = 'feature ' + str(feature['properties'].get('FID')) + ' with vertex ' + str(p['properties'].get('vertex_nr'))
                 log.warning(message3)  
                                                                                                   
-                props = OrderedDict()
-                props['bronlijn'] = feature['properties'].get('FID')
+                props = {}
+                props['bronlijn'] = feature['properties'].get('FID',999999)
                 props['line_id'] = p['properties'].get('line_id')
                 props['volgnr'] = p['properties'].get('vertex_nr')
                  
