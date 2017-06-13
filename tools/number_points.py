@@ -37,7 +37,7 @@ def number_points_on_line(lines,
         for point in points.filter(bbox=line_shape.bounds, precision=10**-6):
             pnt = Point(point['geometry']['coordinates'])
 
-            if line_shape.almost_intersect_with_point(pnt):
+            if line_shape.almost_intersect_with_point(pnt, decimals = 2):
                 point['dist'] = line_shape.project(pnt)
                 pnts_on_line.append(point)
 

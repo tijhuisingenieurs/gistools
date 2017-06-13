@@ -1,4 +1,5 @@
 import logging
+# from utils.arcgis_logging import setup_logging
 from shapely.geometry import Point
 
 from gistools.utils.collection import MemCollection, OrderedDict
@@ -23,8 +24,9 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
         length = feature['properties'].get(length_field, default_length)
 
         for p in point_col.filter(bbox=line.bounds, precision=10**-6):
-            log.warning('filter')
+            log.warning('point within bbox line')
             if line.almost_intersect_with_point(Point(p['geometry']['coordinates'])):
+                log.warning('found intersection')
                 props = {}
                 for field in copy_fields:
                     props[field] = p['properties'].get(field, None)
@@ -333,18 +335,33 @@ def get_index_number_from_points(line_col, point_col, index_field):
     retun = line MemCollection with extra attribute"""
     
     records = []
+    log.warning('Tool started')
+
     
     for feature in line_col:
+        log.warning('feature found')
+        message1 = 'feature: ' + str(feature['properties'].get('FID'))
+        log.warning(message1)
+        
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
         else:
             line = TMultiLineString(feature['geometry']['coordinates'])   
               
         for p in point_col.filter(bbox=line.bounds, precision=10**-6):
+            log.warning('point found in bbox')
+            message2 = 'point: ' + str(p['properties'].get('vertex_nr'))
+            log.warning(message2)
+            
             pnt = Point(p['geometry']['coordinates'])
     
-            if line.almost_intersect_with_point(pnt):
-                props = OrderedDict()
+            if line.almost_intersect_with_point(pnt,decimals=2):
+                log.warning('intersection found')
+                message3 = 'feature ' + str(feature['properties'].get('FID')) + ' with vertex ' + str(p['properties'].get('vertex_nr'))
+                log.warning(message3)  
+                                                                                                  
+                props = {}
+                props['bronlijn'] = feature['properties'].get('FID',999999)
                 props['line_id'] = p['properties'].get('line_id')
                 props['volgnr'] = p['properties'].get('vertex_nr')
                  

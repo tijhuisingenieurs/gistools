@@ -5,7 +5,9 @@ import os.path
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import (get_start_endpoints,
                                             get_midpoints, get_points_on_line,
-                                            get_points_on_line_random)
+                                            get_points_on_line_random,
+                                            get_points_on_perc,
+                                            get_points_on_line_amount)
 
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -201,6 +203,95 @@ class TestTools(unittest.TestCase):
         self.assertDictEqual(point_col[9]['properties'],
                              {'id': 2L, 'name': 'line 2'})
         
+    
+    def test_get_points_on_perc(self):
+        collection = MemCollection(geometry_type='MultiLinestring')
+        
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (0.0, 79.0)),
+                                          ((0.0, 89.0), (0.0, 170.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (90.0, 0.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}}
+        ])
+
+        point_col = get_points_on_perc(collection, ['id', 'name'],
+                                       default_perc=25.0, 
+                                       perc_field=None)
+        
+        self.assertEqual(len(point_col), 8)
+        
+        self.assertDictEqual(point_col[0]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 40.0)})  
+        self.assertDictEqual(point_col[1]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 90.0)})
+        self.assertDictEqual(point_col[2]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 130.0)})
+        self.assertDictEqual(point_col[3]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 170.0)})
+        self.assertDictEqual(point_col[4]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (22.5, 0.0)})
+        self.assertDictEqual(point_col[5]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (45.0, 0.0)})
+        self.assertDictEqual(point_col[6]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (67.5, 0.0)})
+        self.assertDictEqual(point_col[7]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (90.0, 0.0)})
+
+    def get_points_on_line_amount(self):
+        collection = MemCollection(geometry_type='MultiLinestring')
+        
+        collection.writerecords([
+            {'geometry': {'type': 'MultiLineString',
+                          'coordinates': [((0.0, 0.0), (0.0, 80.0)),
+                                          ((0.0, 90.0), (0.0, 170.0))]},
+             'properties': {'id': 1L, 'name': 'line 1'}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (90.0, 0.0)]},
+             'properties': {'id': 2L, 'name': 'line 2'}}
+        ])
+
+        point_col = get_points_on_line_amount(collection, ['id', 'name'],
+                                       default_amount=4.0, 
+                                       amount_field=None)
+        
+        self.assertEqual(len(point_col), 8)
+        
+        self.assertDictEqual(point_col[0]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 40.0)})  
+        self.assertDictEqual(point_col[1]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 80.0)})
+        self.assertDictEqual(point_col[2]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 130.0)})
+        self.assertDictEqual(point_col[3]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (0.0, 170.0)})
+        self.assertDictEqual(point_col[4]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (22.5, 0.0)})
+        self.assertDictEqual(point_col[5]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (45.0, 0.0)})
+        self.assertDictEqual(point_col[6]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (67.5, 0.0)})
+        self.assertDictEqual(point_col[7]['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (90.0, 0.0)})
+    
     def test_get_points_on_line_random(self):
         collection = MemCollection(geometry_type='MultiLinestring')
 
@@ -232,5 +323,4 @@ class TestTools(unittest.TestCase):
         self.assertGreaterEqual(point_col[2]['geometry']['coordinates'][0],1.76)
         self.assertLessEqual(point_col[2]['geometry']['coordinates'][0],18.24)
         self.assertGreaterEqual(point_col[2]['geometry']['coordinates'][1],1.76)
-        self.assertLessEqual(point_col[2]['geometry']['coordinates'][1],18.24)  
-        
+        self.assertLessEqual(point_col[2]['geometry']['coordinates'][1],18.24)
