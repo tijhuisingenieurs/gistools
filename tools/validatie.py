@@ -1,5 +1,5 @@
 import logging
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 from gistools.utils.collection import MemCollection, OrderedDict
 from gistools.utils.geometry import TLine, TMultiLineString, tshape
@@ -157,3 +157,65 @@ def get_local_intersect_angles(line_col1, line_col2):
     point_col = get_global_intersect_angles(line1_parts_col,line2_parts_col)
     
     return point_col
+
+
+def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
+    """ get distance of points to contour of polygons
+    
+    return pointcollection with distances. positive is inside polygon, 
+    negative is outside polygon
+    """
+     
+    records = []
+              
+    for feature in poly_col:
+        vlak = Polygon(feature['geometry']['coordinates'][0])
+        contour = TLine(vlak.boundary)
+        contour_buffer = vlak.boundary.buffer(2.0)
+        
+        for p in point_col.filter(bbox=contour_buffer.bounds, precision=10**-6):
+        
+            if p in point_col.filter(bbox=contour.bounds, precision=10**-6):
+                log.info('Punt in polygon boundingbox')
+                pnt = Point(p['geometry']['coordinates'])
+                
+                pnt_prj = contour.project(pnt)
+                pnt_on_contour = Point(contour.get_point_at_distance(pnt_prj))
+                
+                afstand = pnt.distance(pnt_on_contour)
+                afstand = round(afstand, 2)
+                
+                props = {}
+                props['line_id'] = feature['properties'].get(poly_id_field, None)
+                props['afstand'] = afstand
+                     
+                records.append({'geometry': {'type': pnt.type,
+                                             'coordinates': pnt.coords[0]},
+                                             'properties': props})
+        
+            
+            else:
+                log.info('Punt buiten polygon boundingbox, binnen 2 meter buffer')
+                pnt = Point(p['geometry']['coordinates'])
+                
+                pnt_prj = contour.project(pnt)
+                pnt_on_contour = Point(contour.get_point_at_distance(pnt_prj))
+                
+                afstand = -pnt.distance(pnt_on_contour)
+                afstand = round(afstand, 2)
+                
+                props = {}
+                props['line_id'] = feature['properties'].get(poly_id_field, None)
+                props['afstand'] = afstand
+                     
+                records.append({'geometry': {'type': pnt.type,
+                                             'coordinates': pnt.coords[0]},
+                                             'properties': props})
+            
+            
+    point_dist_col = MemCollection(geometry_type=pnt.type) 
+    point_dist_col.writerecords(records)
+            
+    return point_dist_col
+    
+    

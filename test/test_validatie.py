@@ -128,4 +128,54 @@ class TestWit(unittest.TestCase):
                              {'crossangle': 22.5 })
         self.assertDictEqual(angle_col[3]['properties'],
                              {'crossangle': 67.5 })
+        
     
+    def test_get_distance_point_to_contour(self):
+        """test get distance from point to countour of polygon"""
+        
+        collection1 = MemCollection(geometry_type='MultiPolygon')
+        collection2 = MemCollection(geometry_type='MultiPoint')
+        
+        collection1.writerecords([
+            {'geometry': {'type': 'Polygon',
+                          'coordinates': [((0.0, 0.0), (3.0, 0.0), (3.0, 3.0), 
+                                          (0.0, 3.0), (0.0, 0.0))]},
+             'properties': {'id': 1L, 'name': 'polygon 1'}},
+            {'geometry': {'type': 'Polygon',
+                          'coordinates': [((0.0, 0.0), (3.0, 0.0), (3.0, 3.0), 
+                                          (0.0, 3.0), (0.0, 0.0)), 
+                                          ((1.0, 1.0), (2.0, 1.0), 
+                                           (2.0, 2.0), (1.0, 2.0),
+                                           (1.0, 1.0)) ]},
+             'properties': {'id': 2L, 'name': 'polygon 1'}}
+             ])
+        
+        collection2.writerecords([
+            {'geometry': {'type': 'Point',
+                          'coordinates': [(0.1, 1.5)]},
+             'properties': {'id': 1, 'name': 'test_p1'}},
+            {'geometry': {'type': 'Point',
+                          'coordinates': [(3.1, 1.5)]},
+             'properties': {'id': 2, 'name': 'test_p2'}},
+            {'geometry': {'type': 'Point',
+                          'coordinates': [(1.5, 1.5)]},
+             'properties': {'id': 3, 'name': 'test_p3'}},
+            {'geometry': {'type': 'Point',
+                          'coordinates': [(10.0, 10.0)]},
+             'properties': {'id': 4, 'name': 'test_p4'}}
+             ])
+                                                                           
+        point_dist_col = get_distance_point_to_contour(collection1, collection2, 'id')
+        
+        self.assertDictEqual(point_dist_col[0]['properties'],
+                             {'line_id':1L, 'afstand': 0.1 })
+        self.assertDictEqual(point_dist_col[1]['properties'],
+                             {'line_id':1L, 'afstand': -0.1 })
+        self.assertDictEqual(point_dist_col[2]['properties'],
+                             {'line_id':1L, 'afstand': 1.5 })
+        self.assertDictEqual(point_dist_col[3]['properties'],
+                             {'line_id':2L, 'afstand': 0.1 })
+        self.assertDictEqual(point_dist_col[4]['properties'],
+                             {'line_id':2L, 'afstand': -0.1 })
+        self.assertDictEqual(point_dist_col[5]['properties'],
+                             {'line_id':2L, 'afstand': 1.5 })
