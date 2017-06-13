@@ -186,7 +186,7 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
                 afstand = round(afstand, 2)
                 
                 props = {}
-                props['line_id'] = feature['properties'].get(poly_id_field, None)
+                props['poly_id'] = feature['properties'].get(poly_id_field, None)
                 props['afstand'] = afstand
                      
                 records.append({'geometry': {'type': pnt.type,
@@ -205,7 +205,7 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
                 afstand = round(afstand, 2)
                 
                 props = {}
-                props['line_id'] = feature['properties'].get(poly_id_field, None)
+                props['poly_id'] = feature['properties'].get(poly_id_field, None)
                 props['afstand'] = afstand
                      
                 records.append({'geometry': {'type': pnt.type,

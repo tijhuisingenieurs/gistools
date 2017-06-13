@@ -168,14 +168,14 @@ class TestWit(unittest.TestCase):
         point_dist_col = get_distance_point_to_contour(collection1, collection2, 'id')
         
         self.assertDictEqual(point_dist_col[0]['properties'],
-                             {'line_id':1L, 'afstand': 0.1 })
+                             {'poly_id':1L, 'afstand': 0.1 })
         self.assertDictEqual(point_dist_col[1]['properties'],
-                             {'line_id':1L, 'afstand': -0.1 })
+                             {'poly_id':1L, 'afstand': -0.1 })
         self.assertDictEqual(point_dist_col[2]['properties'],
-                             {'line_id':1L, 'afstand': 1.5 })
+                             {'poly_id':1L, 'afstand': 1.5 })
         self.assertDictEqual(point_dist_col[3]['properties'],
-                             {'line_id':2L, 'afstand': 0.1 })
+                             {'poly_id':2L, 'afstand': 0.1 })
         self.assertDictEqual(point_dist_col[4]['properties'],
-                             {'line_id':2L, 'afstand': -0.1 })
+                             {'poly_id':2L, 'afstand': -0.1 })
         self.assertDictEqual(point_dist_col[5]['properties'],
-                             {'line_id':2L, 'afstand': 1.5 })
+                             {'poly_id':2L, 'afstand': 1.5 })
