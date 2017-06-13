@@ -209,8 +209,8 @@ class TestTools(unittest.TestCase):
         
         collection.writerecords([
             {'geometry': {'type': 'MultiLineString',
-                          'coordinates': [((0.0, 0.0), (0.0, 80.0)),
-                                          ((0.0, 90.0), (0.0, 170.0))]},
+                          'coordinates': [((0.0, 0.0), (0.0, 79.0)),
+                                          ((0.0, 89.0), (0.0, 170.0))]},
              'properties': {'id': 1L, 'name': 'line 1'}},
             {'geometry': {'type': 'LineString',
                           'coordinates': [(0.0, 0.0), (90.0, 0.0)]},
@@ -228,7 +228,7 @@ class TestTools(unittest.TestCase):
                               'coordinates': (0.0, 40.0)})  
         self.assertDictEqual(point_col[1]['geometry'],
                              {'type': 'Point',
-                              'coordinates': (0.0, 80.0)})
+                              'coordinates': (0.0, 90.0)})
         self.assertDictEqual(point_col[2]['geometry'],
                              {'type': 'Point',
                               'coordinates': (0.0, 130.0)})
