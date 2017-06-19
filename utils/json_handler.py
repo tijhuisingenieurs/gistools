@@ -70,23 +70,38 @@ def fielddata_to_memcollection(filename):
     
     json_data_col = MemCollection(geometry_type='MultiPoint')
     records = []
-    point = Point()
+        
+    # dicts voor genereren WDB tabellen
+    project_dict = {}
+    profile_dict = {}
     
-    for project in json_dict:
+
+    for project_id, project in enumerate(json_dict):
+        # check of project ook inhoud heeft
         if len(json_dict[project]['measured_profiles']) > 0:
+            project_dict[project_id] = project
             
-            for profile in json_dict[project]['measured_profiles']:
+            # profielen in project nalopen            
+            for pro_id, profile in enumerate(json_dict[project]['measured_profiles']):
                 profile_name = json_dict[project]['measured_profiles'][profile]['ids']
 
+                profile_dict[pro_id] = {}
+                profile_dict[pro_id]['profiel'] = profile_name
+                profile_dict[pro_id]['project'] = project
+                
+                # meetpunten in profiele nalopen
                 for i,p in enumerate(json_dict[project]['measured_profiles'][profile]['profile_points']):
-
+                    
+            
 #                     test = json_dict[project]['measured_profiles'][profile]['profile_points'][i]['method']
                     if json_dict[project]['measured_profiles'][profile]['profile_points'][i]['method'] != 'handmatig':
-
+                                              
                         # ken alle beschikbare attributen toe als properties
                         properties = {}
+                        properties['pro_id'] = pro_id
                         properties['profiel'] = profile_name
                         properties['volgnr'] = i
+                        properties['puntcode'] = json_dict[project]['measured_profiles'][profile]['profile_points'][i]['code']
                         properties['z'] = p['rd_coordinates'][2]
                         keys = p.keys()
                         for key in keys:
@@ -100,6 +115,7 @@ def fielddata_to_memcollection(filename):
         
     json_data_col.writerecords(records)
     
-    return json_data_col
+    # lever de collection met meetpunten en de dicts voor WDB terug
+    return json_data_col, project_dict, profile_dict
     
     
