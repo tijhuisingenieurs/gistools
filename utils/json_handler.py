@@ -102,6 +102,7 @@ def fielddata_to_memcollection(filename):
                         properties['profiel'] = profile_name
                         properties['volgnr'] = i
                         properties['puntcode'] = json_dict[project]['measured_profiles'][profile]['profile_points'][i]['code']
+                        properties['project'] = project
                         properties['z'] = p['rd_coordinates'][2]
                         keys = p.keys()
                         for key in keys:
@@ -116,6 +117,6 @@ def fielddata_to_memcollection(filename):
     json_data_col.writerecords(records)
     
     # lever de collection met meetpunten en de dicts voor WDB terug
-    return json_data_col, project_dict, profile_dict
+    return json_data_col, project_dict, profile_dict, json_dict
     
     

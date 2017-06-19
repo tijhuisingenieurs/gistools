@@ -39,7 +39,7 @@ class TestWit(unittest.TestCase):
         project_dict = {}
         profile_dict = {}
         
-        json_data_col, project_dict, profile_dict = fielddata_to_memcollection(json_file)
+        json_data_col, project_dict, profile_dict, json_dict = fielddata_to_memcollection(json_file)
         
         #187 punten in dataset, waarvan 106 handmatig - 81 met geometrie
         self.assertEqual(len(json_data_col),81)
@@ -57,6 +57,7 @@ class TestWit(unittest.TestCase):
                                 'profiel': '279',
                                 'volgnr': 0,
                                 'puntcode': '1',
+                                'project': 'p1',
                                 'z': -1.3267445101445259,
                                 'datetime': '2017-06-14T12:40:59.321Z',
                                 'code': '1',
