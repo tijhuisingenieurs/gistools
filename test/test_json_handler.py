@@ -1,8 +1,10 @@
 import unittest
 import os.path
+import tempfile
+import shutil
 
 from gistools.utils.collection import MemCollection
-from gistools.utils.json_handler import fielddata_to_memcollection, json_to_dict
+from gistools.utils.json_handler import (fielddata_to_memcollection, json_to_dict)
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
@@ -56,7 +58,6 @@ class TestWit(unittest.TestCase):
                              { 'pro_id': 3,
                                 'profiel': '279',
                                 'volgnr': 0,
-                                'puntcode': '1',
                                 'project': 'p1',
                                 'z': -1.3267445101445259,
                                 'datetime': '2017-06-14T12:40:59.321Z',
@@ -89,4 +90,5 @@ class TestWit(unittest.TestCase):
                                 'upper_level_unit': 'mNAP'})
         self.assertEqual(project_dict[1],'p1')
         self.assertEqual(profile_dict[3]['profiel'],'279') 
-        self.assertEqual(profile_dict[3]['project'],'p1')         
+        self.assertEqual(profile_dict[3]['project'],'p1')      
+        
