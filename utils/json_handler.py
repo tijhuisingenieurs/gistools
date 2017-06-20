@@ -1,4 +1,5 @@
 import json
+import csv
 from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 from collection import MemCollection, OrderedDict
@@ -101,7 +102,6 @@ def fielddata_to_memcollection(filename):
                         properties['pro_id'] = pro_id
                         properties['profiel'] = profile_name
                         properties['volgnr'] = i
-                        properties['puntcode'] = json_dict[project]['measured_profiles'][profile]['profile_points'][i]['code']
                         properties['project'] = project
                         properties['z'] = p['rd_coordinates'][2]
                         keys = p.keys()
@@ -118,5 +118,4 @@ def fielddata_to_memcollection(filename):
     
     # lever de collection met meetpunten en de dicts voor WDB terug
     return json_data_col, project_dict, profile_dict, json_dict
-    
     
