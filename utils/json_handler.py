@@ -3,6 +3,7 @@ import csv
 from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 from collection import MemCollection, OrderedDict
+from conversion_tool import get_float
 
 import logging
 log = logging.getLogger(__name__)
@@ -104,6 +105,7 @@ def fielddata_to_memcollection(filename):
                         properties['volgnr'] = i
                         properties['project'] = project
                         properties['z'] = p['rd_coordinates'][2]
+                        properties['afstand'] = get_float(p['distance'])
                         keys = p.keys()
                         for key in keys:
                             properties[key] = p[key]
