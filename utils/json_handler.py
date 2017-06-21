@@ -3,9 +3,8 @@ import csv
 from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
                               Polygon, MultiPolygon)
 from collection import MemCollection, OrderedDict
-# from conversion_tool import get_float
-from utils.conversion_tools import get_float
-from utils.iso8601 import parse_date
+from gistools.utils.conversion_tools import get_float
+from gistools.utils.iso8601 import parse_date
 
 import logging
 log = logging.getLogger(__name__)
@@ -252,17 +251,33 @@ def fielddata_to_memcollections(filename):
             for i, point in enumerate(profile['profile_points']):
 
                 ############################# 22L en 22R #################################
+                records_ttlr = []
+                
                 if point.get('code') in ['22L', '22R']:
                     tt = {}
 
-                    # todo
-
-                    ttlr_col.writerecords([{
-                        'geometry' : {
-
-                        },
-                        'props': tt
-                    }])
+                    tt['prof_pk'] = pro_pk
+                    tt['ids'] = profile.get('ids', '')
+                    tt['project_id'] = project_id
+                    
+                    tt['code'] = point.get('code')
+                    tt['afstand'] = point.get('distance')
+#                     tt['gps_width'] = ''
+#                     tt['h_width'] = ''
+                    tt['wpeil'] = prof['wpeil']
+                    tt['wpeil_bron'] = prof['wpeil_bron']
+                    tt['datum'] = prof['datum']
+                    
+                    tt['z']= point['rd_coordinates'][12]
+                    tt['x_coord'] = point['rd_coordinates'][0]
+                    tt['y_coord'] = point['rd_coordinates'][1]
+                    
+                    records_ttlr.append([{
+                        'geometry' : {'type': 'Point',
+                        'coordinates': (point['rd_coordinates'][0], point['rd_coordinates'][1])},       
+                        'properties': tt}])
+                
+                ttlr_col.writerecords(records_ttlr)
 
                 ############################# points #################################
 
