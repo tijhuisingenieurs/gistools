@@ -28,10 +28,7 @@ def export_points_to_metfile(point_col, metfile_name):
     
     returns csv file in metfile dialect"""
     
-    # Oplossen met writer = csv.DictWriter en aantal benodigde kolommen? ????
-
-    metfile_csv = metfile_name
-    with open(metfile_csv, 'wb') as csvfile:
+    with open(metfile_name, 'wb') as csvfile:
      
         fieldnames = ['regel']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='|',
