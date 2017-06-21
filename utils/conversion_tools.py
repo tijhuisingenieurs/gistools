@@ -1,6 +1,6 @@
 
 
-def get_float(value, default=-99.0):
+def get_float(value, default=None):
 
     if value is None:
         return default
