@@ -95,3 +95,51 @@ class TestWit(unittest.TestCase):
                               '_ok_nap': None,
                               '_ok_tov_wp': None,
                               })
+        
+         # 187 punten in dataset, waarvan 20 punten met een 22 code
+        self.assertEqual(len(ttlr_col), 20)
+        point = None
+        
+        for p in ttlr_col.filter():
+            if p['properties']['ids'] == '279' and p['properties']['code'] == '22L':
+                point = p
+                break
+            
+        self.assertDictEqual(point['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (114216.10686321165,472040.14822950924)})
+        
+        self.assertDictEqual(dict(point['properties']),
+                             {'wpeil_bron': '22L en 22R', 
+                              'code': '22L', 
+                              'afstand': 0.00, 
+                              'y_coord': 472040.14822950924, 
+                              'z': -1.7967513668576456, 
+                              'datum': '14/06/2017', 
+                              'ids': '279', 
+                              'x_coord': 114216.10686321165, 
+                              'prof_pk': 3, 
+                              'project_id': 'p1', 
+                              'wpeil': -1.78})
+        
+        for p in ttlr_col.filter():
+            if p['properties']['ids'] == '279' and p['properties']['code'] == '22R':
+                point = p
+                break                      
+
+        self.assertDictEqual(point['geometry'],
+                             {'type': 'Point',
+                              'coordinates': (114219.05704747832,472038.3659261789)})
+        
+        self.assertDictEqual(dict(point['properties']),
+                             {'wpeil_bron': '22L en 22R', 
+                              'code': '22R', 
+                              'afstand': 3.45, 
+                              'y_coord': 472038.3659261789, 
+                              'z': -1.7637636573671327, 
+                              'datum': '14/06/2017', 
+                              'ids': '279', 
+                              'x_coord': 114219.05704747832, 
+                              'prof_pk': 3, 
+                              'project_id': 'p1', 
+                              'wpeil': -1.78})

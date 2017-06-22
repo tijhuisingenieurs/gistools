@@ -97,6 +97,8 @@ def fielddata_to_memcollections(filename):
             prof['pk'] = pro_pk
             prof['ids'] = profile.get('ids', '')
             prof['project_id'] = project_id
+            opmerking = profile.get('remarks')
+            opmerking = opmerking.replace('\n', '')
             prof['opm'] = profile.get('remarks')
 
             ttl = {}
@@ -179,7 +181,7 @@ def fielddata_to_memcollections(filename):
             prof['aantal_2'] = count_two
 
             prof['aantal_gps'] = count_gps
-            prof['aantal_hand'] = count_manual
+            prof['aantal_h'] = count_manual
 
             alt_accuracy_list = [a for a in alt_accuracy_list if a is not None]
             date_list = [a for a in date_list if a is not None]
@@ -188,7 +190,8 @@ def fielddata_to_memcollections(filename):
 
             coordinates = [[0, 0], [0, 1]]
 
-            if ttl is not None and ttr is not None:
+#             if ttl is not None and ttr is not None:
+            if ttl.get('rd_coordinates', None) is not None and ttr.get('rd_coordinates', None) is not None:                
                 # todo: verkorten of verlengen op basis van lengte
                 coordinates = ([ttl['rd_coordinates'][0],
                                 ttl['rd_coordinates'][1]],
@@ -255,7 +258,7 @@ def fielddata_to_memcollections(filename):
                     tt['project_id'] = project_id
                     
                     tt['code'] = point.get('code')
-                    tt['afstand'] = point.get('distance')
+                    tt['afstand'] = get_float(point.get('distance'))
 #                     tt['gps_width'] = ''
 #                     tt['h_width'] = ''
                     tt['wpeil'] = prof['wpeil']
@@ -282,7 +285,7 @@ def fielddata_to_memcollections(filename):
                 p['volgnr'] = i
                 p['prof_ids'] = prof['ids']
                 p['prof_wpeil'] = prof['wpeil']
-                p['prof_opm'] = prof['opm']
+#                 p['prof_opm'] = prof['opm']
                 p['prof_hpeil'] = prof['hpeil']
                 p['prof_lpeil'] = prof['lpeil']
                 p['prof_rpeil'] = prof['rpeil']
@@ -309,13 +312,13 @@ def fielddata_to_memcollections(filename):
                 if p['bk_bron'] == 'gps':
                     p['_bk_nap'] = p['bk']
                     if prof['wpeil'] is not None and p['bk'] is not None:
-                        p['_bk_tov_wp'] =  int(math.ceil((p['bk'] - prof['wpeil']) * 100))
+                        p['_bk_tov_wp'] =  int(math.ceil((prof['wpeil'] - p['bk']) * 100))
                     else:
                         p['_bk_tov_wp'] = None
-                elif p['bk_bron'] == 'manual' and p['bk_eenheid'] == 'cm tov wp':
+                elif p['bk_bron'] == 'manual' and p['bk_eenheid'] == 'cm tov WP':
                     p['_bk_tov_wp'] = p['bk']
                     if prof['wpeil'] is not None and p['bk'] is not None:
-                        p['_bk_nap'] = prof['wpeil'] - 100 * p['bk']
+                        p['_bk_nap'] = prof['wpeil'] - (p['bk'] / 100)
                     else:
                         p['_bk_nap'] = None
                 else:
@@ -325,16 +328,19 @@ def fielddata_to_memcollections(filename):
                 if p['ok_bron'] == 'gps':
                     p['_ok_nap'] = p['ok']
                     if prof['wpeil'] is not None and p['ok'] is not None:
-                        p['_ok_tov_wp'] = int(math.ceil((p['ok'] - prof['wpeil']) * 100))
+                        p['_ok_tov_wp'] = int(math.ceil((prof['wpeil'] - p['ok']) * 100))
                     else:
                         p['_ok_tov_wp'] = None
-                elif p['ok_bron'] == 'manual' and p['ok_eenheid'] == 'cm tov wp':
+                elif p['ok_bron'] == 'manual' and p['ok_eenheid'] == 'cm tov WP':
                     p['_ok_tov_wp'] = p['ok']
                     if prof['wpeil'] is not None and p['ok'] is not None:
-                        p['_ok_nap'] = prof['wpeil'] - 100 * p['ok']
+                        p['_ok_nap'] = prof['wpeil'] - (p['ok'] / 100)
                     else:
                         p['_ok_nap'] = None
-                else:
+                elif p['ok_bron'] == '' and p['_bk_tov_wp'] is not None:
+                    p['_ok_tov_wp'] = p['_bk_tov_wp']
+                    p['_ok_nap'] = p['_bk_nap']
+                else:                    
                     p['_ok_tov_wp'] = None
                     p['_ok_nap'] = None
 
