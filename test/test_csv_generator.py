@@ -4,7 +4,7 @@ import tempfile
 import shutil
 
 from gistools.utils.collection import MemCollection
-from gistools.utils.metingtabel_generator import export_memcollection_to_csv
+from gistools.utils.csv_generator import export_memcollection_to_csv
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
