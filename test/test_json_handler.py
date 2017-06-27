@@ -91,9 +91,9 @@ class TestWit(unittest.TestCase):
                               'bk_afw': None,
                               'bk_eenheid': 'mNAP',
                               '_bk_nap': -1.33,
-                              '_bk_tov_wp': 45,
-                              '_ok_nap': None,
-                              '_ok_tov_wp': None,
+                              '_bk_tov_wp': -45,
+                              '_ok_nap': -1.33,
+                              '_ok_tov_wp': -45,
                               })
         
          # 187 punten in dataset, waarvan 20 punten met een 22 code

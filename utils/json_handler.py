@@ -1,8 +1,4 @@
 import json
-import math
-import csv
-from shapely.geometry import (Point, MultiPoint, LineString, MultiLineString,
-                              Polygon, MultiPolygon)
 from collection import MemCollection, OrderedDict
 from gistools.utils.conversion_tools import get_float
 from gistools.utils.iso8601 import parse_date
@@ -86,7 +82,7 @@ def fielddata_to_memcollections(filename):
         if len(project['measured_profiles']) == 0:
             continue
 
-         # profielen in project nalopen
+            # profielen in project nalopen
         for pro_pk, profile_ids in enumerate(project['measured_profiles']):
 
             ############################# profile #################################
@@ -97,9 +93,7 @@ def fielddata_to_memcollections(filename):
             prof['pk'] = pro_pk
             prof['ids'] = profile.get('ids', '')
             prof['project_id'] = project_id
-            opmerking = profile.get('remarks')
-            opmerking = opmerking.replace('\n', '')
-            prof['opm'] = profile.get('remarks')
+            prof['opm'] = profile.get('remarks').replace('\n', '')
 
             ttl = {}
             ttr = {}
@@ -190,8 +184,8 @@ def fielddata_to_memcollections(filename):
 
             coordinates = [[0, 0], [0, 1]]
 
-#             if ttl is not None and ttr is not None:
-            if ttl.get('rd_coordinates', None) is not None and ttr.get('rd_coordinates', None) is not None:                
+            #             if ttl is not None and ttr is not None:
+            if ttl.get('rd_coordinates', None) is not None and ttr.get('rd_coordinates', None) is not None:
                 # todo: verkorten of verlengen op basis van lengte
                 coordinates = ([ttl['rd_coordinates'][0],
                                 ttl['rd_coordinates'][1]],
@@ -240,42 +234,38 @@ def fielddata_to_memcollections(filename):
                 prof['min_l1_len'] = None
                 prof['max_l1_len'] = None
 
-
-
-
                 # meetpunten in profiele nalopen
             # todo: sort profile points
             for i, point in enumerate(profile['profile_points']):
 
                 ############################# 22L en 22R #################################
                 records_ttlr = []
-                
+
                 if point.get('code') in ['22L', '22R']:
                     tt = {}
 
                     tt['prof_pk'] = pro_pk
                     tt['ids'] = profile.get('ids', '')
                     tt['project_id'] = project_id
-                    
+
                     tt['code'] = point.get('code')
                     tt['afstand'] = get_float(point.get('distance'))
-#                     tt['gps_width'] = ''
-#                     tt['h_width'] = ''
+                    # tt['gps_width'] = ''
+                    # tt['h_width'] = ''
                     tt['wpeil'] = prof['wpeil']
                     tt['wpeil_bron'] = prof['wpeil_bron']
                     tt['datum'] = prof['datum']
-                    
-                    tt['z']= point['rd_coordinates'][2]
+
+                    tt['z'] = point['rd_coordinates'][2]
                     tt['x_coord'] = point['rd_coordinates'][0]
                     tt['y_coord'] = point['rd_coordinates'][1]
-                    
-                    records_ttlr.append({
-                        'geometry' : {'type': 'Point',
-                        'coordinates': (point['rd_coordinates'][0], point['rd_coordinates'][1])},       
-                        'properties': tt})
-                
-                ttlr_col.writerecords(records_ttlr)
 
+                    records_ttlr.append({
+                        'geometry': {'type': 'Point',
+                                     'coordinates': (point['rd_coordinates'][0], point['rd_coordinates'][1])},
+                        'properties': tt})
+
+                ttlr_col.writerecords(records_ttlr)
 
                 ############################# points #################################
                 p = OrderedDict()
@@ -285,7 +275,7 @@ def fielddata_to_memcollections(filename):
                 p['volgnr'] = i
                 p['prof_ids'] = prof['ids']
                 p['prof_wpeil'] = prof['wpeil']
-#                 p['prof_opm'] = prof['opm']
+                p['prof_opm'] = prof['opm']
                 p['prof_hpeil'] = prof['hpeil']
                 p['prof_lpeil'] = prof['lpeil']
                 p['prof_rpeil'] = prof['rpeil']
@@ -312,7 +302,7 @@ def fielddata_to_memcollections(filename):
                 if p['bk_bron'] == 'gps':
                     p['_bk_nap'] = p['bk']
                     if prof['wpeil'] is not None and p['bk'] is not None:
-                        p['_bk_tov_wp'] =  int(math.ceil((prof['wpeil'] - p['bk']) * 100))
+                        p['_bk_tov_wp'] = int(round((prof['wpeil'] - p['bk']) * 100))
                     else:
                         p['_bk_tov_wp'] = None
                 elif p['bk_bron'] == 'manual' and p['bk_eenheid'] == 'cm tov WP':
@@ -324,11 +314,11 @@ def fielddata_to_memcollections(filename):
                 else:
                     p['_bk_tov_wp'] = None
                     p['_bk_nap'] = None
-                
+
                 if p['ok_bron'] == 'gps':
                     p['_ok_nap'] = p['ok']
                     if prof['wpeil'] is not None and p['ok'] is not None:
-                        p['_ok_tov_wp'] = int(math.ceil((prof['wpeil'] - p['ok']) * 100))
+                        p['_ok_tov_wp'] = int(round((prof['wpeil'] - p['ok']) * 100))
                     else:
                         p['_ok_tov_wp'] = None
                 elif p['ok_bron'] == 'manual' and p['ok_eenheid'] == 'cm tov WP':
@@ -340,7 +330,7 @@ def fielddata_to_memcollections(filename):
                 elif p['ok_bron'] == '' and p['_bk_tov_wp'] is not None:
                     p['_ok_tov_wp'] = p['_bk_tov_wp']
                     p['_ok_nap'] = p['_bk_nap']
-                else:                    
+                else:
                     p['_ok_tov_wp'] = None
                     p['_ok_nap'] = None
 
@@ -381,7 +371,7 @@ def fielddata_to_memcollections(filename):
                                   'coordinates': coordinates},
                      'properties': p}])
 
-                log.warning('records toegevoegd %i',i + 1)
+                log.warning('records toegevoegd %i', i + 1)
 
     # lever de collection met meetpunten en de dicts voor WDB terug
     return point_col, prof_col, ttlr_col
