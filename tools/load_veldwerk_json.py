@@ -1,15 +1,16 @@
 import logging
+from math import sqrt
 
 from gistools.utils.collection import MemCollection, OrderedDict
 from gistools.utils.conversion_tools import get_float
 from gistools.utils.iso8601 import parse_date
 from gistools.utils.json_handler import json_to_dict
-
+from gistools.utils.geometry import TLine
 
 log = logging.getLogger(__name__)
 
 
-def fielddata_to_memcollections(filename):
+def fielddata_to_memcollections(filename, profile_plan_col=None):
     """ creates a MemCollection with geometry and attributes of json file 
     with point data, as collected with Tijhuis Field App
 
@@ -22,6 +23,11 @@ def fielddata_to_memcollections(filename):
         amongst which 'profile_points'
     - profile_points is list of dicts with profile point definitions, 
         amongst which 'rd_coordinates' and 'method'
+        
+    profile_plan_col (MemCollection): MemCollection of fieldwork plan with
+        planned locations of profile measurements. In case the location of the profile,
+        based on the 22L and 22R points are not complete, the predefined location
+        is taken.
 
     returns MemCollection json_data_col with content of JSON file
     """
@@ -66,6 +72,8 @@ def fielddata_to_memcollections(filename):
             pole_list = []
             l1_list = []
 
+            max_99_breedte = 0
+
             for p in profile.get('profile_points'):
                 code = p.get('code')
                 method_list.append(p.get('method'))
@@ -81,6 +89,8 @@ def fielddata_to_memcollections(filename):
                     count_ttl += 1
                     ttl = p
                 elif code == '99':
+                    if p.get('distance') != '':
+                        max_99_breedte = max(max_99_breedte, get_float(p.get('distance'), -99))
                     count_nn += 1
                 elif code == '22R':
                     count_ttr += 1
@@ -99,6 +109,25 @@ def fielddata_to_memcollections(filename):
                     alt_accuracy_list += accuracy
                 elif p.get('lower_source') == 'manual':
                     count_manual += 1
+
+            prof['breedte'] = None
+            prof['h_breedte'] = profile.get('width')
+            if prof['h_breedte'] == '':
+                prof['h_breedte'] = None
+
+            prof['gps_breed'] = None
+
+            if ttl is not None and ttr is not None:
+                prof['gps_breed'] = sqrt(
+                    (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
+                    (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
+
+            prof['m99_breed'] = max_99_breedte  # breedte volgens 99 pnt
+
+            if prof['h_breedte'] is not None:
+                prof['breedte'] = prof['h_breedte']
+            else:
+                prof['breedte'] = max(prof['gps_breed'], prof['m99_breed'])
 
             prof['hpeil'] = get_float(profile.get('reference_level', None))
 
@@ -139,23 +168,31 @@ def fielddata_to_memcollections(filename):
 
             coordinates = [[0, 0], [0, 1]]
 
-            #             if ttl is not None and ttr is not None:
             if ttl.get('rd_coordinates', None) is not None and ttr.get('rd_coordinates', None) is not None:
-                # todo: verkorten of verlengen op basis van lengte
                 coordinates = ([ttl['rd_coordinates'][0],
                                 ttl['rd_coordinates'][1]],
                                [ttr['rd_coordinates'][0],
                                 ttr['rd_coordinates'][1]])
                 prof['geom_bron'] = '22L en 22R'
-            else:
-                prof['geom_bron'] = 'todo: uit plan'
-                # todo; haal uit plan als deze niet gemaakt kan worden op basis van 22L en 22R
-                pass
+            elif profile_plan_col is not None:
+                # todo: check if id is the correct field to look for profile id
+                meet_prof = [p for p in profile_plan_col.filter({'DWPcode': prof['ids']})]
 
-            prof_col.writerecords([
-                {'geometry': {'type': 'LineString',
-                              'coordinates': coordinates},
-                 'properties': prof}])
+                if len(meet_prof) > 0:
+                    coordinates = meet_prof[0]['geometry']['coordinates']
+                    prof['geom_bron'] = 'meetplan'
+                else:
+                    prof['geom_bron'] = '22L en/of 22R mist en geen profiel gevonden in meetplan shape'
+
+            else:
+                prof['geom_bron'] = '22L en/of 22R mist en geen meetplan shape opgegeven'
+
+            line = TLine(coordinates)
+
+            if prof['breedte'] is not None:
+                line = line.get_line_with_length(prof['breedte'], 0.5)
+            else:
+                log.warning('profiel %s heeft geen breedte, lijn wordt niet geschaald', prof['ids'])
 
             if len(alt_accuracy_list) > 0:
                 prof['min_z_afw'] = min(alt_accuracy_list)
@@ -189,7 +226,11 @@ def fielddata_to_memcollections(filename):
                 prof['min_l1_len'] = None
                 prof['max_l1_len'] = None
 
-                # meetpunten in profiele nalopen
+            prof_col.writerecords([
+                {'geometry': {'type': 'LineString',
+                              'coordinates': line.coordinates},
+                 'properties': prof}])
+
             # todo: sort profile points
             for i, point in enumerate(profile['profile_points']):
 
@@ -205,8 +246,7 @@ def fielddata_to_memcollections(filename):
 
                     tt['code'] = point.get('code')
                     tt['afstand'] = get_float(point.get('distance'))
-                    # tt['gps_width'] = ''
-                    # tt['h_width'] = ''
+
                     tt['wpeil'] = prof['wpeil']
                     tt['wpeil_bron'] = prof['wpeil_bron']
                     tt['datum'] = prof['datum']
@@ -236,8 +276,8 @@ def fielddata_to_memcollections(filename):
                 p['prof_rpeil'] = prof['rpeil']
 
                 p['code'] = point.get('code')
-                p['afstand'] = get_float(point.get('distance'))  # todo: herberekenen?
-                p['afst_afw'] = get_float(point.get('distance_accuracy'))  # todo: herberekenen?
+                p['afstand'] = get_float(point.get('distance'))
+                p['afst_afw'] = get_float(point.get('distance_accuracy'))
                 p['afst_bron'] = point.get('distance_source')
 
                 p['bk'] = get_float(point.get('upper_level'))
