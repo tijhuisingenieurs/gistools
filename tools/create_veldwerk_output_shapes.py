@@ -39,24 +39,14 @@ def create_fieldwork_output_shapes(line_col, point_col):
             'breedte': line_props['breedte']
         }
 
-        # todo: geometry
-
-        line['geometry']
-
-        ttl = line['geometry']['coordinates'][0]
-        ttr = line['geometry']['coordinates'][1]
-
-        # afstand berekenen
-        # cor_ttl en cor_ttr berekenen
-
-        line = TLine((ttl_cor, ttr_cor))
+        line = TLine((line['geometry']['coordinates'][0], line['geometry']['coordinates'][-1]))
+        line = line.get_line_with_length(l['breedte'], 0.5)
 
         for point in point_col.filter({'prof_ids': line['ids']}):
 
             point_props = point['properties']
 
-            xy = line.get_point_at_distance(point_props['afstand']) #todo: check if values before and after are supported
-
+            xy = line.get_projected_point_at_distance(point_props['afstand']) # todo: check if values before and after are supported
 
             p = {
                 'prof_ids': point_props['prof_ids'],
@@ -67,14 +57,14 @@ def create_fieldwork_output_shapes(line_col, point_col):
                 'bk_nap': l['wpeil'] - (point_props['bk_wp'] / 100),
                 'ok_wp': point_props['ok_wp'],
                 'ok_nap': l['wpeil'] - (point_props['ok_wp'] / 100),
-                'x': xy.x,
-                'y': xy.y,
+                'x': xy[0],
+                'y': xy[1],
             }
 
             output_point_col.writerecords([{
                 'geometry': {
                     'type': 'Point',
-                    'coordinates': xy.coords()
+                    'coordinates': xy
                 },
                 'properties': p
             }])
@@ -82,17 +72,16 @@ def create_fieldwork_output_shapes(line_col, point_col):
         l['xb_prof'] = line.coords[0][0]
         l['yb_prof'] = line.coords[0][1]
 
-        l['xe_prof'] = line.coords[1][0]
-        l['ye_prof'] = line.coords[1][1]
+        l['xe_prof'] = line.coords[-1][0]
+        l['ye_prof'] = line.coords[-1][1]
 
         output_line_col.writerecords([{
             'geometry': {
                 'type': 'LineString',
-                'coordinates': line.coords()
+                'coordinates': line.coordinates
             },
             'properties': l
         }])
-
 
     return output_line_col, output_point_col
 
