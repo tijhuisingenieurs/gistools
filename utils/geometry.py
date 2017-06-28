@@ -356,8 +356,37 @@ class TLine(LineString):
             if line_angle < 0:
                 line_angle = 180 + line_angle
                            
-        return line_angle 
-    
+        return line_angle
+
+    def get_line_with_length(self, target_length, scale_point_perc=0):
+        """ get line with given line, with same direction and scalled
+        around the scale point
+        
+        target_length (float): length in shape units
+        scale_point_perc  (float): percentage (0-1)of point on line to relatively scale around
+            0=begin of line, 1=end of line, 0.5 = halfway 
+        return: TLine with new line geometry
+        """
+
+        scale_point = self.get_point_at_percentage(float(scale_point_perc))
+        orig_length = self.length
+
+        if orig_length <= 0:
+            log.error('length of shape is 0 or lower. returned orginal without scaling')
+            return TLine(self.coordinates)
+
+        scale_factor = float(target_length) / orig_length
+
+        output_coordinates = []
+
+        for vertex in self.coords:
+            x = scale_point[0] + (vertex[0] - scale_point[0]) * scale_factor
+            y = scale_point[1] + (vertex[1] - scale_point[1]) * scale_factor
+            output_coordinates.append((x, y))
+
+        return TLine(output_coordinates)
+
+
 class TMultiLineString(MultiLineString, TLine):
 
     def __init__(self, *args, **kwargs):

@@ -4,7 +4,6 @@ from gistools.utils.geometry import TLine, TMultiLineString
 from math import sqrt
 # from generatepointsfromlines import percentage
 
-
 class TestTLine(unittest.TestCase):
 
     def setUp(self):
@@ -253,3 +252,32 @@ class TestTMultiLine(unittest.TestCase):
         first_line, second_line = line.split_at_vertex(4)
         self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))))
         self.assertTupleEqual(second_line.coordinates, (((10, 0), (10, 0)), ))
+
+    def test_get_line_with_length(self):
+
+        line = TLine([(0, 0), (10, 0)])
+
+        output = line.get_line_with_length(20, 0)
+        self.assertTupleEqual(output.coordinates, ((0, 0), (20, 0)))
+
+        output = line.get_line_with_length(20, 1)
+        self.assertTupleEqual(output.coordinates, ((-10, 0), (10, 0)))
+
+        output = line.get_line_with_length(20, 0.5)
+        self.assertTupleEqual(output.coordinates, ((-5, 0), (15, 0)))
+
+        line = TLine([(10, 0), (0, 0)])
+
+        output = line.get_line_with_length(20, 0)
+        self.assertTupleEqual(output.coordinates, ((10, 0), (-10, 0)))
+
+        output = line.get_line_with_length(20, 0.5)
+        self.assertTupleEqual(output.coordinates, ((15, 0), (-5, 0)))
+
+        line = TLine([(5, 5), (10, 10)])
+
+        output = line.get_line_with_length(3*sqrt(50), 0.5)
+        self.assertTupleEqual(output.coordinates, ((0, 0), (15, 15)))
+
+        output = line.get_line_with_length(3*sqrt(50), 0)
+        self.assertTupleEqual(output.coordinates, ((5, 5), (20, 20)))
