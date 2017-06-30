@@ -311,6 +311,73 @@ class TLine(LineString):
         point = self.get_point_at_distance(afstand)
 
         return point
+    
+    def get_projected_point_at_distance(self, afstand):
+        """ create a point on a line at a given distance of total line length
+        from the line origin, including (negative) distances outside line geom
+
+        perc: percentage from line length to create point at
+        return: point (shapely.point)
+        """
+        dist = afstand
+        
+        if afstand < 0:
+            richting = self.get_segment_richting_dist(0.001)                  
+            x = self.coordinates[0][0]
+            y = self.coordinates[0][1]                                    
+            
+            # richting is dx en dy -> omrekenen naar dx en dy per 1 eenheid lengte
+            
+            if richting[0] == 0:
+                new_x = x
+                new_y = y + afstand
+            elif richting[1] == 0:
+                new_y = y
+                new_x = x + afstand
+            else:   
+                length_richting = sqrt((richting[0]*richting[0]) + 
+                                       (richting[1]*richting[1]))
+                
+                delta_x_per_eenheid = richting[0] / length_richting
+                delta_y_per_eenheid = richting[1] / length_richting
+                         
+                new_x = x + (afstand * delta_x_per_eenheid)
+                new_y = y + (afstand * delta_y_per_eenheid)
+            
+            point = (new_x, new_y)
+            
+        elif afstand > self.length:
+            richting = self.get_segment_richting_dist(self.length)
+            x = self.coordinates[-1][0]
+            y = self.coordinates[-1][1]
+            
+            extensie = afstand - self.length  
+                                
+            # richting is dx en dy -> omrekenen naar dx en dy per 1 eenheid lengte
+            
+            if richting[0] == 0:
+                new_x = x
+                new_y = y + extensie
+            elif richting[1] == 0:
+                new_y = y
+                new_x = x + extensie
+            else:   
+                length_richting = sqrt((richting[0]*richting[0]) + 
+                                       (richting[1]*richting[1]))
+                
+                delta_x_per_eenheid = richting[0] / length_richting
+                delta_y_per_eenheid = richting[1] / length_richting
+                
+                          
+                new_x = x + (extensie * delta_x_per_eenheid)
+                new_y = y + (extensie * delta_y_per_eenheid)
+            
+            point = (new_x, new_y)
+        
+        else:
+            point = self.get_point_at_distance(afstand)
+
+        return point
 
     def get_flipped_line(self):
         """ flip geometry of line

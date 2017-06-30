@@ -100,7 +100,12 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114216.10686321165,
                               'prof_pk': 3,
                               'project_id': 'p1',
-                              'wpeil': -1.78})
+                              'wpeil': -1.78,
+                              'breedte': 3.446765493694888,
+                              'gps_breed': 3.446765493694888,
+                              'h_breedte': None,
+                              'm99_breed': 3.19                              
+                              })
 
         for p in ttlr_col.filter():
             if p['properties']['ids'] == '279' and p['properties']['code'] == '22R':
@@ -122,4 +127,9 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114219.05704747832,
                               'prof_pk': 3,
                               'project_id': 'p1',
-                              'wpeil': -1.78})
+                              'wpeil': -1.78,
+                              'breedte': 3.446765493694888,
+                              'gps_breed': 3.446765493694888,
+                              'h_breedte': None,
+                              'm99_breed': 3.19                              
+                              })

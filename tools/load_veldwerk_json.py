@@ -10,7 +10,7 @@ from gistools.utils.geometry import TLine
 log = logging.getLogger(__name__)
 
 
-def fielddata_to_memcollections(filename, profile_plan_col=None):
+def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_field='DWPcode'):
     """ creates a MemCollection with geometry and attributes of json file 
     with point data, as collected with Tijhuis Field App
 
@@ -28,6 +28,9 @@ def fielddata_to_memcollections(filename, profile_plan_col=None):
         planned locations of profile measurements. In case the location of the profile,
         based on the 22L and 22R points are not complete, the predefined location
         is taken.
+        
+    profiel_id_field: fieldname of field with profiel identification.
+        Default value: 'DWPcode'
 
     returns MemCollection json_data_col with content of JSON file
     """
@@ -117,7 +120,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None):
 
             prof['gps_breed'] = None
 
-            if ttl is not None and ttr is not None:
+            if  len(ttl) > 0 and len(ttr) > 0:
                 prof['gps_breed'] = sqrt(
                     (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
                     (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
@@ -176,8 +179,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None):
                 prof['geom_bron'] = '22L en 22R'
             elif profile_plan_col is not None:
                 # todo: check if id is the correct field to look for profile id
-                meet_prof = [p for p in profile_plan_col.filter({'DWPcode': prof['ids']})]
-
+                meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == prof['ids']]
+                
                 if len(meet_prof) > 0:
                     coordinates = meet_prof[0]['geometry']['coordinates']
                     prof['geom_bron'] = 'meetplan'
@@ -246,6 +249,11 @@ def fielddata_to_memcollections(filename, profile_plan_col=None):
 
                     tt['code'] = point.get('code')
                     tt['afstand'] = get_float(point.get('distance'))
+                    
+                    tt['breedte'] = prof['breedte']
+                    tt['gps_breed'] = prof['gps_breed']
+                    tt['h_breedte'] = prof['h_breedte']
+                    tt['m99_breed'] = prof['m99_breed']                                                            
 
                     tt['wpeil'] = prof['wpeil']
                     tt['wpeil_bron'] = prof['wpeil_bron']

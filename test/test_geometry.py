@@ -147,6 +147,41 @@ class TestTLine(unittest.TestCase):
         self.assertEqual(segment[2], 5.0)
         
         self.assertEqual(point, (2.0, 3.0))
+        
+    def test_get_projected_point_at_distance(self):
+        """test create point on line at given % of total line length"""
+        
+        line1 = TLine([(0.0, 0.0), (0.0, 2.0), (2.0, 2.0), (2.0, 8.0)])
+        line2 = TLine([(0.0, 0.0), (2.0, 2.0), (0.0, 4.0)])
+
+        afstand1 = -1.5   
+        afstand2 = 11.5
+        afstand3 = 1.0
+
+        test = 'point1'
+        point1 = line1.get_projected_point_at_distance(afstand1)
+        test = 'point2'
+        point2 = line1.get_projected_point_at_distance(afstand2)
+        test = 'point3'
+        point3 = line1.get_projected_point_at_distance(afstand3)
+        
+        test = 'point4'
+        point4 = line2.get_projected_point_at_distance(afstand1)
+        test = 'point5'        
+        point5 = line2.get_projected_point_at_distance(afstand2)
+        test = 'point6'
+        point6 = line2.get_projected_point_at_distance(afstand3)
+
+        self.assertEqual(point1, (0.0, -1.5))
+        self.assertEqual(point2, (2.0, 9.5))
+        self.assertEqual(point3, (0.0, 1.0))
+        
+        self.assertEqual(point4, (-sqrt((afstand1*afstand1)/2), -sqrt((afstand1*afstand1)/2)))
+        self.assertEqual(round(point5[0], 3), (-4.132))
+        self.assertEqual(round(point5[1], 3), (8.132))
+        self.assertEqual(round(point6[0], 3), round(sqrt((afstand3*afstand3)/2),3))
+        self.assertEqual(round(point6[1], 3), round(sqrt((afstand3*afstand3)/2),3))
+
 
     def test_get_flipped_line(self):
         """test flip line"""
@@ -281,3 +316,19 @@ class TestTMultiLine(unittest.TestCase):
 
         output = line.get_line_with_length(3*sqrt(50), 0)
         self.assertTupleEqual(output.coordinates, ((5, 5), (20, 20)))
+
+#     def test_get_projected_point_at_distance(self):
+#         """test create point on line at given % of total line length"""
+#         afstand1 = -1.5   
+#         afstand2 = 11.5
+#         afstand3 = 1.0
+# 
+#         line3 = TMultiLineString([((0.0, 0.0), (0.0, 2.0)), ((2.0, 2.0), (2.0, 8.0))])
+#                  
+#         point1a = line3.get_projected_point_at_distance(afstand1)
+#         point2a = line3.get_projected_point_at_distance(afstand2)
+#         point3a = line3.get_projected_point_at_distance(afstand3)                
+#         
+#         self.assertEqual(point1a, (0.0, -1.5))
+#         self.assertEqual(point2a, (2.0, 11.5))
+#         self.assertEqual(point3, (0.0, 0.1))
