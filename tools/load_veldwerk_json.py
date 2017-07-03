@@ -367,7 +367,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     p['gps_wgs_z'] = None
 
                 p['gps_h_afw'] = get_float(point['accuracy'])
-                p['gps_h_afw'] = get_float(point['altitude_accuracy'])
+                p['gps_z_afw'] = get_float(point['altitude_accuracy'])
 
                 point_col.writerecords([
                     {'geometry': {'type': 'Point',

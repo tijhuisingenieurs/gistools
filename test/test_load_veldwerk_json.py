@@ -17,14 +17,12 @@ class TestLoadVeldwerk(unittest.TestCase):
         json_data_col = MemCollection(geometry_type='MultiPoint')
         json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata.json')
 
-        # dicts voor genereren WDB tabellen
-        project_dict = {}
-        profile_dict = {}
-
         point_col, profile_col, ttlr_col = fielddata_to_memcollections(json_file)
 
         # 187 punten in dataset, waarvan 106 handmatig - 81 met geometrie
         self.assertEqual(len(point_col), 187)
+                
+        # test in bron volledig correct gevuld profiel
         point = None
         for p in point_col.filter():
             if p['properties']['prof_ids'] == '279' and p['properties']['datumtijd'] == '2017-06-14T12:40:59.321Z':
@@ -58,7 +56,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'gps_wgs_y': 4.790167,
                               'gps_wgs_z': 43.999000549316406,
                               'gps_h_afw': 3.9000000953674316,
-                              'gps_h_afw': None,
+                              'gps_z_afw': None,
                               'afstand': 0.0,
                               'afst_bron': 'gps',
                               'afst_afw': 3.9000000953674316,
@@ -74,7 +72,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               '_bk_tov_wp': -45,
                               '_ok_nap': -1.33,
                               '_ok_tov_wp': -45,
-                              })
+                              })           
 
         # 187 punten in dataset, waarvan 20 punten met een 22 code
         self.assertEqual(len(ttlr_col), 20)
