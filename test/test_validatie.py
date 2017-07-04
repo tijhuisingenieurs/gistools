@@ -1,19 +1,16 @@
 import unittest
 import os.path
 
-from gistools.utils.collection import MemCollection
-from  gistools.tools.validatie import *
+from gistools.tools.validatie import *
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
-class TestWit(unittest.TestCase):
+class TestValidate(unittest.TestCase):
 
     def setUp(self):
         pass
 
-    
-    
     def test_get_intersecting_segments(self):
         """test get line segments that intersect"""
          
@@ -44,8 +41,7 @@ class TestWit(unittest.TestCase):
                           'coordinates': [(0.0, -0.5), (-500.0, -0.5)]},
              'properties': {'id': 4L, 'name': 'testsegments line 4b'}}                                  
         ])
-         
-         
+
         line_parts_col1 = get_intersecting_segments(collection1, collection2)
         line_parts_col2 = get_intersecting_segments(collection2, collection1)
          
@@ -128,8 +124,7 @@ class TestWit(unittest.TestCase):
                              {'crossangle': 22.5 })
         self.assertDictEqual(angle_col[3]['properties'],
                              {'crossangle': 67.5 })
-        
-    
+
     def test_get_distance_point_to_contour(self):
         """test get distance from point to countour of polygon"""
         
