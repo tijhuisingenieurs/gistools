@@ -15,9 +15,10 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
         """test fill MemCollection with json data from file"""
 
         input_line_col = MemCollection(geometry_type='MultiLineString')
-        input_point_col = MemCollection(geometry_type='MultiPoint')        
+        input_point_col1 = MemCollection(geometry_type='MultiPoint')
+        input_point_col2 = MemCollection(geometry_type='MultiPoint')               
 
-        input_point_col.writerecords([
+        input_point_col1.writerecords([
         {'geometry': {'type': 'Point',
                           'coordinates': [(10.0, 0.0)]},
          'properties': {'prof_ids': 'test123',
@@ -81,7 +82,39 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                 'afstand': '9.0',
                 'bk_wp': '-90',
                 'ok_wp': '-90'}}   
-        ])                             
+        ])
+        
+        input_point_col2.writerecords([
+        {'geometry': {'type': 'Point',
+                          'coordinates': [(10.0, 0.0)]},
+         'properties': {'prof_ids': 'test123',
+                'code': '1',
+                'afstand': '-3.0',
+                'bk_wp': '',
+                'ok_wp': '-80'}},
+        {'geometry': {'type': 'Point',
+                          'coordinates': [(11.0, 0.0)]},
+         'properties': {'prof_ids': 'test123',
+                'code': '1',
+                'afstand': '-1.0',
+                'bk_wp': '-20',
+                'ok_wp': ''}},
+        {'geometry': {'type': 'Point',
+                          'coordinates': [(11.5, 0.0)]},
+         'properties': {'prof_ids': 'test123',
+                'code': '22L',
+                'afstand': '0',
+                'bk_wp': '',
+                'bk_nap': '-5.36',
+                'ok_wp': '0'}},
+        {'geometry': {'type': 'Point',
+                          'coordinates': [(12.0, 0.0)]},
+         'properties': {'prof_ids': 'test123',
+                'code': '99',
+                'afstand': '1.0',
+                'bk_wp': '',
+                'ok_wp': ''}}
+        ])                            
         
         input_line_col.writerecords([
         {'geometry': {'type': 'LineString',
@@ -95,8 +128,14 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
             'breedte': '6.0'}}
         ])
         
-        
-        line_col, point_col = create_fieldwork_output_shapes(input_line_col, input_point_col)
+        # test complete dataset with scaling of line length
+        line_col, point_col = create_fieldwork_output_shapes(input_line_col, input_point_col1)
+        # test use result of complete dataset as input
+        line_col1, point_col1 = create_fieldwork_output_shapes(line_col, point_col)                
+        # test incomplete dataset with scaling of line length
+        line_col2, point_col2 = create_fieldwork_output_shapes(input_line_col, input_point_col2)
+        # test use result of incomplete dataset as input                    
+        line_col3, point_col3 = create_fieldwork_output_shapes(line_col2, point_col2)        
         
         self.assertDictEqual(line_col[0]['geometry'],
                              {'type': 'LineString',
@@ -150,9 +189,119 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                                 'datum': '20/06/2017',
                                 'code': '1',
                                 'afstand': -3.0,
-                                'bk_wp': -80,
+                                'bk_wp': -80.0,
                                 'bk_nap': -4.56,
-                                'ok_wp': -80,
+                                'ok_wp': -80.0,
                                 'ok_nap': -4.56,
                                 'x': 7.0,
                                 'y': 0.0})
+
+        self.assertEqual(len(point_col1), 9)
+        
+        self.assertDictEqual(point_col1[0]['properties'],
+                             {'prof_ids': 'test123',
+                                'datum': '20/06/2017',
+                                'code': '1',
+                                'afstand': -3.0,
+                                'bk_wp': -80.0,
+                                'bk_nap': -4.56,
+                                'ok_wp': -80.0,
+                                'ok_nap': -4.56,
+                                'x': 7.0,
+                                'y': 0.0})
+
+        self.assertEqual(len(point_col2), 4)
+        
+        self.assertDictEqual(point_col2[0]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '1',
+                        'afstand': -3.0,
+                        'bk_wp': '',
+                        'bk_nap': 'NoData',
+                        'ok_wp': -80,
+                        'ok_nap': -4.56,
+                        'x': 7.0,
+                        'y': 0.0})
+        self.assertDictEqual(point_col2[1]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '1',
+                        'afstand': -1.0,
+                        'bk_wp': -20.0,
+                        'bk_nap': -5.16,
+                        'ok_wp': -20.0,
+                        'ok_nap': -5.16,
+                        'x': 9.0,
+                        'y': 0.0})      
+        self.assertDictEqual(point_col2[2]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '22L',
+                        'afstand': 0.0,
+                        'bk_wp': 0.0,
+                        'bk_nap': -5.36,
+                        'ok_wp': 0.0,
+                        'ok_nap': -5.36,
+                        'x': 10.0,
+                        'y': 0.0})       
+        self.assertDictEqual(point_col2[3]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '99',
+                        'afstand': 1.0,
+                        'bk_wp': '',
+                        'bk_nap': 'NoData',
+                        'ok_wp': '',
+                        'ok_nap': 'NoData',
+                        'x': 11.0,
+                        'y': 0.0})
+        
+
+        
+        self.assertEqual(len(point_col3), 4)
+        
+        self.assertDictEqual(point_col3[0]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '1',
+                        'afstand': -3.0,
+                        'bk_wp': '',
+                        'bk_nap': 'NoData',
+                        'ok_wp': -80,
+                        'ok_nap': -4.56,
+                        'x': 7.0,
+                        'y': 0.0})
+        self.assertDictEqual(point_col3[1]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '1',
+                        'afstand': -1.0,
+                        'bk_wp': -20.0,
+                        'bk_nap': -5.16,
+                        'ok_wp': -20.0,
+                        'ok_nap': -5.16,
+                        'x': 9.0,
+                        'y': 0.0})      
+        self.assertDictEqual(point_col3[2]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '22L',
+                        'afstand': 0.0,
+                        'bk_wp': 0.0,
+                        'bk_nap': -5.36,
+                        'ok_wp': 0.0,
+                        'ok_nap': -5.36,
+                        'x': 10.0,
+                        'y': 0.0})       
+        self.assertDictEqual(point_col3[3]['properties'],
+                     {'prof_ids': 'test123',
+                        'datum': '20/06/2017',
+                        'code': '99',
+                        'afstand': 1.0,
+                        'bk_wp': '',
+                        'bk_nap': 'NoData',
+                        'ok_wp': '',
+                        'ok_nap': 'NoData',
+                        'x': 11.0,
+                        'y': 0.0})
