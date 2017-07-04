@@ -34,9 +34,9 @@ def create_fieldwork_output_shapes(line_col, point_col):
             'ids': line_props['ids'],
             'project_id': line_props['project_id'],
             'opm': line_props['opm'],
-            'wpeil': get_float(line_props['wpeil']),
+            'wpeil': round(get_float(line_props['wpeil']),2),
             'datum': line_props['datum'],
-            'breedte': get_float(line_props['breedte'])
+            'breedte': round(get_float(line_props['breedte']),2)
         }
 
         line = TLine((line['geometry']['coordinates'][0], line['geometry']['coordinates'][-1]))
@@ -46,7 +46,7 @@ def create_fieldwork_output_shapes(line_col, point_col):
             if point['properties']['prof_ids'] == l['ids']:
     
                 point_props = point['properties']
-                afstand = get_float(point_props['afstand'])
+                afstand = round(get_float(point_props['afstand']),2)
     
                 xy = line.get_projected_point_at_distance(afstand) # todo: check if values before and after are supported
     
@@ -54,11 +54,11 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     'prof_ids': point_props['prof_ids'],
                     'datum': l['datum'],
                     'code': point_props['code'],
-                    'afstand': get_float(point_props['afstand']),
-                    'bk_wp': get_float(point_props['bk_wp']),
-                    'bk_nap': get_float(l['wpeil']) - (get_float(point_props['bk_wp']) / 100),
-                    'ok_wp': get_float(point_props['ok_wp']),
-                    'ok_nap': get_float(l['wpeil']) - (get_float(point_props['ok_wp']) / 100),
+                    'afstand': round(get_float(point_props['afstand']),2),
+                    'bk_wp': round(get_float(point_props['bk_wp']),2),
+                    'bk_nap': round(get_float(l['wpeil']) - (get_float(point_props['bk_wp']) / 100),2),
+                    'ok_wp': round(get_float(point_props['ok_wp']),2),
+                    'ok_nap': round(get_float(l['wpeil']) - (get_float(point_props['ok_wp']) / 100),2),
                     'x': xy[0],
                     'y': xy[1],
                 }
