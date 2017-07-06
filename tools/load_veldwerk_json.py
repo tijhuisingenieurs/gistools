@@ -83,8 +83,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 date = p.get('datetime')
                 if date is not None:
                     date_list.append(parse_date(date))
-                pole_list.append(p.get('pole_length'))
-                l1_list.append(p.get('l_one_length'))
+                pole_list.append(get_float(p.get('pole_length')))
+                l1_list.append(get_float(p.get('l_one_length')))
 
                 if code == '1':
                     count_one += 1
@@ -100,18 +100,20 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     ttr = p
                 elif code == '2':
                     count_two += 1
-                if p.get('upper_source') == 'gps':
+                if p.get('upper_level_source') == 'gps':
                     count_gps += 1
-                    accuracy = get_float(profile.get('upper_accuracy'))
-                    alt_accuracy_list += accuracy
-                elif p.get('upper_source') == 'manual':
+                    accuracy = get_float(p.get('upper_level_accuracy'))
+                    alt_accuracy_list.append(accuracy)
+                elif p.get('upper_level_source') == 'manual':
                     count_manual += 1
-                if p.get('lower_source') == 'gps':
+                if p.get('lower_level_source') == 'gps':
                     count_gps += 1
-                    accuracy = get_float(profile.get('upper_accuracy'))
-                    alt_accuracy_list += accuracy
-                elif p.get('lower_source') == 'manual':
+                    accuracy = get_float(p.get('lower_level_accuracy'))
+                    alt_accuracy_list.append(accuracy)
+                elif p.get('lower_level_source') == 'manual':
                     count_manual += 1
+
+            prof['methode'] = ", ".join(set(method_list))
 
             prof['breedte'] = None
             prof['h_breedte'] = get_float(profile.get('width'))
@@ -120,8 +122,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             prof['gps_breed'] = None
 
+
             if  (len(ttl) > 0 and len(ttr) > 0 and 
                 ttl['rd_coordinates'] <> '' and ttr['rd_coordinates'] <> ''):
+
                 prof['gps_breed'] = sqrt(
                     (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
                     (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
