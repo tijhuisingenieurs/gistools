@@ -176,7 +176,7 @@
 						"upper_level": "6",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:23.502Z",
@@ -206,7 +206,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:34.744Z",
@@ -236,7 +236,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:49.406Z",
@@ -266,7 +266,7 @@
 						"upper_level": "37",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:44:15.655Z",
@@ -296,7 +296,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:44:32.688Z",
@@ -326,7 +326,7 @@
 						"upper_level": "41",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:45:25.816Z",
@@ -356,7 +356,7 @@
 						"upper_level": "37",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:45:51.213Z",
@@ -386,7 +386,7 @@
 						"upper_level": "20",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:46:22.385Z",
@@ -1856,7 +1856,7 @@
 						"upper_level": "32",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:55:34.459Z",
@@ -1886,7 +1886,7 @@
 						"upper_level": "45",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:55:49.640Z",
@@ -1916,7 +1916,7 @@
 						"upper_level": "56",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:56:03.873Z",
@@ -1946,7 +1946,7 @@
 						"upper_level": "63",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:56:27.030Z",
@@ -1976,7 +1976,7 @@
 						"upper_level": "62",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:57:07.254Z",
@@ -2006,7 +2006,7 @@
 						"upper_level": "66",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:57:43.850Z",
@@ -2036,7 +2036,7 @@
 						"upper_level": "57",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:04.015Z",
@@ -2066,7 +2066,7 @@
 						"upper_level": "49",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:14.329Z",
@@ -2096,7 +2096,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:23.971Z",
@@ -2126,7 +2126,7 @@
 						"upper_level": "18",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:33.191Z",
@@ -2347,7 +2347,7 @@
 						"upper_level": "35",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:21.828Z",
@@ -2377,7 +2377,7 @@
 						"upper_level": "47",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:34.012Z",
@@ -2407,7 +2407,7 @@
 						"upper_level": "50",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:48.114Z",
@@ -2437,7 +2437,7 @@
 						"upper_level": "59",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:00.871Z",
@@ -2467,7 +2467,7 @@
 						"upper_level": "61",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:16.265Z",
@@ -2497,7 +2497,7 @@
 						"upper_level": "63",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:42.058Z",
@@ -2527,7 +2527,7 @@
 						"upper_level": "58",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:06.086Z",
@@ -2557,7 +2557,7 @@
 						"upper_level": "48",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:28.548Z",
@@ -2587,7 +2587,7 @@
 						"upper_level": "42",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:54.256Z",
@@ -2617,7 +2617,7 @@
 						"upper_level": "48",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:41:26.233Z",
@@ -2647,7 +2647,7 @@
 						"upper_level": "43",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:15.507Z",
@@ -2677,7 +2677,7 @@
 						"upper_level": "38",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:33.739Z",
@@ -2707,7 +2707,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:45.299Z",
@@ -3433,7 +3433,7 @@
 						"upper_level": "26",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T08:59:59.215Z",
@@ -3463,7 +3463,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:00:13.910Z",
@@ -3493,7 +3493,7 @@
 						"upper_level": "61",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:00:47.183Z",
@@ -3523,7 +3523,7 @@
 						"upper_level": "68",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:04:31.064Z",
@@ -3553,7 +3553,7 @@
 						"upper_level": "74",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:04:52.533Z",
@@ -3583,7 +3583,7 @@
 						"upper_level": "72",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:05:22.339Z",
@@ -3613,7 +3613,7 @@
 						"upper_level": "71",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:05:38.860Z",
@@ -3643,7 +3643,7 @@
 						"upper_level": "67",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:13.391Z",
@@ -3673,7 +3673,7 @@
 						"upper_level": "65",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:36.875Z",
@@ -3703,7 +3703,7 @@
 						"upper_level": "52",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:57.438Z",
@@ -3733,7 +3733,7 @@
 						"upper_level": "47",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:07:51.259Z",
@@ -3763,7 +3763,7 @@
 						"upper_level": "41",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:08:05.917Z",
@@ -3793,7 +3793,7 @@
 						"upper_level": "30",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:08:18.334Z",
