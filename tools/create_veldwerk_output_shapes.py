@@ -91,16 +91,16 @@ def create_fieldwork_output_shapes(line_col, point_col):
                         log.warning('Geen geldige waarde voor _bk_wp te bepalen. _bk_wp = ' 
                                     + point_props['_bk_wp'] + ' en bk_nap niet aanwezig')
                         p['_bk_wp'] = point_props['_bk_wp']
-                        p['_bk_nap'] = '-999'
+                        p['_bk_nap'] = ''
                         
                 else:
                         log.warning('Geen geldige waarde voor ok_wp te bepalen. ok_wp = ' 
                                     + point_props['_ok_wp'] + ' en _bk_wp = ' + 
                                     point_props['_bk_wp'])
                         p['_bk_wp'] = point_props['_bk_wp']
-                        p['_bk_nap'] = '-999'
+                        p['_bk_nap'] = ''
                         p['_ok_wp'] = point_props['_ok_wp']
-                        p['_ok_nap'] = '-999'                        
+                        p['_ok_nap'] = ''                        
                 
                         
                 output_point_col.writerecords([{
