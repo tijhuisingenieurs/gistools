@@ -4,16 +4,16 @@ import tempfile
 import shutil
 
 from gistools.utils.collection import MemCollection
-from gistools.utils.csv_generator import export_memcollection_to_csv
+from gistools.utils.csv_handler import export_memcollection_to_csv, import_csv_to_memcollection
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
-class TestCsvGenerator(unittest.TestCase):
+class TestCsvHandler(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_eexport_memcollection_to_csv(self):
+    def test_export_memcollection_to_csv(self):
         """test export to metfile of point data"""
 
         point_col = MemCollection(geometry_type='MultiPoint')
@@ -114,4 +114,25 @@ class TestCsvGenerator(unittest.TestCase):
 
         csv_file = export_memcollection_to_csv(point_col, csv_file_name)
 
+        pass
+    
+    def test_import_csv_to_memcollection(self):
+        """test import csv with metingen to Memcollection"""
+        
+        csv_file = os.path.join(os.path.dirname(__file__), 'data', 'test_import_csv.csv')
+
+        point_col = import_csv_to_memcollection(csv_file)
+        
+        self.assertEqual(len(point_col), 2)
+        
+        self.assertDictEqual(point_col[0]['properties'],
+                             {'veld1': 'a',
+                              'veld2': 'b',
+                              'veld3': 'c'})
+        self.assertDictEqual(point_col[1]['properties'],
+                             {'veld1': '1',
+                              'veld2': '2',
+                              'veld3': '3'})        
+
+        
         pass

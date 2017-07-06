@@ -75,7 +75,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             pole_list = []
             l1_list = []
 
-            max_99_breedte = 0
+            max_99_breedte = 0.0
 
             for p in profile.get('profile_points'):
                 code = p.get('code')
@@ -114,7 +114,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     count_manual += 1
 
             prof['breedte'] = None
-            prof['h_breedte'] = profile.get('width')
+            prof['h_breedte'] = get_float(profile.get('width'))
             if prof['h_breedte'] == '':
                 prof['h_breedte'] = None
 
@@ -305,36 +305,36 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 if p['bk_bron'] == 'gps':
                     p['_bk_nap'] = p['bk']
                     if prof['wpeil'] is not None and p['bk'] is not None:
-                        p['_bk_tov_wp'] = int(round((prof['wpeil'] - p['bk']) * 100))
+                        p['_bk_wp'] = int(round((prof['wpeil'] - p['bk']) * 100))
                     else:
-                        p['_bk_tov_wp'] = None
+                        p['_bk_wp'] = None
                 elif p['bk_bron'] == 'manual' and p['bk_eenheid'] == 'cm tov WP':
-                    p['_bk_tov_wp'] = p['bk']
+                    p['_bk_wp'] = p['bk']
                     if prof['wpeil'] is not None and p['bk'] is not None:
                         p['_bk_nap'] = prof['wpeil'] - (p['bk'] / 100)
                     else:
                         p['_bk_nap'] = None
                 else:
-                    p['_bk_tov_wp'] = None
+                    p['_bk_wp'] = None
                     p['_bk_nap'] = None
 
                 if p['ok_bron'] == 'gps':
                     p['_ok_nap'] = p['ok']
                     if prof['wpeil'] is not None and p['ok'] is not None:
-                        p['_ok_tov_wp'] = int(round((prof['wpeil'] - p['ok']) * 100))
+                        p['_ok_wp'] = int(round((prof['wpeil'] - p['ok']) * 100))
                     else:
-                        p['_ok_tov_wp'] = None
+                        p['_ok_wp'] = None
                 elif p['ok_bron'] == 'manual' and p['ok_eenheid'] == 'cm tov WP':
-                    p['_ok_tov_wp'] = p['ok']
+                    p['_ok_wp'] = p['ok']
                     if prof['wpeil'] is not None and p['ok'] is not None:
                         p['_ok_nap'] = prof['wpeil'] - (p['ok'] / 100)
                     else:
                         p['_ok_nap'] = None
-                elif p['ok_bron'] == '' and p['_bk_tov_wp'] is not None:
-                    p['_ok_tov_wp'] = p['_bk_tov_wp']
+                elif p['ok_bron'] == '' and p['_bk_wp'] is not None:
+                    p['_ok_wp'] = p['_bk_wp']
                     p['_ok_nap'] = p['_bk_nap']
                 else:
-                    p['_ok_tov_wp'] = None
+                    p['_ok_wp'] = None
                     p['_ok_nap'] = None
 
                 # Metadata
