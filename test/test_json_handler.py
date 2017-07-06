@@ -22,7 +22,7 @@ class TestJsonHandler(unittest.TestCase):
         self.assertEqual(len(json_dict), 2)
         self.assertEqual(json_dict['p1']['name'], 'project_1')
         self.assertEqual(len(json_dict['p1']['predefined_profiles']), 3)
-        self.assertEqual(len(json_dict['p1']['measured_profiles']), 10)
+        self.assertEqual(len(json_dict['p1']['measured_profiles']), 12)
 
         self.assertEqual(json_dict['p2']['name'], 'project_2')
         self.assertEqual(len(json_dict['p2']['predefined_profiles']), 3)
