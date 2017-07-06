@@ -36,10 +36,10 @@ class TestLoadVeldwerk(unittest.TestCase):
         self.assertDictEqual(dict(point['properties']),
                              {'prof_pk': 3,
                               'prof_ids': '279',
-                              'prof_hpeil': None,
+                              'prof_hpeil': -1.75,
                               'prof_lpeil': -1.8,
                               'prof_rpeil': -1.76,
-                              'prof_wpeil': -1.78,
+                              'prof_wpeil': -1.75,
                               'prof_opm': '1=Beschoeiing ',
                               'volgnr': 0,
                               'project_id': 'p1',
@@ -69,9 +69,9 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'bk_afw': None,
                               'bk_eenheid': 'mNAP',
                               '_bk_nap': -1.33,
-                              '_bk_wp': -45,
+                              '_bk_wp': -42,
                               '_ok_nap': -1.33,
-                              '_ok_wp': -45,
+                              '_ok_wp': -42,
                               })           
 
         # 187 punten in dataset, waarvan 20 punten met een 22 code
@@ -88,7 +88,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'coordinates': (114216.10686321165, 472040.14822950924)})
 
         self.assertDictEqual(dict(point['properties']),
-                             {'wpeil_bron': '22L en 22R',
+                             {'wpeil_bron': 'manual',
                               'code': '22L',
                               'afstand': 0.00,
                               'y_coord': 472040.14822950924,
@@ -98,7 +98,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114216.10686321165,
                               'prof_pk': 3,
                               'project_id': 'p1',
-                              'wpeil': -1.78,
+                              'wpeil': -1.75,
                               'breedte': 3.446765493694888,
                               'gps_breed': 3.446765493694888,
                               'h_breedte': None,
@@ -115,7 +115,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'coordinates': (114219.05704747832, 472038.3659261789)})
 
         self.assertDictEqual(dict(point['properties']),
-                             {'wpeil_bron': '22L en 22R',
+                             {'wpeil_bron': 'manual',
                               'code': '22R',
                               'afstand': 3.45,
                               'y_coord': 472038.3659261789,
@@ -125,7 +125,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114219.05704747832,
                               'prof_pk': 3,
                               'project_id': 'p1',
-                              'wpeil': -1.78,
+                              'wpeil': -1.75,
                               'breedte': 3.446765493694888,
                               'gps_breed': 3.446765493694888,
                               'h_breedte': None,
