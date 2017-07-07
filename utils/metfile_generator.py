@@ -8,21 +8,20 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_metfile(point_col, metfile_name):
+def export_points_to_metfile(point_col, project, metfile_name):
     """ export content of point collection with appropriate attributes to 
     metfile in dicts
     
     receives collection of points with project and profile info, and point 
-    specific data:
-    - profiel
-    - datetime 
+    specific data, at least:                    
+    - profile name (prof_ids)
+    - datetime (datum)
     - code
-    - opnamepeil
-    - distance
+    - distance (afstand)
     - x_coord -> x coordinate of point
     - y_coord -> y coordinate of point
-    - lowerlevel -> height of soil in mNAP
-    - upperlevel -> height of top of sediment in mNAP
+    - _bk_nap -> height of soil in mNAP
+    - _ok_nap -> height of top of sediment in mNAP
     
     and file location + name for metfile
     
@@ -36,7 +35,6 @@ def export_points_to_metfile(point_col, metfile_name):
                                 quotechar='', escapechar='\\')
         
         # wegschrijven project data in REEKS
-        project =  str(point_col[0]['properties']['project'])
         project_tekst = ('<REEKS>' + project + ',' + project + ',</REEKS>')
         writer.writerow({'regel': project_tekst})
         
@@ -44,15 +42,15 @@ def export_points_to_metfile(point_col, metfile_name):
         profiel_eind = '</PROFIEL>'
         
         for i, row in enumerate(point_col):
-            profiel = str(point_col[i]['properties']['profiel'])
-            datum = (str(point_col[i]['properties']['datetime']))[:10]
+            profiel = str(point_col[i]['properties']['prof_ids'])
+            datum = (str(point_col[i]['properties']['datum']))[:10]
             code = (str(point_col[i]['properties']['code']))[:2]
                 
             
             x_coord = str(point_col[i]['properties']['x_coord'])
             y_coord = str(point_col[i]['properties']['y_coord'])
-            upper_level = str(point_col[i]['properties']['upperlevel'])
-            lower_level = str(point_col[i]['properties']['lowerlevel'])                      
+            upper_level = str(point_col[i]['properties']['_bk_nap'])
+            lower_level = str(point_col[i]['properties']['_ok_nap'])                      
             
             # check nieuw profiel
             if current_profile <> profiel:
