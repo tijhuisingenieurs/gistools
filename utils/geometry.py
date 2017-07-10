@@ -446,7 +446,7 @@ class TLine(LineString):
 
         output_coordinates = []
 
-        for vertex in self.coords:
+        for vertex in self.coordinates[0]:
             x = scale_point[0] + (vertex[0] - scale_point[0]) * scale_factor
             y = scale_point[1] + (vertex[1] - scale_point[1]) * scale_factor
             output_coordinates.append((x, y))
