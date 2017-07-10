@@ -132,17 +132,17 @@ class TestValidate(unittest.TestCase):
         collection2 = MemCollection(geometry_type='MultiPoint')
         
         collection1.writerecords([
-            {'geometry': {'type': 'Polygon',
-                          'coordinates': [((0.0, 0.0), (3.0, 0.0), (3.0, 3.0), 
-                                          (0.0, 3.0), (0.0, 0.0))]},
-             'properties': {'id': 1L, 'name': 'polygon 1'}},
-            {'geometry': {'type': 'Polygon',
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (3.0, 0.0), (3.0, 3.0), 
+                                          (0.0, 3.0), (0.0, 0.0)]},
+             'properties': {'id': 1L, 'name': 'polyline 1'}},
+            {'geometry': {'type': 'MultiLineString',
                           'coordinates': [((0.0, 0.0), (3.0, 0.0), (3.0, 3.0), 
                                           (0.0, 3.0), (0.0, 0.0)), 
                                           ((1.0, 1.0), (2.0, 1.0), 
                                            (2.0, 2.0), (1.0, 2.0),
                                            (1.0, 1.0)) ]},
-             'properties': {'id': 2L, 'name': 'polygon 1'}}
+             'properties': {'id': 2L, 'name': 'polyline 2'}}
              ])
         
         collection2.writerecords([
