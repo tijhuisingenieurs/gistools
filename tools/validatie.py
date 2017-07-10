@@ -169,18 +169,21 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
     records = []
               
     for feature in poly_col:
-        vlak = Polygon(feature['geometry']['coordinates'][0])
-        contour = TLine(vlak.boundary)
-        contour_buffer = vlak.boundary.buffer(2.0)
+        if type(feature['geometry']['coordinates'][0][0]) != tuple: 
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TLine(feature['geometry']['coordinates'][0])
+        
+        contour_buffer = line.buffer(2.0)
         
         for p in point_col.filter(bbox=contour_buffer.bounds, precision=10**-6):
         
-            if p in point_col.filter(bbox=contour.bounds, precision=10**-6):
+            if p in point_col.filter(bbox=line.bounds, precision=10**-6):
                 log.info('Punt in polygon boundingbox')
                 pnt = Point(p['geometry']['coordinates'])
                 
-                pnt_prj = contour.project(pnt)
-                pnt_on_contour = Point(contour.get_point_at_distance(pnt_prj))
+                pnt_prj = line.project(pnt)
+                pnt_on_contour = Point(line.get_point_at_distance(pnt_prj))
                 
                 afstand = pnt.distance(pnt_on_contour)
                 afstand = round(afstand, 2)
@@ -198,8 +201,8 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
                 log.info('Punt buiten polygon boundingbox, binnen 2 meter buffer')
                 pnt = Point(p['geometry']['coordinates'])
                 
-                pnt_prj = contour.project(pnt)
-                pnt_on_contour = Point(contour.get_point_at_distance(pnt_prj))
+                pnt_prj = line.project(pnt)
+                pnt_on_contour = Point(line.get_point_at_distance(pnt_prj))
                 
                 afstand = -pnt.distance(pnt_on_contour)
                 afstand = round(afstand, 2)
