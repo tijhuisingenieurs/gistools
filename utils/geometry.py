@@ -445,11 +445,17 @@ class TLine(LineString):
         scale_factor = float(target_length) / orig_length
 
         output_coordinates = []
-
-        for vertex in self.coords:
-            x = scale_point[0] + (vertex[0] - scale_point[0]) * scale_factor
-            y = scale_point[1] + (vertex[1] - scale_point[1]) * scale_factor
-            output_coordinates.append((x, y))
+        
+        if type(self.coordinates[0][0]) != tuple: 
+            for vertex in self.coordinates:
+                x = scale_point[0] + (vertex[0] - scale_point[0]) * scale_factor
+                y = scale_point[1] + (vertex[1] - scale_point[1]) * scale_factor
+                output_coordinates.append((x, y))
+        else:
+            for vertex in self.coordinates[0]:
+                x = scale_point[0] + (vertex[0] - scale_point[0]) * scale_factor
+                y = scale_point[1] + (vertex[1] - scale_point[1]) * scale_factor
+                output_coordinates.append((x, y))
 
         return TLine(output_coordinates)
 
