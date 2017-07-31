@@ -19,11 +19,14 @@ class TestJsonHandler(unittest.TestCase):
 
         json_dict = json_to_dict(json_file)
 
-        self.assertEqual(len(json_dict), 2)
-        self.assertEqual(json_dict['p1']['name'], 'project_1')
-        self.assertEqual(len(json_dict['p1']['predefined_profiles']), 3)
-        self.assertEqual(len(json_dict['p1']['measured_profiles']), 12)
+        # json_dict is a dict with three or four elements:
+        # - id = project_id
+        # - name = project_name
+        # - measured_profiles = dict with profiles
+        # - predifined_profiles = dict with planned locations (optional)
+        self.assertEqual(len(json_dict), 4)
+        self.assertEqual(json_dict['id'], 'p1')
+        self.assertEqual(json_dict['name'], 'project_1')
+        self.assertEqual(len(json_dict['predefined_profiles']), 3)
+        self.assertEqual(len(json_dict['measured_profiles']), 12)
 
-        self.assertEqual(json_dict['p2']['name'], 'project_2')
-        self.assertEqual(len(json_dict['p2']['predefined_profiles']), 3)
-        self.assertEqual(len(json_dict['p2']['measured_profiles']), 0)
