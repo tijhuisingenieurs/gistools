@@ -38,7 +38,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
     
     # json_dict is a dict with three or four elements:
     # - id = project_id
-    # - name = project_name
+    # - name = project name
     # - measured_profiles = dict with profiles
     # - predifined_profiles = dict with planned locations (optional)
     
@@ -47,7 +47,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
     ttlr_col = MemCollection(geometry_type='Point')
 
     project_id = str(json_dict['id'])
-    project_name = str(json_dict['name'])
+    proj_name = str(json_dict['name'])
         
 
     # profielen in project nalopen
@@ -62,7 +62,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         prof['pk'] = pro_pk
         prof['ids'] = profile.get('ids', '')
         prof['project_id'] = project_id
-        prof['project_name'] = project_name
+        prof['proj_name'] = proj_name
         prof['opm'] = profile.get('remarks').replace('\n', '')
 
         ttl = {}
@@ -260,7 +260,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 tt['prof_pk'] = pro_pk
                 tt['ids'] = profile.get('ids', '')
                 tt['project_id'] = project_id
-                tt['project_name'] = project_name
+                tt['proj_name'] = proj_name
 
                 tt['code'] = point.get('code')
                 tt['afstand'] = get_float(point.get('distance'))
@@ -309,7 +309,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p = OrderedDict()
 
             p['project_id'] = project_id
-            p['project_name'] = project_name            
+            p['proj_name'] = proj_name            
             p['prof_pk'] = prof['pk']
             p['volgnr'] = i
             p['prof_ids'] = prof['ids']

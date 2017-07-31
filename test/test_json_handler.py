@@ -21,7 +21,7 @@ class TestJsonHandler(unittest.TestCase):
 
         # json_dict is a dict with three or four elements:
         # - id = project_id
-        # - name = project_name
+        # - name = project name
         # - measured_profiles = dict with profiles
         # - predifined_profiles = dict with planned locations (optional)
         self.assertEqual(len(json_dict), 4)
