@@ -34,6 +34,7 @@ def create_fieldwork_output_shapes(line_col, point_col):
             'pk': line_props['pk'],
             'ids': line_props['ids'],
             'project_id': line_props['project_id'],
+            'project_name': line_props['project_name'],           
             'opm': line_props['opm'],
             'wpeil': round(get_float(line_props['wpeil']), 2),
             'datum': line_props['datum'],

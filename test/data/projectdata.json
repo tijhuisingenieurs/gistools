@@ -1,5 +1,4 @@
 {
-	"p1": {
 		"id": "p1",
 		"name": "project_1",
 		"predefined_profiles": [
@@ -5749,57 +5748,4 @@
 				"modified": true
 			}
 		}
-	},
-	"p2": {
-		"id": "p2",
-		"name": "project_2",
-		"predefined_profiles": [
-			{
-				"id": 1,
-				"mid_points": [
-					14,
-					5
-				],
-				"point_l": [
-					13.9,
-					5
-				],
-				"point_r": [
-					14.1,
-					5
-				]
-			},
-			{
-				"id": 2,
-				"mid_points": [
-					15,
-					5
-				],
-				"point_l": [
-					14.9,
-					5
-				],
-				"point_r": [
-					15.1,
-					5
-				]
-			},
-			{
-				"id": 3,
-				"mid_points": [
-					16,
-					5
-				],
-				"point_l": [
-					16,
-					4.9
-				],
-				"point_r": [
-					16,
-					5.1
-				]
-			}
-		],
-		"measured_profiles": {}
-	}
 }
