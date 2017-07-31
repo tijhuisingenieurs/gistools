@@ -334,7 +334,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p['ok_afw'] = get_float(point.get('lower_level_accuracy'))
             p['ok_bron'] = point.get('lower_level_source')
 
-            p['opm'] = point.get('remarks').replace('\n', '')
+            p_opm = point.get('remarks', '')
+            p['opm'] = p_opm.replace('\n', '')
 
             # afgeleiden
 
