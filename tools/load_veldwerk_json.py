@@ -264,7 +264,11 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 tt['proj_name'] = proj_name
 
                 tt['code'] = point.get('code')
-                tt['afstand'] = get_float(point.get('distance'))
+
+                if recalculate_gps_distance and point.get('distance_source') == 'gps':
+                    tt['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
+                else:
+                    tt['afstand'] = get_float(point.get('distance'))
                 
                 tt['breedte'] = prof['breedte']
                 tt['gps_breed'] = prof['gps_breed']
