@@ -76,4 +76,3 @@ def export_points_to_metfile(point_col, project, metfile_name):
         writer.writerow({'regel': profiel_eind})
     
     return
-    

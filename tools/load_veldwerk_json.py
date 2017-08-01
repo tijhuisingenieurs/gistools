@@ -130,8 +130,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         prof['gps_breed'] = None
 
 
-        if  (len(ttl) > 0 and len(ttr) > 0 and 
-            ttl['rd_coordinates'] <> '' and ttr['rd_coordinates'] <> ''):
+        if (len(ttl) > 0 and len(ttr) > 0 and
+            ttl['rd_coordinates'] != '' and ttr['rd_coordinates'] != ''):
 
             prof['gps_breed'] = sqrt(
                 (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
@@ -184,16 +184,15 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         coordinates = [[0, 0], [0, 1]]
 
         if (ttl.get('rd_coordinates', None) is not None and 
-            ttl.get('rd_coordinates', None) <> '' and
+            ttl.get('rd_coordinates', None) != '' and
             ttr.get('rd_coordinates', None) is not None and
-            ttr.get('rd_coordinates', None) <> '') :
+            ttr.get('rd_coordinates', None) != ''):
             coordinates = ([ttl['rd_coordinates'][0],
                             ttl['rd_coordinates'][1]],
                            [ttr['rd_coordinates'][0],
                             ttr['rd_coordinates'][1]])
             prof['geom_bron'] = '22L en 22R'
         elif profile_plan_col is not None:
-            # todo: check if id is the correct field to look for profile id
             meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == prof['ids']]
             
             if len(meet_prof) > 0:
