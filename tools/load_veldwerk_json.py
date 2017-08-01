@@ -85,13 +85,13 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         max_99_breedte = 0.0
 
         for p in profile.get('profile_points'):
-            code = p.get('code')
-            method_list.append(p.get('method'))
-            date = p.get('datetime')
+            code = p.get('code', '')
+            method_list.append(p.get('method', ''))
+            date = p.get('datetime', '')
             if date is not None:
                 date_list.append(parse_date(date))
-            pole_list.append(get_float(p.get('pole_length')))
-            l1_list.append(get_float(p.get('l_one_length')))
+            pole_list.append(get_float(p.get('pole_length', None)))
+            l1_list.append(get_float(p.get('l_one_length', None)))
 
             if code == '1':
                 count_one += 1
@@ -99,7 +99,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 count_ttl += 1
                 ttl = p
             elif code == '99':
-                if p.get('distance') != '':
+                if p.get('distance', '') != '':
                     max_99_breedte = max(max_99_breedte, get_float(p.get('distance'), -99))
                 count_nn += 1
             elif code == '22R':
@@ -107,23 +107,23 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 ttr = p
             elif code == '2':
                 count_two += 1
-            if p.get('upper_level_source') == 'gps':
+            if p.get('upper_level_source', '') == 'gps':
                 count_gps += 1
-                accuracy = get_float(p.get('upper_level_accuracy'))
+                accuracy = get_float(p.get('upper_level_accuracy', None))
                 alt_accuracy_list.append(accuracy)
-            elif p.get('upper_level_source') == 'manual':
+            elif p.get('upper_level_source', '') == 'manual':
                 count_manual += 1
-            if p.get('lower_level_source') == 'gps':
+            if p.get('lower_level_source', '') == 'gps':
                 count_gps += 1
-                accuracy = get_float(p.get('lower_level_accuracy'))
+                accuracy = get_float(p.get('lower_level_accuracy', None))
                 alt_accuracy_list.append(accuracy)
-            elif p.get('lower_level_source') == 'manual':
+            elif p.get('lower_level_source', '') == 'manual':
                 count_manual += 1
 
         prof['methode'] = ", ".join(set(method_list))
 
         prof['breedte'] = None
-        prof['h_breedte'] = get_float(profile.get('width'))
+        prof['h_breedte'] = get_float(profile.get('width', None))
         if prof['h_breedte'] == '':
             prof['h_breedte'] = None
 
@@ -146,10 +146,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         prof['hpeil'] = get_float(profile.get('manual_ref_level', None))
 
-        prof['lpeil'] = get_float(ttl.get('upper_level'))
-        prof['lpeil_afw'] = get_float(ttl.get('upper_level_accuracy'))
-        prof['rpeil'] = get_float(ttr.get('upper_level'))
-        prof['rpeil_afw'] = get_float(ttr.get('upper_level_accuracy'))
+        prof['lpeil'] = get_float(ttl.get('upper_level', None))
+        prof['lpeil_afw'] = get_float(ttl.get('upper_level_accuracy', None))
+        prof['rpeil'] = get_float(ttr.get('upper_level', None))
+        prof['rpeil_afw'] = get_float(ttr.get('upper_level_accuracy', None))
 
         prof['wpeil'] = None
         if prof['hpeil'] is not None:
@@ -254,7 +254,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             ############################# 22L en 22R #################################
             records_ttlr = []
 
-            if point.get('code') in ['22L', '22R']:
+            if point.get('code', '') in ['22L', '22R']:
                 tt = {}
 
                 tt['prof_pk'] = pro_pk
@@ -262,13 +262,13 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 tt['project_id'] = project_id
                 tt['proj_name'] = proj_name
 
-                tt['code'] = point.get('code')
+                tt['code'] = point.get('code', None)
 
-                if recalculate_gps_distance and point.get('distance_source') == 'gps':
+                if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
                     tt['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
                 else:
-                    tt['afstand'] = get_float(point.get('distance'))
-                
+                    tt['afstand'] = get_float(point.get('distance', None))
+
                 tt['breedte'] = prof['breedte']
                 tt['gps_breed'] = prof['gps_breed']
                 tt['h_breedte'] = prof['h_breedte']
@@ -288,11 +288,11 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == tt['ids']]
                 
                     if len(meet_prof) > 0:
-                        if point.get('code') == '22L': 
+                        if point.get('code', '') == '22L': 
                             tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][0][0]
                             tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][0][1]
                             tt['z'] = ''
-                        if point.get('code') == '22R': 
+                        if point.get('code', '') == '22R': 
                             tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][-1][0]
                             tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][-1][1]
                             tt['z'] = ''                        
@@ -323,28 +323,27 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p['prof_lpeil'] = prof['lpeil']
             p['prof_rpeil'] = prof['rpeil']
 
-            p['code'] = point.get('code')
+            p['code'] = point.get('code', '')
 
-            if recalculate_gps_distance and point.get('distance_source') == 'gps':
+            if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
                 p['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
             else:
-                p['afstand'] = get_float(point.get('distance'))
+                p['afstand'] = get_float(point.get('distance', None))
 
-            p['afst_afw'] = get_float(point.get('distance_accuracy'))
-            p['afst_bron'] = point.get('distance_source')
+            p['afst_afw'] = get_float(point.get('distance_accuracy', None))
+            p['afst_bron'] = point.get('distance_source', None)
 
-            p['bk'] = get_float(point.get('upper_level'))
-            p['bk_eenheid'] = point.get('upper_level_unit')
-            p['bk_afw'] = get_float(point.get('upper_level_accuracy'))
-            p['bk_bron'] = point.get('upper_level_source')
+            p['bk'] = get_float(point.get('upper_level', None))
+            p['bk_eenheid'] = point.get('upper_level_unit', None)
+            p['bk_afw'] = get_float(point.get('upper_level_accuracy', None))
+            p['bk_bron'] = point.get('upper_level_source', None)
 
-            p['ok'] = get_float(point.get('lower_level'))
-            p['ok_eenheid'] = point.get('lower_level_unit')
-            p['ok_afw'] = get_float(point.get('lower_level_accuracy'))
-            p['ok_bron'] = point.get('lower_level_source')
+            p['ok'] = get_float(point.get('lower_level', None))
+            p['ok_eenheid'] = point.get('lower_level_unit', None)
+            p['ok_afw'] = get_float(point.get('lower_level_accuracy', None))
+            p['ok_bron'] = point.get('lower_level_source', None)
 
-            p_opm = point.get('remarks', '')
-            p['opm'] = p_opm.replace('\n', '')
+            p['opm'] = point.get('remarks', '').replace('\n', '')
 
             # afgeleiden
 
