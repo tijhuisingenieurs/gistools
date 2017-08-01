@@ -41,15 +41,18 @@ def export_points_to_metfile(point_col, project, metfile_name):
         current_profile = ''
         profiel_eind = '</PROFIEL>'
         
-        for i, row in enumerate(point_col):
-            profiel = str(point_col[i]['properties']['prof_ids'])
-            datum = (str(point_col[i]['properties']['datum']))[:10]
-            code = (str(point_col[i]['properties']['code']))[:2]
-            
-            x_coord = str(point_col[i]['properties']['x_coord'])
-            y_coord = str(point_col[i]['properties']['y_coord'])
-            upper_level = str(point_col[i]['properties']['_bk_nap'])
-            lower_level = str(point_col[i]['properties']['_ok_nap'])                      
+        unsorted_points = [p for p in point_col]
+        sorted_points = sorted(unsorted_points, key = lambda x: (x['properties']['prof_ids'], x['properties']['afstand']))
+        
+        for i, row in enumerate(sorted_points):
+            profiel = str(sorted_points[i]['properties']['prof_ids'])
+            datum = (str(sorted_points[i]['properties']['datum']))[:10]
+            code = (str(sorted_points[i]['properties']['code']))[:2]
+
+            x_coord = str(sorted_points[i]['properties']['x_coord'])
+            y_coord = str(sorted_points[i]['properties']['y_coord'])
+            upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+            lower_level = str(sorted_points[i]['properties']['_ok_nap'])                      
             
             # check nieuw profiel
             if current_profile != profiel:
