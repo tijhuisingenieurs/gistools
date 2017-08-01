@@ -10,7 +10,8 @@ from gistools.utils.geometry import TLine
 log = logging.getLogger(__name__)
 
 
-def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_field='DWPcode'):
+def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_field='DWPcode',
+                                recalculate_gps_distance=False):
     """ creates a MemCollection with geometry and attributes of json file 
     with point data, as collected with Tijhuis Field App
 
@@ -320,7 +321,12 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p['prof_rpeil'] = prof['rpeil']
 
             p['code'] = point.get('code')
-            p['afstand'] = get_float(point.get('distance'))
+
+            if recalculate_gps_distance and point.get('distance_source') == 'gps':
+                p['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
+            else:
+                p['afstand'] = get_float(point.get('distance'))
+
             p['afst_afw'] = get_float(point.get('distance_accuracy'))
             p['afst_bron'] = point.get('distance_source')
 
@@ -415,3 +421,35 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
     # lever de collection met meetpunten en de dicts voor WDB terug
     return point_col, prof_col, ttlr_col
+
+def calc_profile_distance(point, ttl, ttr, manual_width):
+
+    def calc_distance_between(point_one, point_two):
+        distance = sqrt((point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2 +
+                             (point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2)
+        return distance
+
+    if point['code'] == '22L':
+        return 0.0
+    elif point['code'] == '22R' and manual_width is not None:
+        return float(manual_width)
+    elif point['code'] == '2':
+        if ttr is not None:
+            if manual_width is not None:
+                return calc_distance_between(point, ttr) + float(manual_width)
+            elif ttl:
+                return calc_distance_between(point, ttr) + calc_distance_between(ttl, ttr)
+            else:
+                return None
+
+        elif ttl:
+            return calc_distance_between(ttl, point)
+        else:
+            return None
+    elif ttl:
+        output = calc_distance_between(ttl, point)
+        if point['code'] == '1':
+            output = -1 * output
+        return output
+    else:
+        return None
