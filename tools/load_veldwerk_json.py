@@ -253,8 +253,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             ############################# 22L en 22R #################################
             records_ttlr = []
-
-            if point.get('code', '') in ['22L', '22R']:
+            code_point = point.get('code', '')
+            if code_point in ['22L', '22R']:
                 tt = {}
 
                 tt['prof_pk'] = pro_pk
@@ -428,7 +428,7 @@ def calc_profile_distance(point, ttl, ttr, manual_width):
 
     def calc_distance_between(point_one, point_two):
         distance = sqrt((point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2 +
-                             (point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2)
+                             (point_one['rd_coordinates'][1] - point_two['rd_coordinates'][1]) ** 2)
         return distance
 
     if point['code'] == '22L':
