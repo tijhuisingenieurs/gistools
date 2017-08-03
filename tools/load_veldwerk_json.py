@@ -10,7 +10,8 @@ from gistools.utils.geometry import TLine
 log = logging.getLogger(__name__)
 
 
-def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_field='DWPcode'):
+def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_field='DWPcode',
+                                recalculate_gps_distance=False):
     """ creates a MemCollection with geometry and attributes of json file 
     with point data, as collected with Tijhuis Field App
 
@@ -129,8 +130,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         prof['gps_breed'] = None
 
 
-        if  (len(ttl) > 0 and len(ttr) > 0 and 
-            ttl['rd_coordinates'] <> '' and ttr['rd_coordinates'] <> ''):
+        if (len(ttl) > 0 and len(ttr) > 0 and
+            ttl['rd_coordinates'] != '' and ttr['rd_coordinates'] != ''):
 
             prof['gps_breed'] = sqrt(
                 (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
@@ -183,16 +184,15 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         coordinates = [[0, 0], [0, 1]]
 
         if (ttl.get('rd_coordinates', None) is not None and 
-            ttl.get('rd_coordinates', None) <> '' and
+            ttl.get('rd_coordinates', None) != '' and
             ttr.get('rd_coordinates', None) is not None and
-            ttr.get('rd_coordinates', None) <> '') :
+            ttr.get('rd_coordinates', None) != ''):
             coordinates = ([ttl['rd_coordinates'][0],
                             ttl['rd_coordinates'][1]],
                            [ttr['rd_coordinates'][0],
                             ttr['rd_coordinates'][1]])
             prof['geom_bron'] = '22L en 22R'
         elif profile_plan_col is not None:
-            # todo: check if id is the correct field to look for profile id
             meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == prof['ids']]
             
             if len(meet_prof) > 0:
@@ -253,8 +253,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             ############################# 22L en 22R #################################
             records_ttlr = []
-
-            if point.get('code', '') in ['22L', '22R']:
+            code_point = point.get('code', '')
+            if code_point in ['22L', '22R']:
                 tt = {}
 
                 tt['prof_pk'] = pro_pk
@@ -262,9 +262,13 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 tt['project_id'] = project_id
                 tt['proj_name'] = proj_name
 
-                tt['code'] = point.get('code', '')
-                tt['afstand'] = get_float(point.get('distance', None))
-                
+                tt['code'] = point.get('code', None)
+
+                if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
+                    tt['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
+                else:
+                    tt['afstand'] = get_float(point.get('distance', None))
+
                 tt['breedte'] = prof['breedte']
                 tt['gps_breed'] = prof['gps_breed']
                 tt['h_breedte'] = prof['h_breedte']
@@ -320,7 +324,12 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p['prof_rpeil'] = prof['rpeil']
 
             p['code'] = point.get('code', '')
-            p['afstand'] = get_float(point.get('distance', None))
+
+            if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
+                p['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
+            else:
+                p['afstand'] = get_float(point.get('distance', None))
+
             p['afst_afw'] = get_float(point.get('distance_accuracy', None))
             p['afst_bron'] = point.get('distance_source', None)
 
@@ -414,3 +423,35 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
     # lever de collection met meetpunten en de dicts voor WDB terug
     return point_col, prof_col, ttlr_col
+
+def calc_profile_distance(point, ttl, ttr, manual_width):
+
+    def calc_distance_between(point_one, point_two):
+        distance = sqrt((point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2 +
+                             (point_one['rd_coordinates'][1] - point_two['rd_coordinates'][1]) ** 2)
+        return distance
+
+    if point['code'] == '22L':
+        return 0.0
+    elif point['code'] == '22R' and manual_width is not None:
+        return float(manual_width)
+    elif point['code'] == '2':
+        if ttr is not None:
+            if manual_width is not None:
+                return calc_distance_between(point, ttr) + float(manual_width)
+            elif ttl:
+                return calc_distance_between(point, ttr) + calc_distance_between(ttl, ttr)
+            else:
+                return None
+
+        elif ttl:
+            return calc_distance_between(ttl, point)
+        else:
+            return None
+    elif ttl:
+        output = calc_distance_between(ttl, point)
+        if point['code'] == '1':
+            output = -1 * output
+        return output
+    else:
+        return None

@@ -48,18 +48,17 @@ def export_points_to_metfile(point_col, project, metfile_name):
             profiel = str(sorted_points[i]['properties']['prof_ids'])
             datum = (str(sorted_points[i]['properties']['datum']))[:10]
             code = (str(sorted_points[i]['properties']['code']))[:2]
-                
-            
+
             x_coord = str(sorted_points[i]['properties']['x_coord'])
             y_coord = str(sorted_points[i]['properties']['y_coord'])
             upper_level = str(sorted_points[i]['properties']['_bk_nap'])
             lower_level = str(sorted_points[i]['properties']['_ok_nap'])                      
             
             # check nieuw profiel
-            if current_profile <> profiel:
+            if current_profile != profiel:
                 
                 # check niet eerste profiel -> dan vorige profiel nog afsluiten
-                if current_profile <> '':                                      
+                if current_profile != '':
                     writer.writerow({'regel': profiel_eind})
                 
                 # wegschrijven profielregel
@@ -79,4 +78,3 @@ def export_points_to_metfile(point_col, project, metfile_name):
         writer.writerow({'regel': profiel_eind})
     
     return
-    
