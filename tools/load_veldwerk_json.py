@@ -207,7 +207,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         line = TLine(coordinates)
 
         if prof['breedte'] is not None:
-            line = line.get_line_with_length(prof['breedte'], 0.5)
+            line = line.get_scaled_line_with_length(prof['breedte'], 0.5)
         else:
             log.warning('profiel %s heeft geen breedte, lijn wordt niet geschaald', prof['ids'])
 

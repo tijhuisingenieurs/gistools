@@ -153,6 +153,7 @@ class TestTLine(unittest.TestCase):
         
         line1 = TLine([(0.0, 0.0), (0.0, 2.0), (2.0, 2.0), (2.0, 8.0)])
         line2 = TLine([(0.0, 0.0), (2.0, 2.0), (0.0, 4.0)])
+        line3 = TLine([(10.0, 0.0), (0.0, 0.0)])
 
         afstand1 = -1.5   
         afstand2 = 11.5
@@ -171,7 +172,10 @@ class TestTLine(unittest.TestCase):
         point5 = line2.get_projected_point_at_distance(afstand2)
         test = 'point6'
         point6 = line2.get_projected_point_at_distance(afstand3)
-
+        
+        test = 'point7'
+        point7 = line3.get_projected_point_at_distance(afstand2)
+        
         self.assertEqual(point1, (0.0, -1.5))
         self.assertEqual(point2, (2.0, 9.5))
         self.assertEqual(point3, (0.0, 1.0))
@@ -181,6 +185,7 @@ class TestTLine(unittest.TestCase):
         self.assertEqual(round(point5[1], 3), (8.132))
         self.assertEqual(round(point6[0], 3), round(sqrt((afstand3*afstand3)/2),3))
         self.assertEqual(round(point6[1], 3), round(sqrt((afstand3*afstand3)/2),3))
+        self.assertEqual(point7, (-1.5, 0.0))
 
 
     def test_get_flipped_line(self):
@@ -230,6 +235,65 @@ class TestTLine(unittest.TestCase):
         first_line, second_line = line.split_at_vertex(2)
         self.assertTupleEqual(first_line.coordinates, ((-10, 0), (-6, 0), (10, 0)))
         self.assertTupleEqual(second_line.coordinates, ((10, 0), (10, 0)))
+
+    def test_get_scaled_line_with_length(self):
+
+        line = TLine([(0, 0), (10, 0)])
+
+        output = line.get_scaled_line_with_length(20, 0)
+        self.assertTupleEqual(output.coordinates, ((0, 0), (20, 0)))
+
+        output = line.get_scaled_line_with_length(20, 1)
+        self.assertTupleEqual(output.coordinates, ((-10, 0), (10, 0)))
+
+        output = line.get_scaled_line_with_length(20, 0.5)
+        self.assertTupleEqual(output.coordinates, ((-5, 0), (15, 0)))
+
+        line = TLine([(10, 0), (0, 0)])
+
+        output = line.get_scaled_line_with_length(20, 0)
+        self.assertTupleEqual(output.coordinates, ((10, 0), (-10, 0)))
+
+        output = line.get_scaled_line_with_length(20, 0.5)
+        self.assertTupleEqual(output.coordinates, ((15, 0), (-5, 0)))
+
+        line = TLine([(5, 5), (10, 10)])
+
+        output = line.get_scaled_line_with_length(3*sqrt(50), 0.5)
+        self.assertTupleEqual(output.coordinates, ((0, 0), (15, 15)))
+
+        output = line.get_scaled_line_with_length(3*sqrt(50), 0)
+        self.assertTupleEqual(output.coordinates, ((5, 5), (20, 20)))
+
+    def test_get_extended_line_with_length(self):
+
+        line = TLine([(0.0, 0.0), (10.0, 0.0)])
+
+        output = line.get_extended_line_with_length(20.0, 'begin')
+        self.assertTupleEqual(output.coordinates, ((-10.0, 0.0), (0.0, 0.0), (10.0, 0.0)))
+
+        output = line.get_extended_line_with_length(20.0, 'end')
+        self.assertTupleEqual(output.coordinates, ((0.0, 0.0), (10.0, 0.0), (20.0, 0.0)))
+
+        output = line.get_extended_line_with_length(20.0, 'both')
+        self.assertTupleEqual(output.coordinates, ((-5.0, 0.0), (0.0, 0.0), (10.0, 0.0), (15.0, 0.0)))
+
+        line = TLine([(10.0, 0.0), (0.0, 0.0)])
+
+        output = line.get_extended_line_with_length(20.0, 'end')
+        self.assertTupleEqual(output.coordinates, ((10.0, 0.0), (0.0, 0.0), (-10.0, 0.0)))
+
+        output = line.get_extended_line_with_length(20.0, 'both')
+        self.assertTupleEqual(output.coordinates, ((15.0, 0.0), (10.0, 0.0), (0.0, 0.0), (-5.0, 0.0)))
+
+        line = TLine([(5.0, 5.0), (10.0, 10.0)])
+
+        output = line.get_extended_line_with_length(3*sqrt(50.0), 'both')
+        self.assertTupleEqual(output.coordinates, ((0.0, 0.0), (5.0, 5.0), (10.0, 10.0), (15.0, 15.0)))
+
+        output = line.get_extended_line_with_length(3*sqrt(50.0), 'end')
+        self.assertTupleEqual(output.coordinates, ((5.0, 5.0), (10.0, 10.0), (20.0, 20.0)))
+
 
 
 class TestTMultiLine(unittest.TestCase):
@@ -288,34 +352,6 @@ class TestTMultiLine(unittest.TestCase):
         self.assertTupleEqual(first_line.coordinates, (((-10, 0), (-4, 0)), ((-3, 0), (0, 0), (10, 0))))
         self.assertTupleEqual(second_line.coordinates, (((10, 0), (10, 0)), ))
 
-    def test_get_line_with_length(self):
-
-        line = TLine([(0, 0), (10, 0)])
-
-        output = line.get_line_with_length(20, 0)
-        self.assertTupleEqual(output.coordinates, ((0, 0), (20, 0)))
-
-        output = line.get_line_with_length(20, 1)
-        self.assertTupleEqual(output.coordinates, ((-10, 0), (10, 0)))
-
-        output = line.get_line_with_length(20, 0.5)
-        self.assertTupleEqual(output.coordinates, ((-5, 0), (15, 0)))
-
-        line = TLine([(10, 0), (0, 0)])
-
-        output = line.get_line_with_length(20, 0)
-        self.assertTupleEqual(output.coordinates, ((10, 0), (-10, 0)))
-
-        output = line.get_line_with_length(20, 0.5)
-        self.assertTupleEqual(output.coordinates, ((15, 0), (-5, 0)))
-
-        line = TLine([(5, 5), (10, 10)])
-
-        output = line.get_line_with_length(3*sqrt(50), 0.5)
-        self.assertTupleEqual(output.coordinates, ((0, 0), (15, 15)))
-
-        output = line.get_line_with_length(3*sqrt(50), 0)
-        self.assertTupleEqual(output.coordinates, ((5, 5), (20, 20)))
 
 #     def test_get_projected_point_at_distance(self):
 #         """test create point on line at given % of total line length"""
