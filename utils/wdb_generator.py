@@ -3,33 +3,36 @@ import csv
 import os.path
 
 from collection import MemCollection, OrderedDict
+from gistools.utils.conversion_tools import get_float
 
 import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_wdb(point_col, line_col, wdb_path, afstand):
+def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project):
     """ export content of point collection with appropriate attributes to 
     csv tabels for WDB
     
     receives collection of points with some project and profile info, and point 
-    specific data:
-    - profiel
-    - datetime 
+    specific data, at least:
+    - profile name (prof_ids)
+    - datetime (datum)
     - code
-    - distance
+    - distance (afstand)
     - x_coord -> x coordinate of point
     - y_coord -> y coordinate of point
-    - lowerlevel -> height of soil in mNAP
-    - upperlevel -> height of top of sediment in mNAP
+    - _bk_nap -> height of soil in mNAP
+    - _ok_nap -> height of top of sediment in mNAP
     
-    and collection of lines with profile location and project data of profiles:
-    - profiel
-    - opnamepeil
+    and collection of lines with profile location and project data of profiles,
+    at least:
+    - profile name (ids)
+    - reference level (wpeil)
     - xb_profiel
     - yb_profiel
     - xe_profiel
     - ye_profiel
+ 
     
     and file location for wdb tables
     
@@ -45,8 +48,9 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand):
                                 quotechar='', escapechar='\\')
         writer1.writeheader()
     
-        # wegschrijven gebied tabel
-        id_opp_water =  str(line_col[0]['properties']['project'])
+        # wegschrijven gebied tabel (code kan compacter, maar expliciet uitgeschreven
+        # zodat bij toekomstige doorontwikkeling makkelijk aanpassingen gedaan kunnen worden)
+        id_opp_water = str(project)
         omschrijving = id_opp_water
         writer1.writerow({'id_opp_water': id_opp_water ,'omschrijving': omschrijving })
 
@@ -64,10 +68,10 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand):
         writer2.writeheader()     
         
         for i, row in enumerate(line_col):
-            id_opp_water = str(line_col[i]['properties']['project'])
-            id_vak = str(line_col[i]['properties']['profiel'])
-            datum_uitvoering = (str(point_col[i]['properties']['datetime']))[:10]
-            projekt =  str(point_col[i]['properties']['project']) 
+            id_opp_water = str(project)
+            id_vak = str(line_col[i]['properties']['ids'])
+            datum_uitvoering = (str(point_col[i]['properties']['datum']))[:10]
+            projekt =  str(project)
                                             
             # wegschrijven locatie regels
             writer2.writerow({'id_opp_water': id_opp_water, 'id_vak': id_vak, 
@@ -97,20 +101,20 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand):
         writer3.writeheader()
         
         for i, row in enumerate(line_col):
-            id_opp_water = str(line_col[i]['properties']['project'])    
-            id_vak = str(line_col[i]['properties']['profiel'])
-            id_profiel = str(line_col[i]['properties']['profiel'])
-            opnamepeil = str(point_col[i]['properties']['opnamepeil']) 
+            id_opp_water = str(project)   
+            id_vak = str(line_col[i]['properties']['ids'])
+            id_profiel = str(line_col[i]['properties']['ids'])
+            opnamepeil = str(line_col[i]['properties']['wpeil']) 
             # in geval van oude Access versies moet check_y2 gelijk zijn aan -1
             # in geval van MDB viewer moet dit 'True' zijn
             # implementatie nu voor Access
             check_y2 = '-1'
             afstandVoor = str(afstand / 2)
             afstandNa = str(afstand / 2)
-            Xb_profiel = str(line_col[i]['properties']['xb_profiel'])   
-            Yb_profiel = str(line_col[i]['properties']['yb_profiel'])   
-            Xe_profiel = str(line_col[i]['properties']['xe_profiel'])   
-            Ye_profiel = str(line_col[i]['properties']['ye_profiel'])   
+            Xb_profiel = str(line_col[i]['properties']['xb_prof'])   
+            Yb_profiel = str(line_col[i]['properties']['yb_prof'])   
+            Xe_profiel = str(line_col[i]['properties']['xe_prof'])   
+            Ye_profiel = str(line_col[i]['properties']['ye_prof'])   
                                             
             # wegschrijven profiel regels
             writer3.writerow({'id_opp_water': id_opp_water, 'id_vak': id_vak, 
@@ -134,18 +138,14 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand):
         writer4.writeheader()
         
         for i, row in enumerate(point_col):
-            id_opp_water = str(point_col[i]['properties']['project'])
-            id_vak = str(point_col[i]['properties']['profiel'])
-            id_profiel = str(point_col[i]['properties']['profiel'])
-            raai = str(point_col[i]['properties']['distance'])
+            id_opp_water = str(project)
+            id_vak = str(point_col[i]['properties']['prof_ids'])
+            id_profiel = str(point_col[i]['properties']['prof_ids'])
+            raai = str(point_col[i]['properties']['afstand'])
             
             # poging afvangen lege velden upper en lower level lukt nog niet !!!
-            opnamepeil = float(point_col[i]['properties']['opnamepeil'])  
-            bk = float(point_col[i]['properties'].get('upperlevel', '0.00'))
-            ok = float(point_col[i]['properties'].get('lowerlevel', '0.00'))
-            
-            bagger = str((float(point_col[i]['properties']['opnamepeil']) - float(point_col[i]['properties'].get('upperlevel', '0.00'))) * 100)
-            vast = str((float(point_col[i]['properties']['opnamepeil']) - float(point_col[i]['properties'].get('lowerlevel', '0.00'))) * 100)
+            bagger = str(get_float(point_col[i]['properties'].get('_bk_wp', '0.00')))
+            vast = str(get_float(point_col[i]['properties'].get('_ok_wp', '0.00')))
             
             pbpsoort = (str(point_col[i]['properties']['code']))[:2]
             

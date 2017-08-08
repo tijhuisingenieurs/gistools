@@ -1,5 +1,4 @@
 {
-	"p1": {
 		"id": "p1",
 		"name": "project_1",
 		"predefined_profiles": [
@@ -50,6 +49,752 @@
 			}
 		],
 		"measured_profiles": {
+			"267": {
+				"modified": false,
+				"id": "267",
+				"ids": "267",
+				"width": "",
+				"reference_level": "",
+				"remarks": "1 en 2 is beschoeiing ",
+				"manual_ref_level": "-5.36",
+				"profile_points": [
+					{
+						"datetime": "2017-06-20T13:37:33.524Z",
+						"code": "22R",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "7.7",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-5.32",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:38:27.331Z",
+						"code": "22L",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 0,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-5.49",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:42:06.491Z",
+						"code": "1",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114237.7353599102,
+							472581.7067852724,
+							-4.5045367126391564
+						],
+						"wgs_coordinates": [
+							52.2397851,
+							4.7904259,
+							40.73999786376953
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "-0.1",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-0.3",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:43:06.473Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "0.1",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "15",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "1",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:43:15.828Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 0.5,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "70",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "16",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:43:32.344Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 1,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "72",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "26",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:43:48.392Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 1.5,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "77",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "34",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:44:14.027Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 2,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "82",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "35",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:44:41.721Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 2.5,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "114",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "43",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:45:12.664Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "3",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "129",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "50",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:45:33.463Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "4",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "146",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "52",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:46:02.730Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "5",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "143",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "49",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:46:28.670Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 5.5,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "118",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "46",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:46:52.569Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 6,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "84",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "43",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:47:19.739Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": 6.5,
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "79",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "36",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:47:47.404Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "7",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "62",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "31",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:49:31.615Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "7.6",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "45",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "28",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:50:38.526Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "7.7",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "0",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "0",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:50:50.810Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "0",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "0",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "0",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:53:23.291Z",
+						"code": "2",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114237.7353599102,
+							472581.7067852724,
+							-4.5045367126391564
+						],
+						"wgs_coordinates": [
+							52.2397851,
+							4.7904259,
+							40.73999786376953
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "8.5",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-1.10",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:54:33.861Z",
+						"code": "2",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114237.7353599102,
+							472581.7067852724,
+							-4.5045367126391564
+						],
+						"wgs_coordinates": [
+							52.2397851,
+							4.7904259,
+							40.73999786376953
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "8.0",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-1.10",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-21T04:56:44.430Z",
+						"code": "1",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							123449.54694320672,
+							469804.49051750195,
+							2.7473392072716876
+						],
+						"wgs_coordinates": [
+							52.2154289,
+							4.9255444,
+							48
+						],
+						"accuracy": 11,
+						"altitude_accuracy": null,
+						"distance": "-3.8",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "-180",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-1.80",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					}
+				]
+			},
+			"268": {
+				"modified": false,
+				"id": "268",
+				"ids": "268",
+				"width": "",
+				"reference_level": "",
+				"remarks": "Handmatig ingevoerd door begroeiing. 1 en 2 is beschoeiing ",
+				"manual_ref_level": "-5.36",
+				"profile_points": [
+					{
+						"datetime": "2017-06-20T13:02:34.426Z",
+						"code": "1",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114153.88398464193,
+							472548.0048767402,
+							-4.89823140834884
+						],
+						"wgs_coordinates": [
+							52.239476,
+							4.7892024,
+							40.34700012207031
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "-2.90",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-0.8",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:05:56.502Z",
+						"code": "1",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114153.88398464193,
+							472548.0048767402,
+							-4.89823140834884
+						],
+						"wgs_coordinates": [
+							52.239476,
+							4.7892024,
+							40.34700012207031
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "-0.1",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-0.2",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:07:10.909Z",
+						"code": "22L",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates":"",
+						"wgs_coordinates":"",
+						"accuracy": "",
+						"altitude_accuracy": null,
+						"distance": 0,
+						"distance_source": "manual",
+						"distance_accuracy": "",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-5.40",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:07:48.827Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "0.1",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "50",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "36",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:16:17.599Z",
+						"code": "99",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": "",
+						"wgs_coordinates": "",
+						"accuracy": "",
+						"altitude_accuracy": "",
+						"distance": "0",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "0",
+						"lower_level_source": "manual",
+						"lower_level_accuracy": "manual",
+						"lower_level_unit": "cm tov WP",
+						"upper_level": "0",
+						"upper_level_source": "manual",
+						"upper_level_accuracy": "manual",
+						"upper_level_unit": "cm tov WP"
+					},
+					{
+						"datetime": "2017-06-20T13:17:00.420Z",
+						"code": "22R",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates":"",
+						"wgs_coordinates":"",
+						"accuracy": "",
+						"altitude_accuracy": null,
+						"distance": "7.8",
+						"distance_source": "manual",
+						"distance_accuracy": "",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-5.48",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:17:33.661Z",
+						"code": "2",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114156.39612007889,
+							472556.93004359957,
+							-5.708111519579509
+						],
+						"wgs_coordinates": [
+							52.2395564,
+							4.7892381,
+							39.5369987487793
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "13",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-0.8",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					},
+					{
+						"datetime": "2017-06-20T13:18:08.254Z",
+						"code": "2",
+						"method": "handmatig",
+						"pole_length": "2",
+						"l_one_length": 0.06,
+						"rd_coordinates": [
+							114158.51850317439,
+							472560.00577953644,
+							-6.489063916954512
+						],
+						"wgs_coordinates": [
+							52.2395842,
+							4.7892688,
+							38.75600051879883
+						],
+						"accuracy": 3.9000000953674316,
+						"altitude_accuracy": null,
+						"distance": "7.9",
+						"distance_source": "manual",
+						"distance_accuracy": "manual",
+						"lower_level": "",
+						"lower_level_source": "",
+						"lower_level_accuracy": "",
+						"lower_level_unit": "",
+						"upper_level": "-0.25",
+						"upper_level_source": "gps",
+						"upper_level_accuracy": null,
+						"upper_level_unit": "mNAP"
+					}
+				]
+			},
 			"279": {
 				"id": "279",
 				"ids": "279",
@@ -176,7 +921,7 @@
 						"upper_level": "6",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:23.502Z",
@@ -206,7 +951,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:34.744Z",
@@ -236,7 +981,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:43:49.406Z",
@@ -266,7 +1011,7 @@
 						"upper_level": "37",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:44:15.655Z",
@@ -296,7 +1041,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:44:32.688Z",
@@ -326,7 +1071,7 @@
 						"upper_level": "41",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:45:25.816Z",
@@ -356,7 +1101,7 @@
 						"upper_level": "37",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:45:51.213Z",
@@ -386,7 +1131,7 @@
 						"upper_level": "20",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T12:46:22.385Z",
@@ -1856,7 +2601,7 @@
 						"upper_level": "32",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:55:34.459Z",
@@ -1886,7 +2631,7 @@
 						"upper_level": "45",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:55:49.640Z",
@@ -1916,7 +2661,7 @@
 						"upper_level": "56",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:56:03.873Z",
@@ -1946,7 +2691,7 @@
 						"upper_level": "63",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:56:27.030Z",
@@ -1976,7 +2721,7 @@
 						"upper_level": "62",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:57:07.254Z",
@@ -2006,7 +2751,7 @@
 						"upper_level": "66",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:57:43.850Z",
@@ -2036,7 +2781,7 @@
 						"upper_level": "57",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:04.015Z",
@@ -2066,7 +2811,7 @@
 						"upper_level": "49",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:14.329Z",
@@ -2096,7 +2841,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:23.971Z",
@@ -2126,7 +2871,7 @@
 						"upper_level": "18",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:58:33.191Z",
@@ -2347,7 +3092,7 @@
 						"upper_level": "35",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:21.828Z",
@@ -2377,7 +3122,7 @@
 						"upper_level": "47",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:34.012Z",
@@ -2407,7 +3152,7 @@
 						"upper_level": "50",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:38:48.114Z",
@@ -2437,7 +3182,7 @@
 						"upper_level": "59",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:00.871Z",
@@ -2467,7 +3212,7 @@
 						"upper_level": "61",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:16.265Z",
@@ -2497,7 +3242,7 @@
 						"upper_level": "63",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:39:42.058Z",
@@ -2527,7 +3272,7 @@
 						"upper_level": "58",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:06.086Z",
@@ -2557,7 +3302,7 @@
 						"upper_level": "48",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:28.548Z",
@@ -2587,7 +3332,7 @@
 						"upper_level": "42",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:40:54.256Z",
@@ -2617,7 +3362,7 @@
 						"upper_level": "48",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:41:26.233Z",
@@ -2647,7 +3392,7 @@
 						"upper_level": "43",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:15.507Z",
@@ -2677,7 +3422,7 @@
 						"upper_level": "38",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:33.739Z",
@@ -2707,7 +3452,7 @@
 						"upper_level": "36",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:42:45.299Z",
@@ -3433,7 +4178,7 @@
 						"upper_level": "26",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T08:59:59.215Z",
@@ -3463,7 +4208,7 @@
 						"upper_level": "33",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:00:13.910Z",
@@ -3493,7 +4238,7 @@
 						"upper_level": "61",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:00:47.183Z",
@@ -3523,7 +4268,7 @@
 						"upper_level": "68",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:04:31.064Z",
@@ -3553,7 +4298,7 @@
 						"upper_level": "74",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:04:52.533Z",
@@ -3583,7 +4328,7 @@
 						"upper_level": "72",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:05:22.339Z",
@@ -3613,7 +4358,7 @@
 						"upper_level": "71",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:05:38.860Z",
@@ -3643,7 +4388,7 @@
 						"upper_level": "67",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:13.391Z",
@@ -3673,7 +4418,7 @@
 						"upper_level": "65",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:36.875Z",
@@ -3703,7 +4448,7 @@
 						"upper_level": "52",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:06:57.438Z",
@@ -3733,7 +4478,7 @@
 						"upper_level": "47",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:07:51.259Z",
@@ -3763,7 +4508,7 @@
 						"upper_level": "41",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:08:05.917Z",
@@ -3793,7 +4538,7 @@
 						"upper_level": "30",
 						"upper_level_source": "manual",
 						"upper_level_accuracy": "manual",
-						"upper_level_unit": "cm tov OK"
+						"upper_level_unit": "cm tov WP"
 					},
 					{
 						"datetime": "2017-06-14T09:08:18.334Z",
@@ -5003,57 +5748,4 @@
 				"modified": true
 			}
 		}
-	},
-	"p2": {
-		"id": "p2",
-		"name": "project_2",
-		"predefined_profiles": [
-			{
-				"id": 1,
-				"mid_points": [
-					14,
-					5
-				],
-				"point_l": [
-					13.9,
-					5
-				],
-				"point_r": [
-					14.1,
-					5
-				]
-			},
-			{
-				"id": 2,
-				"mid_points": [
-					15,
-					5
-				],
-				"point_l": [
-					14.9,
-					5
-				],
-				"point_r": [
-					15.1,
-					5
-				]
-			},
-			{
-				"id": 3,
-				"mid_points": [
-					16,
-					5
-				],
-				"point_l": [
-					16,
-					4.9
-				],
-				"point_r": [
-					16,
-					5.1
-				]
-			}
-		],
-		"measured_profiles": {}
-	}
 }
