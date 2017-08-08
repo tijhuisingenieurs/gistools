@@ -322,18 +322,30 @@ class TLine(LineString):
         dist = afstand
         
         if afstand < 0:
-            richting = self.get_segment_richting_dist(0.001)                  
-            x = self.coordinates[0][0]
-            y = self.coordinates[0][1]                                    
-            
+            richting = self.get_segment_richting_dist(0.001)
+            if type(self.coordinates[0][0]) != tuple:                   
+                x = self.coordinates[0][0]
+                y = self.coordinates[0][1]
+            else:
+                x = self.coordinates[0][0][0]
+                y = self.coordinates[0][0][1]                                                  
+                
             # richting is dx en dy -> omrekenen naar dx en dy per 1 eenheid lengte
+            # let op: als richting negatieve component heeft, corrigeren bij
+            # horizontale en verticale lijnen!            
             
             if richting[0] == 0:
                 new_x = x
-                new_y = y + afstand
+                if  richting[1] > 0:
+                    new_y = y + afstand
+                if  richting[1] < 0:
+                    new_y = y - afstand                    
             elif richting[1] == 0:
                 new_y = y
-                new_x = x + afstand
+                if richting[0] > 0:
+                    new_x = x + afstand
+                if richting[0] < 0:
+                    new_x = x - afstand                    
             else:   
                 length_richting = sqrt((richting[0]*richting[0]) + 
                                        (richting[1]*richting[1]))
@@ -348,19 +360,32 @@ class TLine(LineString):
             
         elif afstand > self.length:
             richting = self.get_segment_richting_dist(self.length)
-            x = self.coordinates[-1][0]
-            y = self.coordinates[-1][1]
+            
+            if type(self.coordinates[0][0]) != tuple:                   
+                x = self.coordinates[-1][0]
+                y = self.coordinates[-1][1]
+            else:
+                x = self.coordinates[0][-1][0]
+                y = self.coordinates[0][-1][1]    
             
             extensie = afstand - self.length  
                                 
             # richting is dx en dy -> omrekenen naar dx en dy per 1 eenheid lengte
+            # let op: als richting negatieve component heeft, corrigeren bij
+            # horizontale en verticale lijnen!
             
             if richting[0] == 0:
                 new_x = x
-                new_y = y + extensie
+                if richting[1] > 0:
+                    new_y = y + extensie
+                if richting[1] < 0:
+                    new_y = y - extensie
             elif richting[1] == 0:
                 new_y = y
-                new_x = x + extensie
+                if richting[0] > 0:
+                    new_x = x + extensie
+                if richting[0] < 0:
+                    new_x = x - extensie
             else:   
                 length_richting = sqrt((richting[0]*richting[0]) + 
                                        (richting[1]*richting[1]))
@@ -425,11 +450,11 @@ class TLine(LineString):
                            
         return line_angle
 
-    def get_line_with_length(self, target_length, scale_point_perc=0):
-        """ get line with given line, with same direction and scalled
+    def get_scaled_line_with_length(self, target_length, scale_point_perc=0):
+        """ get line with given line, with same direction and scaled
         around the scale point
         
-        target_length (float): length in shape units
+        target_length (float): new length in shape units
         scale_point_perc  (float): percentage (0-1)of point on line to relatively scale around
             0=begin of line, 1=end of line, 0.5 = halfway 
         return: TLine with new line geometry
@@ -459,7 +484,54 @@ class TLine(LineString):
 
         return TLine(output_coordinates)
 
+    def get_extended_line_with_length(self, target_length, extend_point='end'):
+        """ get line with given line, with same direction and extended
+        at extend_point
+        
+        target_length (float): new length in shape units
+        extend_point (text): point of line to extend
+            values: 'begin', 'end', 'both'
+        return: TLine with new line geometry
+        """
 
+        orig_length = self.length
+
+        if orig_length <= 0:
+            log.error('length of shape is 0 or lower. returned orginal without scaling')
+            return TLine(self.coordinates)
+
+        extension = float(target_length) - orig_length
+        
+        if type(self.coordinates[0][0]) != tuple: 
+            coordinate_list = list(self.coordinates)
+        else:
+            coordinate_list = list(self.coordinates[0])
+
+        if extend_point == 'end':
+            distance = target_length
+            new_point = self.get_projected_point_at_distance(distance)            
+            coordinate_list.append(new_point)
+            tuple(coordinate_list)
+       
+        if extend_point == 'begin':
+            distance = -extension
+            new_point = self.get_projected_point_at_distance(distance)
+            coordinate_list.insert(0, new_point)
+            tuple(coordinate_list)                   
+        
+        if extend_point == 'both':
+            distance_start = -(extension/2)
+            new_point = self.get_projected_point_at_distance(distance_start)
+            coordinate_list.insert(0, new_point)  
+            
+            distance_end = orig_length + (extension/2)
+            new_point = self.get_projected_point_at_distance(distance_end)
+            coordinate_list.append(new_point)
+            
+            tuple(coordinate_list)  
+
+        return TLine(coordinate_list)
+    
 class TMultiLineString(MultiLineString, TLine):
 
     def __init__(self, *args, **kwargs):

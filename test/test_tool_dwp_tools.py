@@ -547,3 +547,38 @@ class TestDWPTools(unittest.TestCase):
                       'coordinates': [(-1.666666666666666, -3.333333333333332), 
                                       (-1.666666666666666, 10.0), (11.666666666666666, 10.0), 
                                       (11.666666666666666, 23.333333333333332)]})   
+
+    def test_get_extended_line(self):
+        line_col = MemCollection(geometry_type='LineString')
+
+        line_col.writerecords([
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0)]},
+             'properties': {'id': 1L, 'name': 'line 1', 'new_length': 15.0 }},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (0.0, 20.0)]},
+             'properties': {'id': 2L, 'name': 'line 2', 'new_length': 30.0}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(0.0, 0.0), (0.0, 10.0), (10.0, 10.0), (10.0, 20.0)]},
+             'properties': {'id': 3L, 'name': 'line 3', 'new_length': 40.0}},
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(10.0, 0.0), (0.0, 0.0)]},
+             'properties': {'id': 4L, 'name': 'line 4', 'new_length': 20.0}}                              
+        ])    
+        
+        extended_col1 = get_extended_line(line_col, 'new_length', 'both')
+        
+        self.assertDictEqual(extended_col1[0]['geometry'],
+                             {'type': 'LineString',
+                              'coordinates': [(0.0, -2.5), (0.0, 0.0), (0.0, 10.0), (0.0, 12.5)]})
+        self.assertDictEqual(extended_col1[1]['geometry'],
+                             {'type': 'LineString',
+                              'coordinates': [(0.0, -5.0), (0.0, 0.0), (0.0, 10.0), (0.0, 20.0), (0.0, 25.0)]})      
+        self.assertDictEqual(extended_col1[2]['geometry'],
+                     {'type': 'LineString',
+                      'coordinates': [(0, -5), 
+                                      (0.0, 0.0), (0.0, 10.0), (10.0, 10.0), (10.0, 20.0), 
+                                      (10, 25)]})
+        self.assertDictEqual(extended_col1[3]['geometry'],
+                             {'type': 'LineString',
+                              'coordinates': [(15.0, 0.0), (10.0, 0.0), (0.0, 0.0), (-5.0, 0.0)]})          

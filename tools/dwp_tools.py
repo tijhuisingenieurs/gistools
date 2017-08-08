@@ -379,13 +379,12 @@ def get_scaled_line(line_col, target_length_field, scale_point_perc=0):
     """get line with given line, with same direction and scalled
     around the scale point
         
-    target_length_field: field with length in shape units (float)
+    target_length_field: field with new length in shape units (float)
     scale_point_perc  (float): percentage (0-1) of point on line to relatively scale around
             0=begin of line, 1=end of line, 0.5 = halfway
     
     return = line MemCollection with new scaled lengths"""
 
-    #TODO: make variant that only scales at end segments, for non-straight lines
     for feature in line_col:  
         
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
@@ -395,9 +394,9 @@ def get_scaled_line(line_col, target_length_field, scale_point_perc=0):
             
         target_length = feature['properties'].get(target_length_field, 0.0)
         if target_length == 0.0:
-            target_length = line.length
-
-        scaled_line = line.get_line_with_length(target_length, scale_point_perc)
+            scaled_line = line
+        else:
+            scaled_line = line.get_scaled_line_with_length(target_length, scale_point_perc)
         
         coordinates = []
         for p in scaled_line.coordinates:
@@ -407,6 +406,36 @@ def get_scaled_line(line_col, target_length_field, scale_point_perc=0):
                 
     return line_col
                 
+def get_extended_line(line_col, target_length_field, extend_point='end'):
+    """get line with given line, with same direction and extended
+    at extendpoint with given length
+        
+    target_length_field: field with new length in shape units (float)
+    extend_point (text): point of line to extend
+        values: 'begin', 'end', 'both'
+    
+    return = line MemCollection with new extended lengths"""
+
+    for feature in line_col:  
+        
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = TLine(feature['geometry']['coordinates'])
+        else:
+            line = TMultiLineString(feature['geometry']['coordinates'])  
             
+        target_length = feature['properties'].get(target_length_field, 0.0)
+        
+        if target_length == 0.0:
+            extended_line = line            
+        else:
+            extended_line = line.get_extended_line_with_length(target_length, extend_point)
+        
+        coordinates = []
+        for p in extended_line.coordinates:
+            coordinates.append(p) 
+
+        feature['geometry']['coordinates'] = coordinates
+                
+    return line_col            
             
             

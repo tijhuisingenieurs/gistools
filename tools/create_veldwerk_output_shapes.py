@@ -50,7 +50,7 @@ def create_fieldwork_output_shapes(line_col, point_col):
         else:
             line = TLine([line['geometry']['coordinates'][0][0],line['geometry']['coordinates'][-1][-1]])
         
-        line = line.get_line_with_length(l['breedte'], 0.5)
+        line = line.get_scaled_line_with_length(l['breedte'], 0.5)
 
         for point in point_col:
             if point['properties']['prof_ids'] == l['ids']:
