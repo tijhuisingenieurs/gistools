@@ -436,14 +436,13 @@ def calc_profile_distance(point, ttl, ttr, manual_width):
     elif point['code'] == '22R' and manual_width is not None:
         return float(manual_width)
     elif point['code'] == '2':
-        if ttr is not None:
+        if ttr is not None and ttr['distance_source'] == 'gps':
             if manual_width is not None:
                 return calc_distance_between(point, ttr) + float(manual_width)
             elif ttl:
                 return calc_distance_between(point, ttr) + calc_distance_between(ttl, ttr)
             else:
                 return None
-
         elif ttl:
             return calc_distance_between(ttl, point)
         else:
