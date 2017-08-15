@@ -18,7 +18,7 @@ class TestXMLHandler(unittest.TestCase):
         
         xml_file = os.path.join(os.path.dirname(__file__), 'data', 'Metfile_profielen_generiek.met')
 
-        point_col, line_col, ttlr_col = import_xml_to_memcollection(xml_file, 'z1z2')
+        point_col, line_col, ttlr_col, records_errors = import_xml_to_memcollection(xml_file, 'z1z2')
         
 #         self.assertEqual(len(point_col), 2)
 #         
