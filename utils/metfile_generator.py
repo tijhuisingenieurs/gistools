@@ -47,7 +47,15 @@ def export_points_to_metfile(point_col, project, metfile_name):
         for i, row in enumerate(sorted_points):
             profiel = str(sorted_points[i]['properties']['prof_ids'])
             datum = (str(sorted_points[i]['properties']['datum']))[:10]
-            code = (str(sorted_points[i]['properties']['code']))[:2]
+            code = (str(sorted_points[i]['properties']['code']))
+            tekencode = 999
+            if code in ['22L', '22l', '22R', '22r']:
+                code = 22
+            if len(str(code)) > 3:
+                a = str(code).split('_')
+                code = a[0]
+                tekencode = a[1]
+
 
             x_coord = str(sorted_points[i]['properties']['x_coord'])
             y_coord = str(sorted_points[i]['properties']['y_coord'])
@@ -70,7 +78,7 @@ def export_points_to_metfile(point_col, project, metfile_name):
                 current_profile = profiel
             
             # wegschrijven meting regels   
-            meting_tekst = ('<METING>' + code + ',' + '999' + ',' +
+            meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
                             x_coord + ',' + y_coord + ',' +
                             upper_level + ',' + lower_level + ',</METING>')
             writer.writerow({'regel': meting_tekst})
