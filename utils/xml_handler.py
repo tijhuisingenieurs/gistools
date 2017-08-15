@@ -28,7 +28,8 @@ def import_xml_to_memcollection(xml_file, zvalues):
 
     records_p = []
     records_ttlr = []
-    records_l = []        
+    records_l = []   
+    records_errors = []     
 
     pk = 0
     
@@ -50,6 +51,11 @@ def import_xml_to_memcollection(xml_file, zvalues):
         
     for e in root:   
         properties_l = {}
+        properties_l['xb_prof'] = 0.0
+        properties_l['yb_prof'] = 0.0
+        properties_l['xe_prof'] = 0.0
+        properties_l['ye_prof'] = 0.0
+        
         print ('Element gevonden; ' + str(e.tag) + ' ' +  str(e.text))
         
         if e.tag in ['reeks', 'REEKS', 'Reeks']:
@@ -78,6 +84,8 @@ def import_xml_to_memcollection(xml_file, zvalues):
             
             wpeilen_list = []
             t = 0
+            properties_l['breedte'] = 999
+            
             for p in e:
                 point_list = p.text.split(',')
                 if point_list[0] == '22':
@@ -185,8 +193,9 @@ def import_xml_to_memcollection(xml_file, zvalues):
             
 
                 elif properties_p['code'] == '22' and i > 1: 
+                    i = i+1
                     print ('Meer dan 2 punten met 22 code gevonden')  
-                
+
                 
                 #TODO: deze moet buiten de iteratie over de punten geplaatst worden zodat wpeil
                 #      al bekend is voordat punten worden benoemd. Idem voor bepaling afstand
@@ -195,15 +204,25 @@ def import_xml_to_memcollection(xml_file, zvalues):
 
                 properties_p['_bk_wp'] = get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_bk_nap']))
                 properties_p['_ok_wp'] = get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_ok_nap']))                                
-                
+                    
                 records_p.append({'geometry': {'type': 'Point',
                                  'coordinates': (properties_p['x_coord'], properties_p['y_coord'])},
                         'properties': properties_p})
                 
 
             print ('Aantal gevonden 22 punten: ' + str(i))
-              
-            records_l.append({'geometry': {'type': 'LineString',
+            errors_p = {}
+            if i < 2:
+                errors_p['Profiel'] = properties_p['prof_ids']
+                errors_p['Error'] = 'Minder dan 2 punten met 22 code gevonden.. geen lijn gegenereerd'
+                records_errors.append(errors_p)                
+            if i > 2:
+                errors_p['Profiel'] = properties_p['prof_ids']
+                errors_p['Error'] = 'Meer dan 2 punten met 22 code gevonden... lijn gebaseerd op eerste 2 gevonden 22-punten'    
+                records_errors.append(errors_p)
+            
+            if i >= 2:  
+                records_l.append({'geometry': {'type': 'LineString',
                              'coordinates': ((properties_l['xb_prof'], properties_l['yb_prof']),(properties_l['xe_prof'], properties_l['ye_prof']))},
                     'properties': properties_l})
     
@@ -211,4 +230,6 @@ def import_xml_to_memcollection(xml_file, zvalues):
     ttlr_col.writerecords(records_ttlr)
     line_col.writerecords(records_l)
 
-    return point_col, line_col, ttlr_col
+    
+
+    return point_col, line_col, ttlr_col, records_errors
