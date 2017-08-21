@@ -167,6 +167,14 @@ def import_xml_to_memcollection(xml_file, zvalues):
                                  'coordinates': (properties_p['x_coord'], properties_p['y_coord'])},
                         'properties': properties_ttlr})                      
 
+                    # afstanden van punten voor 22L negatief maken.
+                    # als volgnr < volgnr van 22L dan afstand = -afstand
+                    
+                    if j > 1:
+                        for punt in records_p:
+                            if punt['properties'].get('prof_ids') == prof_list[0]:
+                                dist = punt['properties'].get('afstand')
+                                punt['properties'].update(afstand = -dist)
                     
                 elif properties_p['code'] == '22' and i == 1:
 #                     print ('22R code gevonden met waterpeil:' + str(properties_p['_bk_nap']))
@@ -210,6 +218,8 @@ def import_xml_to_memcollection(xml_file, zvalues):
                         'properties': properties_p})
                 
 
+            
+
             print ('Aantal gevonden 22 punten: ' + str(i))
             errors_p = {}
             if i < 2:
@@ -225,6 +235,8 @@ def import_xml_to_memcollection(xml_file, zvalues):
                 records_l.append({'geometry': {'type': 'LineString',
                              'coordinates': ((properties_l['xb_prof'], properties_l['yb_prof']),(properties_l['xe_prof'], properties_l['ye_prof']))},
                     'properties': properties_l})
+                
+
     
     point_col.writerecords(records_p)
     ttlr_col.writerecords(records_ttlr)

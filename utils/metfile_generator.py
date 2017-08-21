@@ -8,7 +8,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_metfile(point_col, project, metfile_name):
+def export_points_to_metfile(point_col, project, metfile_name, codering):
     """ export content of point collection with appropriate attributes to 
     metfile in dicts
     
@@ -48,13 +48,16 @@ def export_points_to_metfile(point_col, project, metfile_name):
             profiel = str(sorted_points[i]['properties']['prof_ids'])
             datum = (str(sorted_points[i]['properties']['datum']))[:10]
             code = (str(sorted_points[i]['properties']['code']))
-            tekencode = 999
+            tekencode = 999  
             if code in ['22L', '22l', '22R', '22r']:
                 code = 22
-            if len(str(code)) > 3:
-                a = str(code).split('_')
-                code = a[0]
-                tekencode = a[1]
+            if codering == 1:
+                tekencode = (str(sorted_points[i]['properties']['tekencode']))
+            if codering == 2:  
+                if len(str(code)) > 3:
+                    a = str(code).split('_')
+                    code = a[0]
+                    tekencode = a[1]
 
 
             x_coord = str(sorted_points[i]['properties']['x_coord'])
