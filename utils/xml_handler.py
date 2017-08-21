@@ -89,7 +89,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
             for p in e:
                 point_list = p.text.split(',')
                 if point_list[0] == '22':
-                    wpeilen_list.append(point_list[4])  
+                    wpeilen_list.append(get_float(point_list[4]))  
                     if  t == 0:
                         nulpunt_x = point_list[2]
                         nulpunt_y = point_list[3]
@@ -210,8 +210,8 @@ def import_xml_to_memcollection(xml_file, zvalues):
                 #      ten opzichte van 22L
   
 
-                properties_p['_bk_wp'] = get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_bk_nap']))
-                properties_p['_ok_wp'] = get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_ok_nap']))                                
+                properties_p['_bk_wp'] = (get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_bk_nap'])))*100
+                properties_p['_ok_wp'] = (get_float(get_float(properties_l['wpeil']) - get_float(properties_p['_ok_nap'])))*100                                
                     
                 records_p.append({'geometry': {'type': 'Point',
                                  'coordinates': (properties_p['x_coord'], properties_p['y_coord'])},

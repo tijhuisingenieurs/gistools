@@ -34,9 +34,9 @@ def create_fieldwork_output_shapes(line_col, point_col):
             'ids': line_props['ids'],
             'project_id': line_props['project_id'],
             'proj_name': line_props.get('proj_name', ''),           
-            'opm': line_props['opm'],
+            'opm': line_props.get('opm', ''),
             'wpeil': round(get_float(line_props['wpeil']), 2),
-            'datum': line_props['datum'],
+            'datum': line_props.get('datum', ''),
             'breedte': round(get_float(line_props['breedte']), 2)
         }
         
@@ -63,10 +63,11 @@ def create_fieldwork_output_shapes(line_col, point_col):
                 p = {
                     'prof_ids': point_props['prof_ids'],
                     'datum': l['datum'],
-                    'code': point_props['code'],                
+                    'code': point_props['code'],
+                    'tekencode': point_props.get('tekencode', 999),                
                     'afstand': round(get_float(point_props['afstand']),2),
-                    'x_coord': xy[0],
-                    'y_coord': xy[1]                    
+                    'x_coord': round(xy[0],3),
+                    'y_coord': round(xy[1],3)                    
                 }                             
                 
                 # indien alle hoogtes bekend, vul waarden in
