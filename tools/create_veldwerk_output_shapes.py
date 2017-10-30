@@ -75,30 +75,30 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     point_props['_ok_wp'] = ''
 
                 if l['wpeil'] is not None:
-                    if point_props['_bk_wp'] <> '' and point_props['_ok_wp'] <> '':
+                    if point_props['_bk_wp'] != '' and point_props['_ok_wp'] != '':
                         p['_bk_wp'] = round(get_float(point_props['_bk_wp']), 2)
                         p['_bk_nap'] = round(get_float(l['wpeil']) - (get_float(point_props['_bk_wp']) / 100), 2)
                         p['_ok_wp'] = round(get_float(point_props['_ok_wp']), 2)
                         p['_ok_nap'] = round(get_float(l['wpeil']) - (get_float(point_props['_ok_wp']) / 100), 2)
 
                         # indien _ok_wp onbekend, maar _bk_wp bekend, neem _bk_wp over en vul waarden in
-                    elif point_props['_ok_wp'] == '' and point_props['_bk_wp'] <> '':
+                    elif point_props['_ok_wp'] == '' and point_props['_bk_wp'] != '':
                         p['_bk_wp'] = round(get_float(point_props['_bk_wp']), 2)
                         p['_bk_nap'] = round(get_float(l['wpeil']) - (get_float(point_props['_bk_wp']) / 100), 2)
                         p['_ok_wp'] = round(get_float(point_props['_bk_wp']), 2)
                         p['_ok_nap'] = round(get_float(l['wpeil']) - (p['_ok_wp'] / 100), 2)
 
                     # indien _bk_wp onbekend, maar _ok_wp bekend, vul ok waarden in en probeer _bk_wp te vullen vanuit _bk_nap     
-                    elif point_props['_bk_wp'] == '' and point_props['_ok_wp'] <> '':
+                    elif point_props['_bk_wp'] == '' and point_props['_ok_wp'] != '':
                         p['_ok_wp'] = round(get_float(point_props['_ok_wp']), 2)
                         p['_ok_nap'] = round(get_float(l['wpeil']) - (get_float(point_props['_ok_wp']) / 100), 2)
 
-                        if '_bk_nap' in point_props and (point_props['_bk_nap'] <> '-9999'
-                                                         and point_props['_bk_nap'] <> ''
+                        if '_bk_nap' in point_props and (point_props['_bk_nap'] != '-9999'
+                                                         and point_props['_bk_nap'] != ''
                                                          and point_props['_bk_nap'] is not None):
                             p['_bk_wp'] = round(get_float(l['wpeil']) - get_float(point_props['_bk_nap']), 2)
                             p['_bk_nap'] = round(get_float(l['wpeil']) - (p['_bk_wp'] / 100), 2)
-                        elif 'bk' in point_props and point_props['bk'] <> '' and point_props['bk'] is not None:
+                        elif 'bk' in point_props and point_props['bk'] != '' and point_props['bk'] is not None:
                             if point_props['bk_bron'] == 'manual':
                                 p['_bk_wp'] = get_float(point_props['bk'])
                                 p['_bk_nap'] = round(get_float(l['wpeil']) - (get_float(p['_bk_wp']) / 100), 2)
