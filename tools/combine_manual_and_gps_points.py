@@ -1,8 +1,8 @@
-"""Tool voor Iris voor het combineren van metingen uit Excel en GPS punten. Deze tool is gemaakt voor
-eenmalig gebruik binnen dit project (beperkte foutmeldingen en terugkoppeling)."""
+"""Tool voor Iris voor het combineren van metingen uit Excel en GPS punten"""
+import xlrd
 from math import sqrt
 
-import xlrd
+
 
 
 def get_distance(p, q):
@@ -19,13 +19,11 @@ def get_projected_point(ttl, ttr, distance):
 
 
 class CombineMeasurements(object):
-    """Steps for creating HDSR output from manual measured points and GPS points"""
 
     def __init__(self):
         pass
 
-    @staticmethod
-    def read_natte_profiel_punten(file_path):
+    def read_natte_profiel_punten(self, file_path):
 
         profile_data = []
 
@@ -34,7 +32,7 @@ class CombineMeasurements(object):
         sheet = wb.sheets()[0]
 
         for record_nr in range(sheet.nrows/3):
-            row = record_nr * 3
+            row = (record_nr) * 3
             if sheet.cell_type(row, 0) not in (xlrd.XL_CELL_EMPTY, xlrd.XL_CELL_BLANK):
                 profile = {
                     'id': int(sheet.cell(row, 0).value),
@@ -44,7 +42,7 @@ class CombineMeasurements(object):
                 for col in range(2, sheet.ncols):
                     if sheet.cell_type(row, col) in (xlrd.XL_CELL_EMPTY, xlrd.XL_CELL_BLANK):
                         break
-
+                    val = sheet.cell(row, col)
                     profile['wet_points'].append({
                         'distance': round(float(sheet.cell(row, col).value), 2),
                         'bk': int(sheet.cell(row + 1, col).value),
@@ -54,8 +52,7 @@ class CombineMeasurements(object):
 
         return profile_data
 
-    @staticmethod
-    def read_gps_punten(file_path):
+    def read_gps_punten(self, file_path):
 
         profile_data = []
 
@@ -70,8 +67,8 @@ class CombineMeasurements(object):
                     'id': int(sheet.cell(row, 0).value),
                     'zijde': sheet.cell(row, 1).value,
                     'pnt_soort': int(sheet.cell(row, 2).value),
-                    'x': round(float(sheet.cell(row, 3).value.replace(',', '.')), 4),
-                    'y': round(float(sheet.cell(row, 4).value.replace(',', '.')), 4),
+                    'x': round(float(sheet.cell(row, 3).value), 4),
+                    'y': round(float(sheet.cell(row, 4).value), 4),
                     'z': round(float(sheet.cell(row, 5).value), 4),
                     'code': sheet.cell(row, 6).value,
                 }
@@ -80,8 +77,7 @@ class CombineMeasurements(object):
 
         return profile_data
 
-    @staticmethod
-    def combine(wet_profile, gps_points):
+    def combine(self, wet_profile, gps_points):
         messages = []
 
         points = []
@@ -170,7 +166,31 @@ class CombineMeasurements(object):
                 })
                 right_points_output.sort(key=lambda p: p['distance'])
 
-            for point in profile['wet_points']:
+            point = profile['wet_points'][0]
+            projected_point = get_projected_point(ttl, ttr, point['distance'])
+            output_profile.append({
+                'type': 'waterlijn',
+                'x': projected_point['x'],
+                'y': projected_point['y'],
+                'z': profile['ref_level'] - (float(point['bk']) / 100),
+                'code': 'dp',
+                'profiel': format(profile['id'], '04d'),
+                'distance': point['distance']
+            })
+
+            point = profile['wet_points'][1]
+            projected_point = get_projected_point(ttl, ttr, point['distance'])
+            output_profile.append({
+                'type': 'bagger_en_vastebodem',
+                'x': projected_point['x'],
+                'y': projected_point['y'],
+                'z': profile['ref_level'] - (float(point['bk']) / 100),
+                'code': 'dp',
+                'profiel': format(profile['id'], '04d'),
+                'distance': point['distance']
+            })
+
+            for point in profile['wet_points'][2:-2]:
                 projected_point = get_projected_point(ttl, ttr, point['distance'])
 
                 output_profile.append({
@@ -192,6 +212,30 @@ class CombineMeasurements(object):
                     'profiel': format(profile['id'], '04d'),
                     'distance': point['distance']
                 })
+
+            point = profile['wet_points'][-2]
+            projected_point = get_projected_point(ttl, ttr, point['distance'])
+            output_profile.append({
+                'type': 'bagger_en_vastebodem',
+                'x': projected_point['x'],
+                'y': projected_point['y'],
+                'z': profile['ref_level'] - (float(point['bk']) / 100),
+                'code': 'dp',
+                'profiel': format(profile['id'], '04d'),
+                'distance': point['distance']
+            })
+
+            point = profile['wet_points'][-1]
+            projected_point = get_projected_point(ttl, ttr, point['distance'])
+            output_profile.append({
+                'type': 'waterlijn',
+                'x': projected_point['x'],
+                'y': projected_point['y'],
+                'z': profile['ref_level'] - (float(point['bk']) / 100),
+                'code': 'dp',
+                'profiel': format(profile['id'], '04d'),
+                'distance': point['distance']
+            })
 
             output_profile.extend(right_points_output)
 
