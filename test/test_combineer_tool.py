@@ -84,4 +84,4 @@ class TestCombineerTool(unittest.TestCase):
             os.path.join(test_data_dir, 'GPS_Punten.xlsx')
         )
 
-        self.assertEqual(len(prof_point_output), 713)
+        self.assertEqual(len(prof_point_output), 669)
