@@ -65,7 +65,8 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     'tekencode': point_props.get('tekencode', 999),
                     'afstand': round(get_float(point_props['afstand']), 2),
                     'x_coord': round(xy[0], 3),
-                    'y_coord': round(xy[1], 3)
+                    'y_coord': round(xy[1], 3),
+                    'wpeil': l['wpeil']
                 }
 
                 # indien alle hoogtes bekend, vul waarden in
