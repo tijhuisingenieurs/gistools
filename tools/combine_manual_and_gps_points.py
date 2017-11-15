@@ -3,14 +3,14 @@ import xlrd
 from math import sqrt
 
 
-
-
 def get_distance(p, q):
     return sqrt((float(p['x']) - float(q['x']))**2 + (float(p['y']) - float(q['y']))**2)
 
 
 def get_projected_point(ttl, ttr, distance):
     ttl_ttr_distance = get_distance(ttl, ttr)
+    if ttl_ttr_distance == 0.0:
+        print('afstand is 0 tussen 22l en 22r')
 
     x = (float(ttr['x']) - float(ttl['x'])) * (float(distance) / ttl_ttr_distance) + float(ttl['x'])
     y = (float(ttr['y']) - float(ttl['y'])) * (float(distance) / ttl_ttr_distance) + float(ttl['y'])
