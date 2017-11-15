@@ -1,15 +1,17 @@
 import logging
-# from utils.arcgis_logging import setup_logging
-
-from shapely.geometry import shape
-from math import floor
 import random
+from math import floor
 
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
+from shapely.geometry import shape
+
+# from utils.arcgis_logging import setup_logging
+
+log = logging.getLogger(__file__)
 
 
-def get_start_endpoints(line_col, copy_fields=[]):
+def get_start_endpoints(line_col, copy_fields=list()):
     """ returns MemCollection with start and end points of line"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -29,7 +31,7 @@ def get_start_endpoints(line_col, copy_fields=[]):
     return point_col
 
 
-def get_midpoints(line_col, copy_fields=[]):
+def get_midpoints(line_col, copy_fields=list()):
     """ returns MemCollection with midpoints"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -51,10 +53,11 @@ def get_midpoints(line_col, copy_fields=[]):
 
     return point_col
 
-def get_points_on_line(line_col, copy_fields=[],
+
+def get_points_on_line(line_col, copy_fields=list(),
                        default_distance=100.0, min_default_offset_start=0.0,
                        distance_field=None, min_offset_start_field=None, 
-                       use_rest = True):
+                       use_rest=True):
     """ returns MemCollection with points on line with special logic"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -72,7 +75,7 @@ def get_points_on_line(line_col, copy_fields=[],
         # afstand en offset bepalen
         distance = float(feature['properties'].get(distance_field, default_distance))
         # round distance down to 2 decimals to get correct nr of points later on
-        distance = floor(distance *100)/100
+        distance = floor(distance * 100) / 100
         offset_start = float(feature['properties'].get(min_offset_start_field, min_default_offset_start))
         
         if distance > 0:
@@ -107,7 +110,7 @@ def get_points_on_line(line_col, copy_fields=[],
                     
             for i in range(0, int(nr)):
                 if i == int(nr_full):           
-                # hoe om te gaan met het laatste punt
+                    # todo: hoe om te gaan met het laatste punt
                     if rest_lengte == 0 and rest_lengte_offset == 0:
                         # als het precies past
                         if offset_start > 0:
@@ -145,7 +148,8 @@ def get_points_on_line(line_col, copy_fields=[],
             
     return point_col
 
-def get_points_on_perc(line_col, copy_fields=[], default_perc=10.0, perc_field=None):
+
+def get_points_on_perc(line_col, copy_fields=list(), default_perc=10.0, perc_field=None):
     """ returns MemCollection with points on line at specified percentage"""
     
     point_col = MemCollection(geometry_type='Point')
@@ -163,26 +167,26 @@ def get_points_on_perc(line_col, copy_fields=[], default_perc=10.0, perc_field=N
         # afstand
         percentage = (float(feature['properties'].get(perc_field, default_perc))/100)
         # round percentage down to 2 decimals to get correct nr of points later on
-        percentage = floor(percentage *100)/100
+        percentage = floor(percentage * 100) / 100
         
         if percentage > 0.0:
             # aantal benodigde profielen bepalen
             nr = int(1 / percentage)
         
             for i in range(0, int(nr)):
-                if i <= int(nr): 
-                    prec = (i+1) * percentage
-                
+                perc = (i+1) * percentage
+
                 point_col.writerecords([
-                {'geometry': {'type': 'Point',
-                              'coordinates': line.get_point_at_percentage(prec)},
-                 'properties': props}])
+                    {'geometry': {'type': 'Point',
+                                  'coordinates': line.get_point_at_percentage(perc)},
+                     'properties': props}])
         else:
             log.warning('Geen geldig percentage voor feature: ' + percentage)
     
     return point_col
 
-def get_points_on_line_amount(line_col, copy_fields=[], default_amount=10.0, amount_field=None):
+
+def get_points_on_line_amount(line_col, copy_fields=list(), default_amount=10.0, amount_field=None):
     """ returns MemCollection with specified amount of points on line at equal distance"""
     
     point_col = MemCollection(geometry_type='Point')
@@ -202,22 +206,22 @@ def get_points_on_line_amount(line_col, copy_fields=[], default_amount=10.0, amo
         if aantal > 0:
             distance = line.length / aantal
             # round distance down to 2 decimals to get correct nr of points later on
-            distance = floor(distance *100)/100
+            distance = floor(distance * 100.0) / 100.0
     
             for i in range(0, int(aantal)):
-                if i <= int(aantal): 
-                    dist = (0.5 + i) * distance
-                
+                dist = (0.5 + i) * distance
+
                 point_col.writerecords([
-                {'geometry': {'type': 'Point',
-                              'coordinates': line.get_point_at_distance(dist)},
-                 'properties': props}])
+                    {'geometry': {'type': 'Point',
+                                  'coordinates': line.get_point_at_distance(dist)},
+                     'properties': props}])
         else:
             log.warning('Geen geldig aantal voor feature: ' + aantal)
             
     return point_col
 
-def get_points_on_line_random(line_col, copy_fields=[], default_offset=0.75, offset_field=None):
+
+def get_points_on_line_random(line_col, copy_fields=list(), default_offset=0.75, offset_field=None):
     """ returns MemCollection with specified amount of points on line at equal distance"""
     
     point_col = MemCollection(geometry_type='Point')
@@ -238,13 +242,10 @@ def get_points_on_line_random(line_col, copy_fields=[], default_offset=0.75, off
             offset = 0.25 * line.length
             
         random_afstand = random.uniform(offset, line.length - offset)
-        
+
         point_col.writerecords([
-        {'geometry': {'type': 'Point',
-                      'coordinates': line.get_point_at_distance(random_afstand)},
-         'properties': props}])
+            {'geometry': {'type': 'Point',
+                          'coordinates': line.get_point_at_distance(random_afstand)},
+             'properties': props}])
 
     return point_col
-    
-    
-    
