@@ -85,3 +85,13 @@ class TestCombineerTool(unittest.TestCase):
         )
 
         self.assertEqual(len(prof_point_output), 669)
+
+    def test_combine_punten_file2(self):
+        cm = CombineMeasurements()
+
+        prof_point_output, messages = cm.run(
+            os.path.join(test_data_dir, 'Natte_Profielen2.xlsx'),
+            os.path.join(test_data_dir, 'GPS_Punten2.xlsx')
+        )
+
+        self.assertEqual(len(prof_point_output), 3403)
