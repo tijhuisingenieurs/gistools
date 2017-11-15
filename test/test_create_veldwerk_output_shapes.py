@@ -16,7 +16,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
 
         input_line_col = MemCollection(geometry_type='MultiLineString')
         input_point_col1 = MemCollection(geometry_type='MultiPoint')
-        input_point_col2 = MemCollection(geometry_type='MultiPoint')               
+        input_point_col2 = MemCollection(geometry_type='MultiPoint')
 
         input_point_col1.writerecords([
         {'geometry': {'type': 'Point',
@@ -53,7 +53,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                 'code': '99',
                 'afstand': '3.0',
                 '_bk_wp': '20',
-                '_ok_wp': '35'}},                                                                          
+                '_ok_wp': '35'}},
         {'geometry': {'type': 'Point',
                           'coordinates': [(14.0, 0.0)]},
          'properties': {'prof_ids': 'test123',
@@ -81,9 +81,9 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                 'code': '2',
                 'afstand': '9.0',
                 '_bk_wp': '-90',
-                '_ok_wp': '-90'}}   
+                '_ok_wp': '-90'}}
         ])
-        
+
         input_point_col2.writerecords([
         {'geometry': {'type': 'Point',
                           'coordinates': [(10.0, 0.0)]},
@@ -114,8 +114,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                 'afstand': '1.0',
                 '_bk_wp': '',
                 '_ok_wp': ''}}
-        ])                            
-        
+        ])
+
         input_line_col.writerecords([
         {'geometry': {'type': 'LineString',
                           'coordinates': [(12.0, 0.0), (14.0, 0.0)]},
@@ -128,20 +128,20 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
             'datum': '20/06/2017',
             'breedte': '6.0'}}
         ])
-        
+
         # test complete dataset with scaling of line length
         line_col, point_col = create_fieldwork_output_shapes(input_line_col, input_point_col1)
         # test use result of complete dataset as input
-        line_col1, point_col1 = create_fieldwork_output_shapes(line_col, point_col)                
+        line_col1, point_col1 = create_fieldwork_output_shapes(line_col, point_col)
         # test incomplete dataset with scaling of line length
         line_col2, point_col2 = create_fieldwork_output_shapes(input_line_col, input_point_col2)
         # test use result of incomplete dataset as input                    
-        line_col3, point_col3 = create_fieldwork_output_shapes(line_col2, point_col2)        
-        
+        line_col3, point_col3 = create_fieldwork_output_shapes(line_col2, point_col2)
+
         self.assertDictEqual(line_col[0]['geometry'],
                              {'type': 'LineString',
                               'coordinates': ((10.0, 0.0),(16.0, 0.0))})
-        
+
         self.assertDictEqual(line_col[0]['properties'],
                              {'pk': '1',
                                 'ids': 'test123',
@@ -155,9 +155,9 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                                 'yb_prof': 0.0,
                                 'xe_prof': 16.0,
                                 'ye_prof': 0.0})
-        
+
         self.assertEqual(len(point_col), 9)
-        
+
         self.assertDictEqual(point_col[0]['geometry'],
                              {'type': 'Point',
                               'coordinates': (7.0, 0.0)})
@@ -166,7 +166,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'coordinates': (9.0, 0.0)})
         self.assertDictEqual(point_col[2]['geometry'],
                              {'type': 'Point',
-                              'coordinates': (10.0, 0.0)})  
+                              'coordinates': (10.0, 0.0)})
         self.assertDictEqual(point_col[3]['geometry'],
                              {'type': 'Point',
                               'coordinates': (11.0, 0.0)})
@@ -184,23 +184,24 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'coordinates': (17.0, 0.0)})
         self.assertDictEqual(point_col[8]['geometry'],
                              {'type': 'Point',
-                              'coordinates': (19.0, 0.0)})        
+                              'coordinates': (19.0, 0.0)})
 
         self.assertDictEqual(point_col[0]['properties'],
                              {'prof_ids': 'test123',
                                 'datum': '20/06/2017',
                                 'code': '1',
-                                'tekencode': 999,                                
+                                'tekencode': 999,
                                 'afstand': -3.0,
                                 '_bk_wp': -80.0,
                                 '_bk_nap': -4.56,
+                                'wpeil': -5.36,
                                 '_ok_wp': -80.0,
                                 '_ok_nap': -4.56,
                                 'x_coord': 7.0,
                                 'y_coord': 0.0})
 
         self.assertEqual(len(point_col1), 9)
-        
+
         self.assertDictEqual(point_col1[0]['properties'],
                              {'prof_ids': 'test123',
                                 'datum': '20/06/2017',
@@ -211,62 +212,67 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                                 '_bk_nap': -4.56,
                                 '_ok_wp': -80.0,
                                 '_ok_nap': -4.56,
+                                'wpeil': -5.36,
                                 'x_coord': 7.0,
                                 'y_coord': 0.0})
 
         self.assertEqual(len(point_col2), 4)
-        
+
         self.assertDictEqual(point_col2[0]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '1',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': -3.0,
                         '_bk_wp': '',
                         '_bk_nap': '',
                         '_ok_wp': -80.0,
                         '_ok_nap': -4.56,
+                        'wpeil': -5.36,
                         'x_coord': 7.0,
                         'y_coord': 0.0})
         self.assertDictEqual(point_col2[1]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '1',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': -1.0,
                         '_bk_wp': -20.0,
                         '_bk_nap': -5.16,
                         '_ok_wp': -20.0,
                         '_ok_nap': -5.16,
+                        'wpeil': -5.36,
                         'x_coord': 9.0,
-                        'y_coord': 0.0})      
+                        'y_coord': 0.0})
         self.assertDictEqual(point_col2[2]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '22L',
-                        'tekencode': 999,                       
+                        'tekencode': 999,
                         'afstand': 0.0,
                         '_bk_wp': 0.0,
                         '_bk_nap': -5.36,
                         '_ok_wp': 0.0,
                         '_ok_nap': -5.36,
+                        'wpeil': -5.36,
                         'x_coord': 10.0,
-                        'y_coord': 0.0})       
+                        'y_coord': 0.0})
         self.assertDictEqual(point_col2[3]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '99',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': 1.0,
                         '_bk_wp': '',
                         '_bk_nap': '',
                         '_ok_wp': '',
                         '_ok_nap': '',
+                        'wpeil': -5.36,
                         'x_coord': 11.0,
                         'y_coord': 0.0})
-              
+
         self.assertEqual(len(point_col3), 4)
-        
+
         self.assertDictEqual(point_col3[0]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
@@ -277,41 +283,45 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                         '_bk_nap': '',
                         '_ok_wp': -80,
                         '_ok_nap': -4.56,
+                        'wpeil': -5.36,
                         'x_coord': 7.0,
                         'y_coord': 0.0})
         self.assertDictEqual(point_col3[1]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '1',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': -1.0,
                         '_bk_wp': -20.0,
                         '_bk_nap': -5.16,
                         '_ok_wp': -20.0,
                         '_ok_nap': -5.16,
+                        'wpeil': -5.36,
                         'x_coord': 9.0,
-                        'y_coord': 0.0})      
+                        'y_coord': 0.0})
         self.assertDictEqual(point_col3[2]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '22L',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': 0.0,
                         '_bk_wp': 0.0,
                         '_bk_nap': -5.36,
                         '_ok_wp': 0.0,
                         '_ok_nap': -5.36,
+                        'wpeil': -5.36,
                         'x_coord': 10.0,
-                        'y_coord': 0.0})       
+                        'y_coord': 0.0})
         self.assertDictEqual(point_col3[3]['properties'],
                      {'prof_ids': 'test123',
                         'datum': '20/06/2017',
                         'code': '99',
-                        'tekencode': 999,                        
+                        'tekencode': 999,
                         'afstand': 1.0,
                         '_bk_wp': '',
                         '_bk_nap': '',
                         '_ok_wp': '',
                         '_ok_nap': '',
+                        'wpeil': -5.36,
                         'x_coord': 11.0,
                         'y_coord': 0.0})
