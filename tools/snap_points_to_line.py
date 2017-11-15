@@ -37,11 +37,8 @@ def snap_points_to_line(line_col, points_col, tolerance=0.01, keep_unsnapped_poi
                  'properties': feature['properties']}
             )
 
-        else:
-            if keep_unsnapped_points:
-                snapped_points_list.append(feature)
-            else:
-                pass
+        elif keep_unsnapped_points:
+            snapped_points_list.append(feature)
 
     snapped_points_col.writerecords(snapped_points_list)
 
