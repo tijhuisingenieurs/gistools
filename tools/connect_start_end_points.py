@@ -110,7 +110,7 @@ def get_points_on_line(line_col, copy_fields=list(),
                     
             for i in range(0, int(nr)):
                 if i == int(nr_full):           
-                    # hoe om te gaan met het laatste punt
+                    # todo: hoe om te gaan met het laatste punt
                     if rest_lengte == 0 and rest_lengte_offset == 0:
                         # als het precies past
                         if offset_start > 0:
