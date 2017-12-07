@@ -1,8 +1,8 @@
 from gistools.utils.collection import MemCollection
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point, MultiLineString, LineString
 
 
-def snap_points_to_line(line_col, points_col, tolerance=0.01, keep_unsnapped_points=False):
+def snap_points_to_line(line_col, points_col, tolerance=0.01, keep_unsnapped_points=True):
     snapped_points_col = MemCollection(geometry_type='Point')
     snapped_points_list = []
 
@@ -22,7 +22,11 @@ def snap_points_to_line(line_col, points_col, tolerance=0.01, keep_unsnapped_poi
         nearest_line = None
 
         for line in lines:
-            line_geom = LineString(line['geometry']['coordinates'])
+            if line['geometry']['type'].lower() == 'multilinestring':
+                line_geom = MultiLineString(line['geometry']['coordinates'])
+            else:
+                line_geom = LineString(line['geometry']['coordinates'])
+
             new_distance = point_geom.distance(line_geom)
             if new_distance < distance:
                 distance = new_distance
