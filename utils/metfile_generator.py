@@ -42,6 +42,8 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
         sorted_points = sorted(unsorted_points, key = lambda x: (x['properties']['prof_ids'],
                                                                  x['properties']['afstand']))
 
+
+
         prefix = None
         if type_peiling != None:
             if type_peiling == "Inpeiling":
