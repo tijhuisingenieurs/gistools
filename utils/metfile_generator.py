@@ -1,5 +1,6 @@
 import json
 import csv
+import dateutil.parser as parser
 import os.path
 
 from collection import MemCollection, OrderedDict
@@ -8,7 +9,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_metfile(point_col, project, metfile_name, codering):
+def export_points_to_metfile(point_col, project, metfile_name, codering, type_metfile, type_peiling = None):
     """ export content of point collection with appropriate attributes to 
     metfile in dicts
     
@@ -34,58 +35,139 @@ def export_points_to_metfile(point_col, project, metfile_name, codering):
                                 quoting=csv.QUOTE_NONE,
                                 quotechar='', escapechar='\\')
         
-        # wegschrijven project data in REEKS
-        project_tekst = ('<REEKS>' + project + ',' + project + ',</REEKS>')
-        writer.writerow({'regel': project_tekst})
-        
         current_profile = ''
         profiel_eind = '</PROFIEL>'
-        
+
         unsorted_points = [p for p in point_col]
-        sorted_points = sorted(unsorted_points, key = lambda x: (x['properties']['prof_ids'], x['properties']['afstand']))
-        
-        for i, row in enumerate(sorted_points):
-            profiel = str(sorted_points[i]['properties']['prof_ids'])
-            datum = (str(sorted_points[i]['properties']['datum']))[:10]
-            code = (str(sorted_points[i]['properties']['code']))
-            tekencode = 999  
-            if code in ['22L', '22l', '22R', '22r']:
-                code = 22
-            if codering == 1:
-                tekencode = (str(sorted_points[i]['properties']['tekencode']))
-            if codering == 2:  
-                if len(str(code)) > 3:
-                    a = str(code).split('_')
-                    code = a[0]
-                    tekencode = a[1]
+        sorted_points = sorted(unsorted_points, key = lambda x: (x['properties']['prof_ids'],
+                                                                 x['properties']['afstand']))
+
+        prefix = None
+        if type_peiling != None:
+            if type_peiling == "Inpeiling":
+                prefix = "in_"
+            else:
+                prefix = "uit_"
+
+        if type_metfile == "WIT":
+            # write version
+            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            writer.writerow({'regel': version})
+
+            # write project data in REEKS
+            project_tekst = ('<REEKS>' + project + ',</REEKS>')
+            writer.writerow({'regel': project_tekst})
+
+            for i, row in enumerate(sorted_points):
+                profiel = str(sorted_points[i]['properties']['prof_ids'])
+
+                if prefix != None:
+                    profiel = prefix + profiel
+
+                datum = (str(sorted_points[i]['properties']['datum']))[:10]
+                code = (str(sorted_points[i]['properties']['code']))
+                tekencode = 999
+                if code in ['22L', '22l', '22R', '22r']:
+                    code = 22
+                if codering == 1:
+                    tekencode = (str(sorted_points[i]['properties']['tekencode']))
+                if codering == 2:
+                    if len(str(code)) > 3:
+                        a = str(code).split('_')
+                        code = a[0]
+                        tekencode = a[1]
 
 
-            x_coord = str(sorted_points[i]['properties']['x_coord'])
-            y_coord = str(sorted_points[i]['properties']['y_coord'])
-            upper_level = str(sorted_points[i]['properties']['_bk_nap'])
-            lower_level = str(sorted_points[i]['properties']['_ok_nap'])                      
-            
-            # check nieuw profiel
-            if current_profile != profiel:
-                
-                # check niet eerste profiel -> dan vorige profiel nog afsluiten
-                if current_profile != '':
-                    writer.writerow({'regel': profiel_eind})
-                
-                # wegschrijven profielregel
-                profiel_tekst = ('<PROFIEL>' + profiel + ',' + profiel + ',' + 
-                            datum + ',' + '0.00,NAP,ABS,2,XY,' + x_coord + ',' + 
-                            y_coord + ',')
-                                  
-                writer.writerow({'regel': profiel_tekst})
-                current_profile = profiel
-            
-            # wegschrijven meting regels   
-            meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
-                            x_coord + ',' + y_coord + ',' +
-                            upper_level + ',' + lower_level + ',</METING>')
-            writer.writerow({'regel': meting_tekst})
-        
-        writer.writerow({'regel': profiel_eind})
+                x_coord = str(sorted_points[i]['properties']['x_coord'])
+                y_coord = str(sorted_points[i]['properties']['y_coord'])
+                upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+                lower_level = str(sorted_points[i]['properties']['_ok_nap'])
+
+                # check nieuw profiel
+                if current_profile != profiel:
+
+                    # check niet eerste profiel -> dan vorige profiel nog afsluiten
+                    if current_profile != '':
+                        writer.writerow({'regel': profiel_eind})
+
+                    # wegschrijven profielregel
+                    profiel_tekst = ('<PROFIEL>' + profiel + ',' + profiel + ',' +
+                                     datum + ',' + '0.00,NAP,ABS,2,XY,' + x_coord + ',' +
+                                     y_coord + ',')
+
+                    writer.writerow({'regel': profiel_tekst})
+                    current_profile = profiel
+
+                # wegschrijven meting regels
+                meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
+                                x_coord + ',' + y_coord + ',' +
+                                upper_level + ',' + lower_level + ',</METING>')
+                writer.writerow({'regel': meting_tekst})
+
+            writer.writerow({'regel': profiel_eind})
+
+        elif type_metfile == "Wetterskip Fryslan":
+            # write version
+            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            writer.writerow({'regel': version})
+            csvfile.write("\n")
+
+            # write project data in REEKS
+            project_tekst = ('<REEKS>' + "\n" + project + "\n" + '</REEKS>' + "\n\n")
+            csvfile.write(project_tekst)
+
+            for i, row in enumerate(sorted_points):
+                profiel = str(sorted_points[i]['properties']['prof_ids'])
+
+                if prefix != None:
+                    profiel = prefix + profiel
+
+                datum = (str(sorted_points[i]['properties']['datum']))[:10]
+                date = parser.parse(datum)
+                new_date = date.strftime("%Y%m%d")
+                code = (str(sorted_points[i]['properties']['code']))
+                tekencode = 999
+                if code in ['22L', '22l', '22R', '22r']:
+                    code = 22
+                if codering == 1:
+                    tekencode = (str(sorted_points[i]['properties']['tekencode']))
+                if codering == 2:
+                    if len(str(code)) > 3:
+                        a = str(code).split('_')
+                        code = a[0]
+                        tekencode = a[1]
+
+
+                x_coord = str(sorted_points[i]['properties']['x_coord'])
+                y_coord = str(sorted_points[i]['properties']['y_coord'])
+                upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+                lower_level = str(sorted_points[i]['properties']['_ok_nap'])
+
+                # check nieuw profiel
+                if current_profile != profiel:
+
+                    # check niet eerste profiel -> dan vorige profiel nog afsluiten
+                    if current_profile != '':
+                        writer.writerow({'regel': profiel_eind})
+                        csvfile.write("\n")
+
+                    # wegschrijven profielregel
+                    profiel_tekst = ('<PROFIEL>\n' + profiel + ',,\n' +
+                                     new_date + ',\n' +
+                                     '0.0,NAP,\n' +
+                                     'ABS,2,\n' +
+                                     'XY,' + x_coord + ',' + y_coord + ',\n')
+
+                    # writer.writerow({'regel': profiel_tekst})
+                    csvfile.write(profiel_tekst)
+                    current_profile = profiel
+
+                # wegschrijven meting regels
+                meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
+                                x_coord + ',' + y_coord + ',' +
+                                upper_level + ',' + lower_level + ',</METING>')
+                writer.writerow({'regel': meting_tekst})
+
+            writer.writerow({'regel': profiel_eind})
     
     return
