@@ -46,8 +46,10 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
         if type_peiling != None:
             if type_peiling == "Inpeiling":
                 prefix = "in_"
-            else:
+            elif type_peiling == "Uitpeiling":
                 prefix = "uit_"
+        else:
+            pass
 
         # Temporarily for users to get used to new method
         if "," not in project:
