@@ -1,4 +1,4 @@
 shapely
 rtree
 xlrd
-dateutil
+python-dateutil
