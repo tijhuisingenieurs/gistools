@@ -9,6 +9,7 @@ Requirements
 
 - shapely
 - rtree
+- python-dateutil
 
 Optional:
 - fiona
@@ -21,6 +22,7 @@ Windows:
 download for next packages the 32-bit versions for python 2.7 from http://www.lfd.uci.edu/~gohlke/pythonlibs/ :
 - rtree (Rtree‑0.8.3‑cp27‑cp27m‑win32.whl)
 - shapely (Shapely‑1.5.17‑cp27‑cp27m‑win32.whl)
+- python-dateutil (python_dateutil‑2.6.1‑py2.py3‑none‑any.whl). Python-dateutil is included in ArcGIS python version.
 
 optional:
 - gdal (GDAL‑2.1.3‑cp27‑cp27m‑win32.whl)
