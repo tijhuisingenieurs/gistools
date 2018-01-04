@@ -172,16 +172,17 @@ class TestMetfileGenerator(unittest.TestCase):
         os.mkdir(test_dir)
         metfile_name = os.path.join(test_dir, 'metfile_test.csv')
 
-        metfile = export_points_to_metfile(point_col, 'p1', metfile_name, 2)
+
+        metfile = export_points_to_metfile(point_col, 'p1', metfile_name, 2, "WIT", "Inpeiling")
         
         
         metfile_name2 = os.path.join(test_dir, 'metfile_test2.csv')
 
-        metfile = export_points_to_metfile(point_col2, 'p1', metfile_name2, 1)
+        metfile = export_points_to_metfile(point_col2, 'p1', metfile_name2, 1, "Wetterskip Fryslan", "Uitpeiling")
 
         metfile_name3 = os.path.join(test_dir, 'metfile_test3.csv')
 
-        metfile = export_points_to_metfile(point_col3, 'p1', metfile_name3, 2)
+        metfile = export_points_to_metfile(point_col3, 'p1', metfile_name3, "WIT", 2)
         
 
 
