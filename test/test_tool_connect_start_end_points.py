@@ -112,7 +112,7 @@ class TestTools(unittest.TestCase):
         ])
 
         point_col = get_points_on_line(collection, ['id', 'name'],
-                                       default_distance=1.0)
+                                       fixed_distance=1.0)
 
         self.assertEqual(len(point_col), 8)
         self.assertDictEqual(point_col[0]['geometry'],
@@ -145,8 +145,8 @@ class TestTools(unittest.TestCase):
         ])
 
         point_col = get_points_on_line(collection, ['id', 'name'],
-                                       default_distance=20.0, 
-                                       min_default_offset_start=5.0, 
+                                       fixed_distance=20.0,
+                                       min_fixed_offset_start=5.0,
                                        distance_field=None, 
                                        min_offset_start_field=None)
 

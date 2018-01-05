@@ -7,6 +7,7 @@ from gistools.utils.geometry import TLine, TMultiLineString
 from shapely.geometry import shape
 
 # from utils.arcgis_logging import setup_logging
+# TODO: Change name of the file? I think it does not correctly represent the functions inside it.
 
 log = logging.getLogger(__file__)
 
@@ -55,9 +56,9 @@ def get_midpoints(line_col, copy_fields=list()):
 
 
 def get_points_on_line(line_col, copy_fields=list(),
-                       default_distance=100.0, min_default_offset_start=0.0,
-                       distance_field=None, min_offset_start_field=None, 
-                       use_rest=True):
+                       fixed_distance=100.0, min_fixed_offset_start=0.0,
+                       distance_field=None, min_offset_start_field=None,
+                       max_repr_length=150):
     """ returns MemCollection with points on line with special logic"""
 
     point_col = MemCollection(geometry_type='Point')
@@ -73,10 +74,10 @@ def get_points_on_line(line_col, copy_fields=list(),
             props[field] = feature['properties'].get(field, None)
 
         # afstand en offset bepalen
-        distance = float(feature['properties'].get(distance_field, default_distance))
+        distance = float(feature['properties'].get(distance_field, fixed_distance))
         # round distance down to 2 decimals to get correct nr of points later on
         distance = floor(distance * 100) / 100
-        offset_start = float(feature['properties'].get(min_offset_start_field, min_default_offset_start))
+        offset_start = float(feature['properties'].get(min_offset_start_field, min_fixed_offset_start))
         
         if distance > 0:
             # afspraak: offset alleen van toepassing indien kleiner dan 0.5 * distance
@@ -91,18 +92,18 @@ def get_points_on_line(line_col, copy_fields=list(),
                 rest_lengte_offset = 0
             
             nr = nr_full
-            
+            # TODO: change to maximum representative length
             # indien extra punt nodig is op de restlengte
-            if use_rest is True:
-                
+            if max_repr_length is True:
+
                 # Maximaal 10% overschrijding van vereiste onderlinge afstand, anders
                 # een extra punt nodig
                 if rest_lengte >= 0.1 * distance:
                     nr = nr + 1
-        
+
                 # Bij gebruik offset nog een extra p indien nodig
                 if offset_start > 0 and rest_lengte_offset > 0.5 * distance:
-                    nr = nr + 1                   
+                    nr = nr + 1
                          
             # slechts 1 punt indien lijn korter dan vereiste onderlinge afstand      
             if line.length < distance:
