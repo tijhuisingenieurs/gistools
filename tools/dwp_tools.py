@@ -1,12 +1,12 @@
 import logging
-# from utils.arcgis_logging import setup_logging
 from shapely.geometry import Point
 
-from gistools.utils.collection import MemCollection, OrderedDict
-from gistools.utils.geometry import TLine, TMultiLineString, tshape
+from gistools.utils.collection import MemCollection
+from gistools.utils.geometry import TLine, TMultiLineString
 from gistools.utils.wit import vul_leggerwaarden, create_leggerpunten, update_leggerpunten_diepten
 
 log = logging.getLogger(__file__)
+
 
 def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
                                        default_length=15.0, length_field=None):
@@ -193,7 +193,8 @@ def get_leggerprofiel(line_col):
 #                 if intersect_point.geom_type != 'Point':
 #                     message = 'Intersectie op meerdere plekken, boundingbox = ' + str(intersect_point.bounds)
 #                     log.warning(message)
-#                     message = 'Voor lijn 1 ' + str(line1['geometry']['coordinates']) + ' en lijn 2 '+ str(line2['geometry']['coordinates'])
+#                     message = 'Voor lijn 1 ' + str(line1['geometry']['coordinates']) + ' en lijn 2 '+
+#                               str(line2['geometry']['coordinates'])
 #                     log.warning(message)
 #                 
 #                 else:
@@ -254,7 +255,8 @@ def get_leggerprofiel(line_col):
 #                 if intersect_point.geom_type != 'Point':
 #                     message = 'Intersectie op meerdere plekken, boundingbox = ' + str(intersect_point.bounds)
 #                     log.warning(message)
-#                     message = 'Voor lijn ' + str(line1['geometry']['coordinates']) + ' en lijn '+ str(line2['geometry']['coordinates'])
+#                     message = 'Voor lijn ' + str(line1['geometry']['coordinates']) + ' en lijn '+
+#                                str(line2['geometry']['coordinates'])
 #                     log.warning(message)
 #                 else:
 #                     props = {}        
@@ -298,7 +300,6 @@ def get_vertices_with_index(line_col, id_field):
     input = line MemCollection
     return collection of points with line id and index number"""
     
-    
     records = []
     
     for feature in line_col:
@@ -307,26 +308,27 @@ def get_vertices_with_index(line_col, id_field):
             coords = feature['geometry']['coordinates']
         else:
             for part in feature['geometry']['coordinates']:
-                  for l in part:
-                      coords.append(l)
+                for l in part:
+                    coords.append(l)
 
         i = 0
         
         for p in coords:
             i = i + 1
-            props = {}        
+            props = {}
             props['line_id'] = feature['properties'].get(id_field, None)
             props['vertex_nr'] = i          
             
             records.append({'geometry': {'type': 'Point',
-                                     'coordinates': p},
-                       'properties': props})
+                                         'coordinates': p},
+                            'properties': props})
             
     point_col = MemCollection(geometry_type='Point') 
     point_col.writerecords(records)
     
     return point_col
-    
+
+
 def get_index_number_from_points(line_col, point_col, index_field):
     """ append index number from point as attribute to line
     
@@ -337,7 +339,6 @@ def get_index_number_from_points(line_col, point_col, index_field):
     records = []
     log.warning('Tool started')
 
-    
     for feature in line_col:
         log.warning('feature found')
         message1 = 'feature: ' + str(feature['properties'].get('FID'))
@@ -355,26 +356,27 @@ def get_index_number_from_points(line_col, point_col, index_field):
             
             pnt = Point(p['geometry']['coordinates'])
     
-            if line.almost_intersect_with_point(pnt,decimals=2):
+            if line.almost_intersect_with_point(pnt, decimals=2):
                 log.warning('intersection found')
-                message3 = 'feature ' + str(feature['properties'].get('FID')) + ' with vertex ' + str(p['properties'].get('vertex_nr'))
+                message3 = 'feature ' + str(feature['properties'].get('FID')) + ' with vertex ' + \
+                           str(p['properties'].get('vertex_nr'))
                 log.warning(message3)  
                                                                                                   
                 props = {}
-                props['bronlijn'] = feature['properties'].get('FID',999999)
+                props['bronlijn'] = feature['properties'].get('FID', 999999)
                 props['line_id'] = p['properties'].get('line_id')
                 props['volgnr'] = p['properties'].get('vertex_nr')
                  
                 records.append({'geometry': {'type': line.type,
-                                     'coordinates': line.coordinates},
-                       'properties': props})
-                
-     
+                                             'coordinates': line.coordinates},
+                                'properties': props})
+
     indexed_line_col = MemCollection(geometry_type=line.type) 
     indexed_line_col.writerecords(records)
     
     return indexed_line_col
-   
+
+
 def get_scaled_line(line_col, target_length_field, scale_point_perc=0):
     """get line with given line, with same direction and scalled
     around the scale point
@@ -405,7 +407,8 @@ def get_scaled_line(line_col, target_length_field, scale_point_perc=0):
         feature['geometry']['coordinates'] = coordinates
                 
     return line_col
-                
+
+
 def get_extended_line(line_col, target_length_field, extend_point='end'):
     """get line with given line, with same direction and extended
     at extendpoint with given length
@@ -436,6 +439,4 @@ def get_extended_line(line_col, target_length_field, extend_point='end'):
 
         feature['geometry']['coordinates'] = coordinates
                 
-    return line_col            
-            
-            
+    return line_col
