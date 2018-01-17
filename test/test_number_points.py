@@ -21,19 +21,24 @@ class TestNumberPoints(unittest.TestCase):
 
         points.writerecords([{
             'geometry': {'type': 'Point', 'coordinates': (0, 1)},
-            'properties': {'pid': 1, 'nr': 1, 'correct': 2}
+            'properties': {'pid': 1, 'nr': 1, 'correct': 2},
+            'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (0, 4)},
-            'properties': {'pid': 2, 'nr': 1, 'correct': 3}
+            'properties': {'pid': 2, 'nr': 1, 'correct': 3},
+            'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (1, 4)},
-            'properties': {'pid': 3, 'nr': 1, 'correct': None}
+            'properties': {'pid': 3, 'nr': 1, 'correct': None},
+            'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (5, 2)},
-            'properties': {'pid': 4, 'nr': 1, 'correct': 1}
+            'properties': {'pid': 4, 'nr': 1, 'correct': 1},
+            'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (5, 6)},
-            'properties': {'pid': 5, 'nr': 1, 'correct': 0}
+            'properties': {'pid': 5, 'nr': 1, 'correct': 0},
+            'selected': {True}
         }])
 
         number_points_on_line(lines, points, line_direction_field='direction', start_number=0)
