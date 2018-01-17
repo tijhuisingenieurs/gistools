@@ -143,7 +143,7 @@ def get_points_on_perc(line_col, copy_fields=list(), default_perc=10.0, perc_fie
                                   'coordinates': line.get_point_at_percentage(perc)},
                      'properties': props}])
         else:
-            log.warning('Geen geldig percentage voor feature: ' + str(percentage))
+            log.warning('Geen geldig percentage voor feature: %i', percentage)
     
     return point_col
 
