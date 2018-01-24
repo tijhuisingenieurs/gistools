@@ -7,8 +7,7 @@ def number_points_on_line(lines,
                           line_number_field='nr',
                           line_direction_field=None,
                           point_number_field='nr',
-                          start_number=1,
-                          nr_reverse=False):
+                          start_number=1):
     """ Renumber the points on a set of numbered lines
 
     lines (collection of LineString of MultiLineString): lines with a number
@@ -19,13 +18,12 @@ def number_points_on_line(lines,
             the direction of the shape (for values >= 0) or in opposite direction (for values < 0)
     point_number_field (string): output property/ field of the new (renumbered) index
     start_number (int): first number in index range
-    nr_reverse (bool): if True, numbers are reversed regardless of what is in line_direction_field
     :return:
     """
 
     sorted_lines = [l for l in lines if l['properties'][line_number_field] not in (0, 0.0, '', None)]
     sorted_lines.sort(key=lambda li: li['properties'][line_number_field])
-# TODO: fix so that it checks the ID numbers not the previously calculated nr's.
+
     i = start_number
     id_list = []
 
@@ -44,7 +42,7 @@ def number_points_on_line(lines,
         pnts_on_line.sort(key=lambda li: li['dist'])
 
         if (line_direction_field is not None and
-                (line['properties'][line_direction_field] < 0 or nr_reverse)):
+                (line['properties'][line_direction_field] < 0)):
             pnts_on_line.reverse()
 
         for point in pnts_on_line:
