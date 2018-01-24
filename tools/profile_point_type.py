@@ -27,7 +27,6 @@ def update_profile_point_type(point_col, method):
 
     # get unique profiles and all points
     for point in point_col:
-
         if point['properties']['prof_ids'] not in profiles:
             profiles[point['properties']['prof_ids']] = []
 
@@ -35,6 +34,7 @@ def update_profile_point_type(point_col, method):
 
     # analyse profiles
     for prof_ids, points in profiles.items():
+        print prof_ids
         ttl = None
         ttr = None
 
@@ -48,6 +48,17 @@ def update_profile_point_type(point_col, method):
 
             if point['properties']['code'] == '22R':
                 ttr = point
+
+        if ttl is None and ttr is None:
+            ttl_found = False
+            for point in points:
+                if point['properties']['code'] == '22' and not ttl_found:
+                    point['properties']['code'] = '22L'
+                    ttl_found = True
+                    ttl = point
+                elif point['properties']['code'] == '22' and ttl_found:
+                    point['properties']['code'] = '22R'
+                    ttr = point
 
         if ttl is None or ttr is None:
             continue
@@ -137,8 +148,9 @@ def update_profile_point_type(point_col, method):
             if first_point['properties']['code'] not in ['22L', '22R', '22']:
                 first_point['properties']['code'] = '1'
 
-            if mid_point['properties']['code'] not in ['22L', '22R', '22']:
-                mid_point['properties']['code'] = '7'
+            if mid_point is not None:
+                if mid_point['properties']['code'] not in ['22L', '22R', '22']:
+                    mid_point['properties']['code'] = '7'
 
             if last_point['properties']['code'] not in ['22L', '22R', '22']:
                 last_point['properties']['code'] = '2'
