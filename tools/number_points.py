@@ -47,12 +47,11 @@ def number_points_on_line(lines,
 
         for point in pnts_on_line:
             # check if point has already been processed (in case point is om multiple lines)
-            print(type(point['properties'][point_number_field]))
-            print(id_list)
-            if point['properties'][point_number_field] not in id_list:
+            if point['id'] not in id_list:
                 # Check if selected
                 if point['selected']:
-                    id_list.append(i)
+                    point_id = point['id']
+                    id_list.append(point_id)
                     point['properties'][point_number_field] = i
                     i += 1
 

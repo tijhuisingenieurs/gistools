@@ -29,7 +29,7 @@ class TestNumberPoints(unittest.TestCase):
             'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (1, 4)},
-            'properties': {'pid': 3, 'nr': 1, 'correct': None},
+            'properties': {'pid': 3, 'nr': 1, 'correct': 1},
             'selected': {True}
         }, {
             'geometry': {'type': 'Point', 'coordinates': (5, 2)},
