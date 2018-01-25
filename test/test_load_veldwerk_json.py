@@ -26,20 +26,19 @@ class TestLoadVeldwerk(unittest.TestCase):
 
         json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata.json')
         meetplan_col = MemCollection(geometry_type='MultiLineString')
-        
-        meetplan_col.writerecords([
-        {'geometry': {'type': 'LineString',
-                          'coordinates': [(114231.0, 472589.0), (114238.0, 472587.0)]},
-         'properties': {
-            'DWPnr': '267'}}
-        ])
-        
 
-        point_col, profile_col, ttlr_col = fielddata_to_memcollections(json_file, meetplan_col,'DWPnr')
+        meetplan_col.writerecords([
+            {'geometry': {'type': 'LineString',
+                          'coordinates': [(114231.0, 472589.0), (114238.0, 472587.0)]},
+             'properties': {
+                 'DWPnr': '267'}}
+        ])
+
+        point_col, profile_col, ttlr_col = fielddata_to_memcollections(json_file, meetplan_col, 'DWPnr')
 
         # 217 meetpunten in json file, waarvan 99 met coordinaten
         self.assertEqual(len(point_col), 217)
-                
+
         # test in bron volledig correct gevuld profiel
         point = None
         for p in point_col.filter():
@@ -91,7 +90,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               '_bk_wp': -42,
                               '_ok_nap': -1.33,
                               '_ok_wp': -42,
-                              })           
+                              })
 
         # 217 punten in dataset, waarvan 24 punten met een 22 code, 
         # waarvan 2 punten via meetplan en 2 zonder coordinaten = 22 met coordinaten
@@ -123,7 +122,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'breedte': 3.446765493694888,
                               'gps_breed': 3.446765493694888,
                               'h_breedte': None,
-                              'm99_breed': 3.19                              
+                              'm99_breed': 3.19
                               })
 
         point = None
@@ -147,12 +146,12 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114219.05704747832,
                               'prof_pk': 5,
                               'project_id': 'p1',
-                              'proj_name': 'project_1',                              
+                              'proj_name': 'project_1',
                               'wpeil': -1.75,
                               'breedte': 3.446765493694888,
                               'gps_breed': 3.446765493694888,
                               'h_breedte': None,
-                              'm99_breed': 3.19                              
+                              'm99_breed': 3.19
                               })
 
         # profile 267 heeft geen coordinaten bij de 22-punten
@@ -161,7 +160,7 @@ class TestLoadVeldwerk(unittest.TestCase):
             if p['properties']['ids'] == '267' and p['properties']['code'] == '22L':
                 point = p
                 break
-            
+
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
                               'coordinates': (114231.0, 472589.0)})
@@ -177,22 +176,21 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'x_coord': 114231.0,
                               'prof_pk': 2,
                               'project_id': 'p1',
-                              'proj_name': 'project_1',                              
+                              'proj_name': 'project_1',
                               'wpeil': -5.36,
                               'breedte': 7.70,
                               'gps_breed': None,
                               'h_breedte': None,
-                              'm99_breed': 7.70                              
+                              'm99_breed': 7.70
                               })
-        
+
         # profile 269 heeft geen coordinaten bij de 22-punten en geen entry in meetplan        
-        point ={'geometry': {'type': 'Point', 'coordinates': (0.0, 0.0)}, 'properties': {''}, 'id': 999}
+        point = {'geometry': {'type': 'Point', 'coordinates': (0.0, 0.0)}, 'properties': {''}, 'id': 999}
         for p in ttlr_col.filter():
             if p['properties']['ids'] == '269' and p['properties']['code'] == '22L':
                 point = p
                 break
-        
+
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
                               'coordinates': (0.0, 0.0)})
-        
