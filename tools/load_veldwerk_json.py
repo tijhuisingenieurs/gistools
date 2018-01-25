@@ -63,7 +63,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         prof['ids'] = profile.get('ids', '')
         prof['project_id'] = project_id
         prof['proj_name'] = proj_name
-        prof['opm'] = profile.get('remarks').replace('\n', '')
+        prof['opm'] = profile.get('remarks', '').replace('\n', '')
 
         ttl = {}
         ttr = {}
@@ -83,7 +83,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         max_99_breedte = 0.0
 
-        for p in profile.get('profile_points'):
+        for p in profile.get('profile_points', []):
 
             code = p.get('code', '')
             method_list.append(p.get('method', ''))
@@ -250,7 +250,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
              'properties': prof}])
 
         # todo: sort profile points
-        for i, point in enumerate(profile['profile_points']):
+        for i, point in enumerate(profile.get('profile_points', [])):
 
             ############################# 22L en 22R #################################
             records_ttlr = []
