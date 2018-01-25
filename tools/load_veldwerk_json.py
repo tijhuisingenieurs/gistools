@@ -120,6 +120,12 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             elif p.get('lower_level_source', '') == 'manual':
                 count_manual += 1
 
+        if ttl and ttl['rd_coordinates'] and None in ttl['rd_coordinates']:
+            ttl['rd_coordinates'] = None
+
+        if ttr and ttr['rd_coordinates'] and None in ttr['rd_coordinates']:
+            ttr['rd_coordinates'] = None
+
         prof['methode'] = ", ".join(set(method_list))
 
         prof['breedte'] = None
@@ -129,10 +135,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         prof['gps_breed'] = None
 
-
-        if (len(ttl) > 0 and len(ttr) > 0 and
-            ttl['rd_coordinates'] != '' and ttr['rd_coordinates'] != ''):
-
+        if (ttl and ttr and
+                ttl.get('rd_coordinates') and ttr.get('rd_coordinates')):
             prof['gps_breed'] = sqrt(
                 (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
                 (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
@@ -183,10 +187,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         coordinates = [[0, 0], [0, 1]]
 
-        if (ttl.get('rd_coordinates', None) is not None and 
-            ttl.get('rd_coordinates', None) != '' and
-            ttr.get('rd_coordinates', None) is not None and
-            ttr.get('rd_coordinates', None) != ''):
+        if ttl.get('rd_coordinates') and ttr.get('rd_coordinates'):
             coordinates = ([ttl['rd_coordinates'][0],
                             ttl['rd_coordinates'][1]],
                            [ttr['rd_coordinates'][0],
@@ -411,8 +412,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 p['gps_wgs_y'] = None
                 p['gps_wgs_z'] = None
 
-            p['gps_h_afw'] = get_float(point['accuracy'])
-            p['gps_z_afw'] = get_float(point['altitude_accuracy'])
+            p['gps_h_afw'] = get_float(point.get('accuracy'))
+            p['gps_z_afw'] = get_float(point.get('altitude_accuracy'))
 
             point_col.writerecords([
                 {'geometry': {'type': 'Point',

@@ -11,6 +11,16 @@ class TestLoadVeldwerk(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_version_with_error(self):
+
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17268_lwd.json')
+        fielddata_to_memcollections(json_file)
+
+    def test_version_with_error2(self):
+
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17279_AdamseBos.json')
+        fielddata_to_memcollections(json_file)
+
     def test_fielddata_to_memcollection(self):
         """test fill MemCollection with json data from file"""
 
