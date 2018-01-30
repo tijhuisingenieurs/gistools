@@ -34,7 +34,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                  'DWPnr': '267'}}
         ])
 
-        point_col, profile_col, ttlr_col = fielddata_to_memcollections(json_file, meetplan_col, 'DWPnr')
+        point_col, profile_col, ttlr_col, fp_col = fielddata_to_memcollections(json_file, meetplan_col, 'DWPnr')
 
         # 217 meetpunten in json file, waarvan 99 met coordinaten
         self.assertEqual(len(point_col), 217)
