@@ -435,6 +435,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         fixed_point['ids'] = fp.get('id', '')
         fixed_point['project_id'] = project_id
         fixed_point['proj_name'] = proj_name
+        fixed_point['type'] = fp.get('note_type', '')
         fixed_point['opm'] = fp.get('remarks', '').replace('\n', '')
 
         photo_list = fp.get('photos', None)
@@ -456,10 +457,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             rd_coordinates = fp.get('rd_coordinates')
             fixed_point['x_coord'] = get_float(rd_coordinates[0])
             fixed_point['y_coord'] = get_float(rd_coordinates[1])
-            if rd_coordinates[2]:
+            if rd_coordinates[2] and rd_coordinates[2] != -99:
                 fixed_point['z'] = get_float(rd_coordinates[2])
             else:
-                fixed_point['z'] = -99
+                fixed_point['z'] = -9999
             coordinates = (rd_coordinates[0], rd_coordinates[1])
 
         # Write to point collection
