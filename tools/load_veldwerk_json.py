@@ -1,4 +1,5 @@
 import logging
+import os
 from math import sqrt
 
 from gistools.utils.collection import MemCollection, OrderedDict
@@ -37,15 +38,16 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
     json_dict = json_to_dict(filename)
 
-    # json_dict is a dict with three or four elements:
+    # json_dict is a dict with four elements:
     # - id = project_id
     # - name = project name
     # - measured_profiles = dict with profiles
-    # - predifined_profiles = dict with planned locations (optional)
+    # - fixed_points = dict with fixed points
 
     point_col = MemCollection(geometry_type='Point')
     prof_col = MemCollection(geometry_type='LineString')
     ttlr_col = MemCollection(geometry_type='Point')
+    fp_col = MemCollection(geometry_type='Point')
 
     project_id = str(json_dict['id'])
     proj_name = str(json_dict['name'])
@@ -423,8 +425,51 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             log.warning('records toegevoegd %i', i + 1)
 
+    # Extract fixed points from the geojson
+    for fp_pk, point_ids in enumerate(json_dict['point_notes']):
+
+        fp = json_dict['point_notes'][point_ids]
+        fixed_point = OrderedDict()
+
+        fixed_point['vp_pk'] = fp_pk
+        fixed_point['ids'] = fp.get('id', '')
+        fixed_point['project_id'] = project_id
+        fixed_point['proj_name'] = proj_name
+        fixed_point['opm'] = fp.get('remarks', '').replace('\n', '')
+
+        photo_list = fp.get('photos', None)
+        photo_string = ''
+
+        if photo_list:
+            for i in range(len(photo_list)):
+                f_name = os.path.basename(photo_list[i]).split('.')[0]
+                if i != (len(photo_list) - 1):
+                    photo_string = photo_string + (f_name + ";")
+                else:
+                    photo_string = photo_string + f_name
+
+        fixed_point['fotos'] = photo_string
+
+        fixed_point['datum'] = fp.get('datetime', '')
+
+        if fp.get('rd_coordinates') and not None in fp.get('rd_coordinates')[:2]:
+            rd_coordinates = fp.get('rd_coordinates')
+            fixed_point['x_coord'] = get_float(rd_coordinates[0])
+            fixed_point['y_coord'] = get_float(rd_coordinates[1])
+            if rd_coordinates[2]:
+                fixed_point['z'] = get_float(rd_coordinates[2])
+            else:
+                fixed_point['z'] = -99
+            coordinates = (rd_coordinates[0], rd_coordinates[1])
+
+        # Write to point collection
+        fp_col.writerecords([
+            {'geometry': {'type': 'Point',
+                        'coordinates': coordinates},
+            'properties': fixed_point}])
+
     # lever de collection met meetpunten en de dicts voor WDB terug
-    return point_col, prof_col, ttlr_col
+    return point_col, prof_col, ttlr_col, fp_col
 
 
 def calc_profile_distance(point, ttl, ttr, manual_width):
