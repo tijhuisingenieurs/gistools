@@ -24,7 +24,7 @@ class TestJsonHandler(unittest.TestCase):
         # - name = project name
         # - measured_profiles = dict with profiles
         # - predifined_profiles = dict with planned locations (optional)
-        self.assertEqual(len(json_dict), 4)
+        self.assertEqual(len(json_dict), 5)
         self.assertEqual(json_dict['id'], 'p1')
         self.assertEqual(json_dict['name'], 'project_1')
         self.assertEqual(len(json_dict['predefined_profiles']), 3)
