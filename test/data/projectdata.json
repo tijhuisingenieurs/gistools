@@ -5749,5 +5749,131 @@
 			}
 		},
 	"point_notes": {
+		"0": {
+			"note_type": "-",
+			"remarks": "Vast punt 1.\nGeen foto's toegevoegd.",
+			"photos": [],
+			"location": null,
+			"datetime": "2018-01-19T13:11:32.674Z",
+			"source": "gps",
+			"rd_coordinates": [
+				116752.17329842954,
+				478740.7307465183,
+				-2.8563159259462845
+			],
+			"wgs_coordinates": [
+				52.295318745,
+				4.8265392044999995,
+				40.236999999999995
+			],
+			"altitude_nap_pole": -4.990595925946285,
+			"pole_length": "2",
+			"l_one_length": 0.13428,
+			"accuracy": "0.008",
+			"altitude_accuracy": "0.019",
+			"id": "0"
+		},
+		"1": {
+			"note_type": "Inventarisatie",
+			"remarks": "Vast punt 2.",
+			"photos": [
+				"file:///storage/emulated/0/Android/data/com.roosgeo.veldwerkapp2/cache/1516367539383.jpg",
+				"file:///storage/emulated/0/Android/data/com.roosgeo.veldwerkapp2/cache/1516367554016.jpg"
+			],
+			"datetime": "2018-01-19T13:35:07.453Z",
+			"source": "handmatig van kaart",
+			"rd_coordinates": [
+				116273.44926431918,
+				481160.3476635114,
+				-99
+			],
+			"wgs_coordinates": [
+				52.3170310772992,
+				4.819243882269575,
+				-99
+			],
+			"altitude_nap_pole": null,
+			"pole_length": null,
+			"l_one_length": null,
+			"accuracy": null,
+			"altitude_accuracy": null,
+			"id": "1"
+		},
+		"2": {
+			"note_type": "-",
+			"remarks": "Vast punt 3.",
+			"photos": [],
+			"location": null,
+			"datetime": "2018-01-21T15:50:57.437Z",
+			"source": "handmatig van kaart",
+			"rd_coordinates": [
+				116266.03165634786,
+				481146.4976508313,
+				-99
+			],
+			"wgs_coordinates": [
+				52.316906081267376,
+				4.81913669451842,
+				-99
+			],
+			"altitude_nap_pole": null,
+			"pole_length": null,
+			"l_one_length": null,
+			"accuracy": null,
+			"altitude_accuracy": null,
+			"id": "2"
+		},
+		"3": {
+			"note_type": "-",
+			"remarks": "Vast punt 4.",
+			"photos": [
+				"file:///storage/emulated/0/Android/data/com.roosgeo.veldwerkapp2/cache/1516610159772.jpg"
+			],
+			"location": null,
+			"datetime": "2018-01-22T08:34:57.883Z",
+			"source": "handmatig van kaart",
+			"rd_coordinates": [
+				116215.69215094438,
+				480863.9193656759,
+				null
+			],
+			"wgs_coordinates": [
+				52.31436292606078,
+				4.8184310026090325,
+				null
+			],
+			"altitude_nap_pole": null,
+			"pole_length": null,
+			"l_one_length": null,
+			"accuracy": null,
+			"altitude_accuracy": null,
+			"id": "3"
+		},
+		"4": {
+			"note_type": "Inventarisatie",
+			"remarks": "Vast punt 5.",
+			"photos": [
+				"file:///storage/emulated/0/Android/data/com.roosgeo.veldwerkapp2/cache/1516612526525.jpg"
+			],
+			"location": null,
+			"datetime": "2018-01-22T09:15:03.114Z",
+			"source": "gps",
+			"rd_coordinates": [
+				null,
+                null,
+                null
+			],
+			"wgs_coordinates": [
+				null,
+                null,
+                null
+			],
+			"altitude_nap_pole": -5.601436597378343,
+			"pole_length": "2",
+			"l_one_length": 0.13428,
+			"accuracy": "0.032",
+			"altitude_accuracy": "0.058",
+			"id": "4"
+		}
 	}
 }

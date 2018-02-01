@@ -426,7 +426,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             log.warning('records toegevoegd %i', i + 1)
 
     # Extract fixed points from the geojson
-    for fp_pk, point_ids in enumerate(json_dict['point_notes']):
+    for fp_pk, point_ids in enumerate(json_dict.get('point_notes', [])):
 
         fp = json_dict['point_notes'][point_ids]
         fixed_point = OrderedDict()
@@ -438,22 +438,13 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         fixed_point['type'] = fp.get('note_type', '')
         fixed_point['opm'] = fp.get('remarks', '').replace('\n', '')
 
-        photo_list = fp.get('photos', None)
-        photo_string = ''
-
-        if photo_list:
-            for i in range(len(photo_list)):
-                f_name = os.path.basename(photo_list[i]).split('.')[0]
-                if i != (len(photo_list) - 1):
-                    photo_string = photo_string + (f_name + ";")
-                else:
-                    photo_string = photo_string + f_name
-
-        fixed_point['fotos'] = photo_string
+        fixed_point['fotos'] = ";".join([os.path.basename(photo).split('.')[0] for photo in fp.get('photos', [])])
 
         fixed_point['datum'] = fp.get('datetime', '')
 
-        if fp.get('rd_coordinates') and not None in fp.get('rd_coordinates')[:2]:
+        # TODO: this needs a better solution
+        coordinates = [0, 0]
+        if fp.get('rd_coordinates') and None not in fp.get('rd_coordinates')[:2]:
             rd_coordinates = fp.get('rd_coordinates')
             fixed_point['x_coord'] = get_float(rd_coordinates[0])
             fixed_point['y_coord'] = get_float(rd_coordinates[1])

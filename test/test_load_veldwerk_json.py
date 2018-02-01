@@ -39,6 +39,9 @@ class TestLoadVeldwerk(unittest.TestCase):
         # 217 meetpunten in json file, waarvan 99 met coordinaten
         self.assertEqual(len(point_col), 217)
 
+        # 5 point notes in json file
+        self.assertEqual(len(fp_col), 5)
+
         # test in bron volledig correct gevuld profiel
         point = None
         for p in point_col.filter():
@@ -194,3 +197,36 @@ class TestLoadVeldwerk(unittest.TestCase):
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
                               'coordinates': (0.0, 0.0)})
+
+        for p in fp_col.filter():
+            # point 0 is complete
+            if p['properties']['ids'] == '0':
+                self.assertDictEqual(dict(p['properties']),
+                                     {'project_id': 'p1',
+                                      'proj_name': 'project_1',
+                                      'type': "-",
+                                      'opm': "Vast punt 1.Geen foto's toegevoegd.",
+                                      'fotos': "",
+                                      'datum': "2018-01-19T13:11:32.674Z",
+                                      'ids': '0',
+                                      'x_coord': 116752.17329842954,
+                                      'y_coord': 478740.7307465183,
+                                      'z': -2.8563159259462845,
+                                      'vp_pk': 1
+                                      })
+
+            # point 1 has two photos and has been set manually on the map
+            if p['properties']['ids'] == '1':
+                self.assertEqual(p['properties']['fotos'], "1516367539383;1516367554016")
+                self.assertEqual(p['properties']['z'], -9999)
+                self.assertEqual(p['properties']['type'], "Inventarisatie")
+
+            # point 3 has one photo and missing z-coordinates
+            if p['properties']['ids'] == '3':
+                self.assertEqual(p['properties']['fotos'], "1516610159772")
+                self.assertEqual(p['properties']['z'], -9999)
+
+            # point 4 has no coordinates
+            if p['properties']['ids'] == '4':
+                self.assertEqual(p['geometry']['coordinates'], [0,0])
+
