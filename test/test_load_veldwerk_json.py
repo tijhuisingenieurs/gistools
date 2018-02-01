@@ -230,3 +230,24 @@ class TestLoadVeldwerk(unittest.TestCase):
             if p['properties']['ids'] == '4':
                 self.assertEqual(p['geometry']['coordinates'], [0,0])
 
+    def test_fielddata_to_memcollection2(self):
+        """test fill MemCollection with json data from file without point notes"""
+
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_noPointNotes.json')
+
+        point_col, profile_col, ttlr_col, fp_col = fielddata_to_memcollections(json_file)
+
+        self.assertEqual(bool(point_col), True)
+        self.assertEqual(bool(fp_col), False)
+
+    def test_fielddata_to_memcollection3(self):
+        """test fill MemCollection with json data from file with empty point notes"""
+
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_emptyPointNotes.json')
+
+        point_col, profile_col, ttlr_col, fp_col = fielddata_to_memcollections(json_file)
+
+        self.assertEqual(bool(point_col), True)
+        self.assertEqual(bool(fp_col), False)
+
+

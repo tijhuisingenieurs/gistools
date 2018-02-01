@@ -426,7 +426,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             log.warning('records toegevoegd %i', i + 1)
 
     # Extract fixed points from the geojson
-    for fp_pk, point_ids in enumerate(json_dict.get('point_notes', [])):
+    for fp_pk, point_ids in enumerate(json_dict.get('point_notes', {}.items())):
 
         fp = json_dict['point_notes'][point_ids]
         fixed_point = OrderedDict()
