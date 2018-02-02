@@ -88,18 +88,20 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         for p in profile.get('profile_points', []):
 
             code = p.get('code', '')
-            method_list.append(p.get('method', ''))
-            date = p.get('datetime', '')
+            method_list.append(p['metadata'].get('method', ''))
+            date = p.get('created', '')
             if date is not None:
                 date_list.append(parse_date(date))
-            pole_list.append(get_float(p.get('pole_length', None)))
-            l1_list.append(get_float(p.get('l_one_length', None)))
+            pole_list.append(get_float(p['location']['metadata'].get('pole_length', None)))
+            l1_list.append(get_float(p['location']['metadata'].get('l_one_length', None)))
 
             if code == '1':
                 count_one += 1
             elif code == '22L':
                 count_ttl += 1
                 ttl = p
+                ttl['rd_coordinates'] = (get_float(p['location'].get('x')), get_float(p['location'].get('y')),
+                                         get_float(p['location'].get('z')))
             elif code == '99':
                 if p.get('distance', '') != '':
                     max_99_breedte = max(max_99_breedte, get_float(p.get('distance'), -99))
@@ -107,14 +109,18 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             elif code == '22R':
                 count_ttr += 1
                 ttr = p
+                ttr['rd_coordinates'] = (get_float(p['location'].get('x')), get_float(p['location'].get('y')),
+                                         get_float(p['location'].get('z')))
             elif code == '2':
                 count_two += 1
+
             if p.get('upper_level_source', '') == 'gps':
                 count_gps += 1
                 accuracy = get_float(p.get('upper_level_accuracy', None))
                 alt_accuracy_list.append(accuracy)
             elif p.get('upper_level_source', '') == 'manual':
                 count_manual += 1
+
             if p.get('lower_level_source', '') == 'gps':
                 count_gps += 1
                 accuracy = get_float(p.get('lower_level_accuracy', None))
@@ -328,6 +334,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             p['prof_rpeil'] = prof['rpeil']
 
             p['code'] = point.get('code', '')
+            p['sub_code'] = point.get('sub_code', '')
+            p['drawing_code'] = point.get('drawing_code', '')
 
             if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
                 p['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])
@@ -387,40 +395,37 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 p['_ok_nap'] = None
 
             # Metadata
+            location = point['location']
 
-            p['datumtijd'] = point.get('datetime', '')
-            p['method'] = point.get('method', '')
+            p['datumtijd'] = point.get('created', '')
+            p['method'] = point['metadata'].get('method', '')
 
-            p['stok_len'] = get_float(point.get('pole_length'))
-            p['l1_len'] = get_float(point.get('l_one_length'))
+            p['stok_len'] = get_float(location['metadata'].get('pole_length'))
+            p['l1_len'] = get_float(location['metadata'].get('l_one_length'))
 
-            if type(point['rd_coordinates']) == list:
-                p['gps_rd_x'] = get_float(point['rd_coordinates'][0])
-                p['gps_rd_y'] = get_float(point['rd_coordinates'][1])
-                p['gps_rd_z'] = get_float(point['rd_coordinates'][2])
-                coordinates = (point['rd_coordinates'][0], point['rd_coordinates'][1])
-            else:
-                p['gps_rd_x'] = None
-                p['gps_rd_y'] = None
-                p['gps_rd_z'] = None
-                coordinates = (0, 0)
+            items = [['x', "gps_rd_x"], ['y', "gps_rd_x"], ['z', "gps_rd_z"],
+                     ['latitude', "gps_wgs_x"], ['longitude', "gps_wgs_y"], ['altitude', "gps_wgs_z"],
+                     ['accuracy', "gps_h_afw"], ['altitudeAccuracy', "gps_z_afw"],
+                     ['epsg', "epsg"], ['altitude_nap_pole', "gps_z_nap_pole"]]
 
-            if type(point['wgs_coordinates']) == list:
+            coords = [0,0]
+            for item in items:
+                if location.get(item[0]):
+                    p[item[1]] = get_float(location.get(item[0]))
 
-                p['gps_wgs_x'] = get_float(point['wgs_coordinates'][0])
-                p['gps_wgs_y'] = get_float(point['wgs_coordinates'][1])
-                p['gps_wgs_z'] = get_float(point['wgs_coordinates'][2])
-            else:
-                p['gps_wgs_x'] = None
-                p['gps_wgs_y'] = None
-                p['gps_wgs_z'] = None
+                    if item[0] == "x":
+                        coords[0] = p[item[1]]
+                    if item[0] == "y":
+                        coords[1] = p[item[1]]
 
-            p['gps_h_afw'] = get_float(point.get('accuracy'))
-            p['gps_z_afw'] = get_float(point.get('altitude_accuracy'))
+                else:
+                    p[item[1]] = None
+
+            p['last_modified'] = point.get('last_modified', "")
 
             point_col.writerecords([
                 {'geometry': {'type': 'Point',
-                              'coordinates': coordinates},
+                              'coordinates': tuple(coords)},
                  'properties': p}])
 
             log.warning('records toegevoegd %i', i + 1)
