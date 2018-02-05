@@ -1,4 +1,4 @@
-
+# TODO: make function "get string"; returning None for example when parameter == "".
 
 def get_float(value, default=None):
 

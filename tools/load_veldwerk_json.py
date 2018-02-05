@@ -445,19 +445,22 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         fixed_point['fotos'] = ";".join([os.path.basename(photo).split('.')[0] for photo in fp.get('photos', [])])
 
-        fixed_point['datum'] = fp.get('datetime', '')
+        fixed_point['datum'] = fp.get('created', '')
 
-        # TODO: this needs a better solution
-        coordinates = [0, 0]
-        if fp.get('rd_coordinates') and None not in fp.get('rd_coordinates')[:2]:
-            rd_coordinates = fp.get('rd_coordinates')
-            fixed_point['x_coord'] = get_float(rd_coordinates[0])
-            fixed_point['y_coord'] = get_float(rd_coordinates[1])
-            if rd_coordinates[2] and rd_coordinates[2] != -99:
-                fixed_point['z'] = get_float(rd_coordinates[2])
+        # TODO: this needs a better solution and fixed to newest version
+        coordinates = [0.0, 0.0]
+
+        pre_coords = (get_float(fp['location'].get('x')), get_float(fp['location'].get('y')),
+                                 get_float(fp['location'].get('z')))
+
+        if None not in pre_coords[:2]:
+            coordinates = pre_coords[:2]
+            fixed_point['x_coord'] = pre_coords[0]
+            fixed_point['y_coord'] = pre_coords[1]
+            if pre_coords[2] and pre_coords[2] != -99:
+                fixed_point['z'] = pre_coords[2]
             else:
                 fixed_point['z'] = -9999
-            coordinates = (rd_coordinates[0], rd_coordinates[1])
 
         # Write to point collection
         fp_col.writerecords([
