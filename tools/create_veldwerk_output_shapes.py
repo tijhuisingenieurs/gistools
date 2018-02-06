@@ -22,6 +22,7 @@ def create_fieldwork_output_shapes(line_col, point_col):
     #
     output_line_col = MemCollection(geometry_type='LineString')
     output_point_col = MemCollection(geometry_type='Point')
+    boor_col = MemCollection(geometry_type='Point')
 
     for line in line_col:
 
@@ -129,13 +130,22 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     p['_ok_wp'] = point_props.get('_ok_wp', None)
                     p['_ok_nap'] = point_props.get('_ok_nap', None)
 
-                output_point_col.writerecords([{
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': xy
-                    },
-                    'properties': p
-                }])
+                if p['code'] != "Controle boring":
+                    output_point_col.writerecords([{
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': xy
+                        },
+                        'properties': p
+                    }])
+                else:
+                    output_point_col.writerecords([{
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': xy
+                        },
+                        'properties': p
+                    }])
 
         l['xb_prof'] = line.coords[0][0]
         l['yb_prof'] = line.coords[0][1]

@@ -11,36 +11,26 @@ class TestLoadVeldwerk(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_version_with_error(self):
-
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17268_lwd.json')
-        fielddata_to_memcollections(json_file)
-
-    def test_version_with_error2(self):
-
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17279_AdamseBos.json')
-        fielddata_to_memcollections(json_file)
-
     def test_fielddata_to_memcollection(self):
         """test fill MemCollection with json data from file"""
 
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata.json')
-        meetplan_col = MemCollection(geometry_type='MultiLineString')
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_2.json')
+        #meetplan_col = MemCollection(geometry_type='MultiLineString')
 
-        meetplan_col.writerecords([
-            {'geometry': {'type': 'LineString',
-                          'coordinates': [(114231.0, 472589.0), (114238.0, 472587.0)]},
-             'properties': {
-                 'DWPnr': '267'}}
-        ])
+        # meetplan_col.writerecords([
+        #     {'geometry': {'type': 'LineString',
+        #                   'coordinates': [(114231.0, 472589.0), (114238.0, 472587.0)]},
+        #      'properties': {
+        #          'DWPnr': '267'}}
+        # ])
 
-        point_col, profile_col, ttlr_col, fp_col = fielddata_to_memcollections(json_file, meetplan_col, 'DWPnr')
+        point_col, profile_col, ttlr_col, fp_col = fielddata_to_memcollections(json_file)
 
         # 217 meetpunten in json file, waarvan 99 met coordinaten
-        self.assertEqual(len(point_col), 217)
+        self.assertEqual(len(point_col), 263)
 
         # 5 point notes in json file
-        self.assertEqual(len(fp_col), 5)
+        self.assertEqual(len(fp_col), 6)
 
         # test in bron volledig correct gevuld profiel
         point = None

@@ -397,13 +397,14 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             # Metadata
             location = point['location']
 
+            p['fotos'] = ";".join([os.path.basename(photo).split('.')[0] for photo in point.get('photos', [])])
             p['datumtijd'] = point.get('created', '')
             p['method'] = point['metadata'].get('method', '')
 
             p['stok_len'] = get_float(location['metadata'].get('pole_length'))
             p['l1_len'] = get_float(location['metadata'].get('l_one_length'))
 
-            items = [['x', "gps_rd_x"], ['y', "gps_rd_x"], ['z', "gps_rd_z"],
+            items = [['x', "gps_rd_x"], ['y', "gps_rd_y"], ['z', "gps_rd_z"],
                      ['latitude', "gps_wgs_x"], ['longitude', "gps_wgs_y"], ['altitude', "gps_wgs_z"],
                      ['accuracy', "gps_h_afw"], ['altitudeAccuracy', "gps_z_afw"],
                      ['epsg', "epsg"], ['altitude_nap_pole', "gps_z_nap_pole"]]
@@ -445,9 +446,9 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         fixed_point['fotos'] = ";".join([os.path.basename(photo).split('.')[0] for photo in fp.get('photos', [])])
 
-        fixed_point['datum'] = fp.get('created', '')
+        fixed_point['datumtijd'] = fp.get('created', '')
 
-        # TODO: this needs a better solution and fixed to newest version
+        # TODO: this needs a better solution
         coordinates = [0.0, 0.0]
 
         pre_coords = (get_float(fp['location'].get('x')), get_float(fp['location'].get('y')),
