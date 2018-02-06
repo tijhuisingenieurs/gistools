@@ -3,7 +3,7 @@ import os
 from math import sqrt
 
 from gistools.utils.collection import MemCollection, OrderedDict
-from gistools.utils.conversion_tools import get_float
+from gistools.utils.conversion_tools import get_float, get_int
 from gistools.utils.iso8601 import parse_date
 from gistools.utils.json_handler import json_to_dict
 from gistools.utils.geometry import TLine
@@ -48,6 +48,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
     prof_col = MemCollection(geometry_type='LineString')
     ttlr_col = MemCollection(geometry_type='Point')
     fp_col = MemCollection(geometry_type='Point')
+    boor_col = MemCollection(geometry_type='Point')
 
     project_id = str(json_dict['id'])
     proj_name = str(json_dict['name'])
@@ -424,10 +425,17 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             p['last_modified'] = point.get('last_modified', "")
 
-            point_col.writerecords([
-                {'geometry': {'type': 'Point',
-                              'coordinates': tuple(coords)},
-                 'properties': p}])
+            if p['code'] != 'Controle boring':
+                point_col.writerecords([
+                    {'geometry': {'type': 'Point',
+                                  'coordinates': tuple(coords)},
+                     'properties': p}])
+            else:
+                p['boring_nr'] = get_int(point.get('boring_nr'), "")
+                boor_col.writerecords([
+                    {'geometry': {'type': 'Point',
+                                  'coordinates': tuple(coords)},
+                     'properties': p}])
 
             log.warning('records toegevoegd %i', i + 1)
 
@@ -470,7 +478,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             'properties': fixed_point}])
 
     # lever de collection met meetpunten en de dicts voor WDB terug
-    return point_col, prof_col, ttlr_col, fp_col
+    return point_col, prof_col, ttlr_col, fp_col, boor_col
 
 
 def calc_profile_distance(point, ttl, ttr, manual_width):
