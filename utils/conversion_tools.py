@@ -27,6 +27,8 @@ def get_string(value, default=None):
         return default
     elif value == '':
         return default
+    elif value == ' ':
+        return default
     else:
         return str(value)
 

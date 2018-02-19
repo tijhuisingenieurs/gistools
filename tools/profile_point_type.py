@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from gistools.utils.conversion_tools import get_string
 
 
 def get_nearest_point(points, target_afstand, skip_codes=[], min_afstand=None, max_afstand=None):
