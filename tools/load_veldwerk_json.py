@@ -336,7 +336,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             p['code'] = point.get('code', '')
             p['sub_code'] = point.get('sub_code', '')
-            p['drawing_code'] = point.get('drawing_code', '')
+            p['tekencode'] = point.get('drawing_code', '')
 
             if recalculate_gps_distance and point.get('distance_source', None) == 'gps':
                 p['afstand'] = calc_profile_distance(point, ttl, ttr, prof['h_breedte'])

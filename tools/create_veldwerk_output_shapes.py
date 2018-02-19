@@ -1,7 +1,7 @@
 import logging
 
 from gistools.utils.collection import MemCollection, OrderedDict
-from gistools.utils.conversion_tools import get_float
+from gistools.utils.conversion_tools import get_float, get_string
 from gistools.utils.iso8601 import parse_date
 from gistools.utils.json_handler import json_to_dict
 from gistools.utils.geometry import TLine
@@ -63,11 +63,13 @@ def create_fieldwork_output_shapes(line_col, point_col, boringen_col):
                     'prof_ids': point_props['prof_ids'],
                     'datum': l['datum'],
                     'code': point_props['code'],
-                    'tekencode': point_props.get('tekencode', 999),
+                    'sub_code': point_props['sub_code'],
+                    'tekencode': get_string(point_props['tekencode'], 999),
                     'afstand': round(get_float(point_props['afstand']), 2),
                     'x_coord': round(xy[0], 3),
                     'y_coord': round(xy[1], 3),
-                    'wpeil': l['wpeil']
+                    'wpeil': l['wpeil'],
+                    'fotos': point_props['fotos']
                 }
 
                 # indien alle hoogtes bekend, vul waarden in
