@@ -242,7 +242,7 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
                 # wegschrijven meting regels
                 meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
                                 x_coord + ',' + y_coord + ',' +
-                                upper_level + ',' + lower_level + ',</METING>')
+                                lower_level + ',' + upper_level + ',</METING>')
                 writer.writerow({'regel': meting_tekst})
 
             writer.writerow({'regel': profiel_eind})
