@@ -460,16 +460,16 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         coordinates = [0.0, 0.0]
 
         pre_coords = (get_float(fp['location'].get('x')), get_float(fp['location'].get('y')),
-                                 get_float(fp['location'].get('z')))
+                                 get_float(fp['location'].get('altitude_nap_pole')))
 
         if None not in pre_coords[:2]:
             coordinates = pre_coords[:2]
             fixed_point['x_coord'] = pre_coords[0]
             fixed_point['y_coord'] = pre_coords[1]
             if pre_coords[2] and pre_coords[2] != -99:
-                fixed_point['z'] = pre_coords[2]
+                fixed_point['z_nap'] = pre_coords[2]
             else:
-                fixed_point['z'] = -9999
+                fixed_point['z_nap'] = -9999
 
         # Write to point collection
         fp_col.writerecords([
