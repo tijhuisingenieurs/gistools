@@ -198,7 +198,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
 
         self.assertDictEqual(line_col[0]['geometry'],
                              {'type': 'LineString',
-                              'coordinates': ((10.0, 0.0),(16.0, 0.0))})
+                              'coordinates': ((10.0, 0.0), (16.0, 0.0))})
 
         self.assertDictEqual(line_col[0]['properties'],
                              {'pk': '1',
