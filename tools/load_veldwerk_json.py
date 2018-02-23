@@ -144,8 +144,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         prof['gps_breed'] = None
 
-        if (ttl and ttr and
-                ttl.get('rd_coordinates') and ttr.get('rd_coordinates')):
+        if (ttl and ttr and ttl.get('rd_coordinates') and ttr.get('rd_coordinates')):
             prof['gps_breed'] = sqrt(
                 (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
                 (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
@@ -214,7 +213,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         else:
             prof['geom_bron'] = '22L en/of 22R mist en geen meetplan shape opgegeven'
 
-        line = TLine(coordinates)
+        if len(coordinates) == 1:
+            line = TLine(coordinates[0])
+        else:
+            line = TLine(coordinates)
 
         if prof['breedte'] is not None:
             line = line.get_scaled_line_with_length(prof['breedte'], 0.5)
@@ -298,13 +300,17 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == tt['ids']]
 
                     if len(meet_prof) > 0:
+                        coordinates = meet_prof[0]['geometry']['coordinates']
+                        if len(coordinates) == 1:
+                            coordinates = coordinates[0]
+
                         if point.get('code', '') == '22L':
-                            tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][0][0]
-                            tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][0][1]
+                            tt['x_coord'] = coordinates[0][0]
+                            tt['y_coord'] = coordinates[0][1]
                             tt['z'] = ''
                         if point.get('code', '') == '22R':
-                            tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][-1][0]
-                            tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][-1][1]
+                            tt['x_coord'] = coordinates[-1][0]
+                            tt['y_coord'] = coordinates[-1][1]
                             tt['z'] = ''
                     else:
                         log.warning('Bij profiel %s mist 22L en/of 22R en is geen profiel gevonden in meetplan shape',
