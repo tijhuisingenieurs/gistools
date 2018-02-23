@@ -15,7 +15,7 @@ class TestJsonHandler(unittest.TestCase):
         """test fill dictionary with json data from file"""
 
         point_col = MemCollection(geometry_type='MultiPoint')
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata.json')
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_2.json')
 
         json_dict = json_to_dict(json_file)
 
@@ -24,9 +24,10 @@ class TestJsonHandler(unittest.TestCase):
         # - name = project name
         # - measured_profiles = dict with profiles
         # - predifined_profiles = dict with planned locations (optional)
+
         self.assertEqual(len(json_dict), 4)
-        self.assertEqual(json_dict['id'], 'p1')
-        self.assertEqual(json_dict['name'], 'project_1')
-        self.assertEqual(len(json_dict['predefined_profiles']), 3)
-        self.assertEqual(len(json_dict['measured_profiles']), 12)
+        self.assertEqual(json_dict['id'], 'TI17247_scheldestromen_DG1_SM')
+        self.assertEqual(json_dict['name'], 'TI17247_scheldestromen_DG1_SM')
+        self.assertEqual(len(json_dict['point_notes']), 6)
+        self.assertEqual(len(json_dict['measured_profiles']), 3)
 

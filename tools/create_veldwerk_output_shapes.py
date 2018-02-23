@@ -1,7 +1,7 @@
 import logging
 
 from gistools.utils.collection import MemCollection, OrderedDict
-from gistools.utils.conversion_tools import get_float
+from gistools.utils.conversion_tools import get_float, get_string
 from gistools.utils.iso8601 import parse_date
 from gistools.utils.json_handler import json_to_dict
 from gistools.utils.geometry import TLine
@@ -9,7 +9,7 @@ from gistools.utils.geometry import TLine
 log = logging.getLogger(__name__)
 
 
-def create_fieldwork_output_shapes(line_col, point_col):
+def create_fieldwork_output_shapes(line_col, point_col, boringen_col):
     """
     
     line_col (MemCollection): profile line collection 
@@ -22,6 +22,7 @@ def create_fieldwork_output_shapes(line_col, point_col):
     #
     output_line_col = MemCollection(geometry_type='LineString')
     output_point_col = MemCollection(geometry_type='Point')
+    output_boor_col = MemCollection(geometry_type='Point')
 
     for line in line_col:
 
@@ -62,11 +63,13 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     'prof_ids': point_props['prof_ids'],
                     'datum': l['datum'],
                     'code': point_props['code'],
-                    'tekencode': point_props.get('tekencode', 999),
+                    'sub_code': point_props['sub_code'],
+                    'tekencode': get_string(point_props['tekencode'], 999),
                     'afstand': round(get_float(point_props['afstand']), 2),
                     'x_coord': round(xy[0], 3),
                     'y_coord': round(xy[1], 3),
-                    'wpeil': l['wpeil']
+                    'wpeil': l['wpeil'],
+                    'fotos': point_props['fotos']
                 }
 
                 # indien alle hoogtes bekend, vul waarden in
@@ -137,6 +140,37 @@ def create_fieldwork_output_shapes(line_col, point_col):
                     'properties': p
                 }])
 
+        if boringen_col:
+            for point in boringen_col:
+                if point['properties'].get('prof_ids') == l['ids']:
+                    point_props = point['properties']
+                    afstand = round(get_float(point_props['afstand']), 2)
+
+                    xy = line.get_projected_point_at_distance(afstand)
+
+                    p = {
+                        'project_id': l['project_id'],
+                        'proj_name': l['proj_name'],
+                        'prof_ids': point_props['prof_ids'],
+                        'boring_nr': point_props['boring_nr'],
+                        'datumtijd': point_props['datumtijd'],
+                        'afstand': round(get_float(point_props['afstand']), 2),
+                        'fotos': point_props['fotos'],
+                        'opm': point_props['opm'],
+                        'x_coord': round(xy[0], 3),
+                        'y_coord': round(xy[1], 3),
+                    }
+
+                    output_boor_col.writerecords([{
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': xy
+                        },
+                        'properties': p
+                    }])
+
+
+
         l['xb_prof'] = line.coords[0][0]
         l['yb_prof'] = line.coords[0][1]
 
@@ -151,4 +185,4 @@ def create_fieldwork_output_shapes(line_col, point_col):
             'properties': l
         }])
 
-    return output_line_col, output_point_col
+    return output_line_col, output_point_col, output_boor_col

@@ -11,186 +11,293 @@ class TestLoadVeldwerk(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_version_with_error(self):
-
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17268_lwd.json')
-        fielddata_to_memcollections(json_file)
-
-    def test_version_with_error2(self):
-
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'proj_TI17279_AdamseBos.json')
-        fielddata_to_memcollections(json_file)
-
     def test_fielddata_to_memcollection(self):
         """test fill MemCollection with json data from file"""
 
-        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata.json')
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_2.json')
+
         meetplan_col = MemCollection(geometry_type='MultiLineString')
 
         meetplan_col.writerecords([
             {'geometry': {'type': 'LineString',
-                          'coordinates': [(114231.0, 472589.0), (114238.0, 472587.0)]},
+                          'coordinates': [(69119.450, 406358.153), (69121.600, 406361.359)]},
              'properties': {
-                 'DWPnr': '267'}}
+                 'DWPnr': 13031,
+                 'DWPcode': "13031"}}
         ])
 
-        point_col, profile_col, ttlr_col = fielddata_to_memcollections(json_file, meetplan_col, 'DWPnr')
+        point_col, profile_col, ttlr_col, fp_col, boor_col = fielddata_to_memcollections(json_file, meetplan_col,
+                                                                                         profile_id_field='DWPcode')
 
-        # 217 meetpunten in json file, waarvan 99 met coordinaten
-        self.assertEqual(len(point_col), 217)
+        # 58 meetpunten in json file
+        self.assertEqual(len(point_col), 58)
+
+        # 6 point notes in json file
+        self.assertEqual(len(fp_col), 6)
 
         # test in bron volledig correct gevuld profiel
         point = None
         for p in point_col.filter():
-            if p['properties']['prof_ids'] == '279' and p['properties']['datumtijd'] == '2017-06-14T12:40:59.321Z':
+            if p['properties']['prof_ids'] == '13032' and p['properties']['datumtijd'] == '2018-01-29T10:21:13.291Z':
                 point = p
                 break
 
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
-                              'coordinates': (114215.59920829066, 472040.7198625375)})
+                              'coordinates': (69463.24580575209, 406248.62133429525)})
         self.maxDiff = None
         self.assertDictEqual(dict(point['properties']),
-                             {'prof_pk': 5,
-                              'prof_ids': '279',
-                              'prof_hpeil': -1.75,
-                              'prof_lpeil': -1.8,
-                              'prof_rpeil': -1.76,
-                              'prof_wpeil': -1.75,
-                              'prof_opm': '1=Beschoeiing ',
+                             {'prof_pk': 1,
+                              'prof_ids': '13032',
+                              'prof_hpeil': -0.59,
+                              'prof_lpeil': -0.5729728287114986,
+                              'prof_rpeil': -0.5949266523676746,
+                              'prof_wpeil': -0.59,
+                              'prof_opm': 'Oude beschoeiing op 22lZie foto bij 22l',
                               'volgnr': 0,
-                              'project_id': 'p1',
-                              'proj_name': 'project_1',
-                              'datumtijd': '2017-06-14T12:40:59.321Z',
+                              'project_id': 'TI17247_scheldestromen_DG1_SM',
+                              'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                              'datumtijd': '2018-01-29T10:21:13.291Z',
                               'code': '1',
-                              'opm': '',
+                              'sub_code': '99',
+                              'tekencode': "",
+                              'opm': 'opmerking',
                               'method': 'OK met GPS',
-                              'stok_len': 2.0,
+                              'stok_len': 2.007,
                               'l1_len': 0.13428,
-                              'gps_rd_x': 114215.59920829066,
-                              'gps_rd_y': 472040.7198625375,
-                              'gps_rd_z': -1.3267445101445259,
-                              'gps_wgs_x': 52.2349214,
-                              'gps_wgs_y': 4.790167,
-                              'gps_wgs_z': 43.999000549316406,
-                              'gps_h_afw': 3.9000000953674316,
-                              'gps_z_afw': None,
-                              'afstand': 0.0,
+                              'gps_rd_x': 69463.24580575209,
+                              'gps_rd_y': 406248.62133429525,
+                              'gps_rd_z': 3.13924133377236,
+                              'gps_wgs_x': 51.63855382666667,
+                              'gps_wgs_y': 4.151526587999999,
+                              'gps_wgs_z': 47.221,
+                              'gps_h_afw': 0.006,
+                              'gps_z_afw': 0.013,
+                              'afstand': -7.208174397856045,
                               'afst_bron': 'gps',
-                              'afst_afw': 3.9000000953674316,
+                              'afst_afw': 0.013,
                               'ok': None,
                               'ok_bron': '',
                               'ok_afw': None,
                               'ok_eenheid': '',
-                              'bk': -1.33,
+                              'bk': 0.9979613337723601,
                               'bk_bron': 'gps',
-                              'bk_afw': None,
+                              'bk_afw': 0.013,
                               'bk_eenheid': 'mNAP',
-                              '_bk_nap': -1.33,
-                              '_bk_wp': -42,
-                              '_ok_nap': -1.33,
-                              '_ok_wp': -42,
+                              '_bk_nap': 0.9979613337723601,
+                              '_bk_wp': -159,
+                              '_ok_nap': 0.9979613337723601,
+                              '_ok_wp': -159,
+                              'fotos': '',
+                              'epsg': 28992.0,
+                              'gps_z_nap_pole': 0.9979613337723601,
+                              'last_modified': ""
                               })
 
-        # 217 punten in dataset, waarvan 24 punten met een 22 code, 
-        # waarvan 2 punten via meetplan en 2 zonder coordinaten = 22 met coordinaten
-        self.assertEqual(len(ttlr_col), 22)
+        # 58 punten in dataset, 3 profielen, en 4 22 punten
+        self.assertEqual(len(ttlr_col), 5)
         point = None
 
         for p in ttlr_col.filter():
-            if p['properties']['ids'] == '279' and p['properties']['code'] == '22L':
+            if p['properties']['ids'] == '13032' and p['properties']['code'] == '22L':
                 point = p
                 break
 
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
-                              'coordinates': (114216.10686321165, 472040.14822950924)})
+                              'coordinates': (69459.77787734043, 406254.94045216736)})
 
         self.assertDictEqual(dict(point['properties']),
                              {'wpeil_bron': 'manual',
                               'code': '22L',
                               'afstand': 0.00,
-                              'y_coord': 472040.14822950924,
-                              'z': -1.7967513668576456,
-                              'datum': '14/06/2017',
-                              'ids': '279',
-                              'x_coord': 114216.10686321165,
-                              'prof_pk': 5,
-                              'project_id': 'p1',
-                              'proj_name': 'project_1',
-                              'wpeil': -1.75,
-                              'breedte': 3.446765493694888,
-                              'gps_breed': 3.446765493694888,
+                              'y_coord': 406254.94045216736,
+                              'z': 1.5683071712885015,
+                              'datum': '29/01/2018',
+                              'ids': '13032',
+                              'x_coord': 69459.77787734043,
+                              'prof_pk': 1,
+                              'project_id': 'TI17247_scheldestromen_DG1_SM',
+                              'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                              'wpeil': -0.59,
+                              'breedte': 5.188813223718082,
+                              'gps_breed': 5.188813223718082,
                               'h_breedte': None,
-                              'm99_breed': 3.19
+                              'm99_breed': 5.140231798885141
                               })
 
         point = None
         for p in ttlr_col.filter():
-            if p['properties']['ids'] == '279' and p['properties']['code'] == '22R':
+            if p['properties']['ids'] == '13032' and p['properties']['code'] == '22R':
                 point = p
                 break
 
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
-                              'coordinates': (114219.05704747832, 472038.3659261789)})
+                              'coordinates': (69457.17081247512, 406259.4267641782)})
 
         self.assertDictEqual(dict(point['properties']),
                              {'wpeil_bron': 'manual',
                               'code': '22R',
-                              'afstand': 3.45,
-                              'y_coord': 472038.3659261789,
-                              'z': -1.7637636573671327,
-                              'datum': '14/06/2017',
-                              'ids': '279',
-                              'x_coord': 114219.05704747832,
-                              'prof_pk': 5,
-                              'project_id': 'p1',
-                              'proj_name': 'project_1',
-                              'wpeil': -1.75,
-                              'breedte': 3.446765493694888,
-                              'gps_breed': 3.446765493694888,
+                              'afstand': 5.188813223718082,
+                              'y_coord': 406259.4267641782,
+                              'z': 1.5463533476323255,
+                              'datum': '29/01/2018',
+                              'ids': '13032',
+                              'x_coord': 69457.17081247512,
+                              'prof_pk': 1,
+                              'project_id': 'TI17247_scheldestromen_DG1_SM',
+                              'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                              'wpeil': -0.59,
+                              'breedte': 5.188813223718082,
+                              'gps_breed': 5.188813223718082,
                               'h_breedte': None,
-                              'm99_breed': 3.19
+                              'm99_breed': 5.140231798885141
                               })
 
-        # profile 267 heeft geen coordinaten bij de 22-punten
+        # profile 13031 heeft geen coordinaten bij de 22-punten
         point = None
         for p in ttlr_col.filter():
-            if p['properties']['ids'] == '267' and p['properties']['code'] == '22L':
+            if p['properties']['ids'] == '13031' and p['properties']['code'] == '22L':
                 point = p
                 break
 
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
-                              'coordinates': (114231.0, 472589.0)})
+                              'coordinates': (69119.45, 406358.153)})
 
         self.assertDictEqual(dict(point['properties']),
                              {'wpeil_bron': 'manual',
                               'code': '22L',
                               'afstand': 0.00,
-                              'y_coord': 472589.0,
+                              'y_coord': 406358.153,
                               'z': '',
-                              'datum': '20/06/2017',
-                              'ids': '267',
-                              'x_coord': 114231.0,
-                              'prof_pk': 2,
-                              'project_id': 'p1',
-                              'proj_name': 'project_1',
-                              'wpeil': -5.36,
-                              'breedte': 7.70,
+                              'datum': '29/01/2018',
+                              'ids': '13031',
+                              'x_coord': 69119.45,
+                              'prof_pk': 0,
+                              'project_id': 'TI17247_scheldestromen_DG1_SM',
+                              'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                              'wpeil': -0.59,
+                              'breedte': 3.8061359397894665,
                               'gps_breed': None,
                               'h_breedte': None,
-                              'm99_breed': 7.70
+                              'm99_breed':  3.8061359397894665
                               })
 
         # profile 269 heeft geen coordinaten bij de 22-punten en geen entry in meetplan        
         point = {'geometry': {'type': 'Point', 'coordinates': (0.0, 0.0)}, 'properties': {''}, 'id': 999}
         for p in ttlr_col.filter():
-            if p['properties']['ids'] == '269' and p['properties']['code'] == '22L':
+            if p['properties']['ids'] == '13033' and p['properties']['code'] == '22R':
                 point = p
                 break
 
         self.assertDictEqual(point['geometry'],
                              {'type': 'Point',
                               'coordinates': (0.0, 0.0)})
+
+        # Test collection of fixed points
+        for p in fp_col.filter():
+            # point 0 is complete
+            if p['properties']['ids'] == '0':
+                self.assertDictEqual(dict(p['properties']),
+                                     {'project_id': 'TI17247_scheldestromen_DG1_SM',
+                                      'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                                      'type': "Vast punt",
+                                      'opm': "43D188",
+                                      'fotos': "1517214684398-1516367554016",
+                                      'datumtijd': "2018-01-29T08:31:00.235Z",
+                                      'ids': '0',
+                                      'x_coord': 72085.4317309772,
+                                      'y_coord': 405657.9916649309,
+                                      'z_nap': 1.1245780588627179,
+                                      'vp_pk': 1
+                                      })
+
+            # point 0 has two photos
+            if p['properties']['ids'] == '0':
+                self.assertEqual(p['properties']['fotos'], "1517214684398-1516367554016")
+                self.assertEqual(p['properties']['type'], "Vast punt")
+
+            # point 1 has been set manually on the map
+            if p['properties']['ids'] == '1':
+                self.assertEqual(p['properties']['fotos'], "1517220431127")
+                self.assertEqual(p['properties']['z_nap'], -9999)
+                self.assertEqual(p['properties']['type'], "Inventarisatie")
+
+            # point 3 has no photos
+            if p['properties']['ids'] == '3':
+                self.assertEqual(p['properties']['fotos'], "")
+                self.assertEqual(p['properties']['z_nap'], 1.1325787993745715)
+
+            # point 4 has no coordinates
+            if p['properties']['ids'] == '4':
+                self.assertEqual(p['geometry']['coordinates'], [0,0])
+
+        # Test collection of boorpunten
+        for bp in boor_col.filter():
+            # boring in profile 13031, heeft geen coordinaten
+            if bp['properties']['prof_ids'] == '13031' and bp['properties']['boring_nr'] == "":
+                self.assertDictEqual(dict(bp['properties']),
+                                     {'project_id': 'TI17247_scheldestromen_DG1_SM',
+                                      'proj_name': 'TI17247_scheldestromen_DG1_SM',
+                                      'prof_pk': 0,
+                                      'prof_wpeil': -0.59,
+                                      'code': 'Controle boring',
+                                      'afstand': 1.73,
+                                      'afst_bron': 'manual',
+                                      'afst_afw': None,
+                                      'bk_afw': None,
+                                      'ok_eenheid': None,
+                                      'opm': '',
+                                      '_bk_nap': None,
+                                      'fotos': '1517225956486',
+                                      'datumtijd': '2018-01-29T11:41:57.994Z',
+                                      'gps_rd_x': None,
+                                      'gps_rd_y': None,
+                                      'gps_rd_z': None,
+                                      'boring_nr': '',
+                                      '_bk_wp': None,
+                                      '_ok_nap': None,
+                                      '_ok_wp': None,
+                                      'gps_h_afw': None,
+                                      'bk': None,
+                                      'bk_bron': None,
+                                      'bk_eenheid': None,
+                                      'epsg': None,
+                                      'gps_wgs_x': None,
+                                      'gps_wgs_y': None,
+                                      'gps_wgs_z': None,
+                                      'gps_z_afw': None,
+                                      'gps_z_nap_pole': None,
+                                      'l1_len': None,
+                                      'last_modified': '',
+                                      'method': '',
+                                      'ok': None,
+                                      'ok_afw': None,
+                                      'ok_bron': None,
+                                      'prof_hpeil': -0.59,
+                                      'prof_ids': '13031',
+                                      'prof_lpeil': None,
+                                      'prof_opm': '',
+                                      'prof_rpeil': None,
+                                      'stok_len': None,
+                                      'sub_code': '',
+                                      'tekencode': '',
+                                      'volgnr': 21
+                                      })
+
+            # Boring in profile 13033 has coordinates
+            if bp['properties']['prof_ids'] == '13033' and bp['properties']['boring_nr'] == "":
+                self.assertEqual(bp['geometry']['coordinates'], (68786.93810015894, 406581.3507081304))
+
+
+    def test_fielddata_to_memcollection2(self):
+        """test fill MemCollection with json data from file without point notes"""
+
+        json_file = os.path.join(os.path.dirname(__file__), 'data', 'projectdata_2_noPointNotes.json')
+
+        point_col, profile_col, ttlr_col, fp_col, boor_col = fielddata_to_memcollections(json_file)
+
+        self.assertEqual(bool(point_col), True)
+        self.assertEqual(bool(fp_col), False)

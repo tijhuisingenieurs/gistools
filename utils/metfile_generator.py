@@ -4,6 +4,7 @@ import dateutil.parser as parser
 import os.path
 
 from collection import MemCollection, OrderedDict
+from gistools.utils.conversion_tools import get_string
 
 import logging
 log = logging.getLogger(__name__)
@@ -175,5 +176,76 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
                 writer.writerow({'regel': meting_tekst})
 
             writer.writerow({'regel': profiel_eind})
+
+        elif type_metfile == "Scheldestromen":
+            # write version
+            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            writer.writerow({'regel': version})
+
+            # write project data in REEKS
+            proj_nameList = project.split(",")
+            project_tekst = ('<REEKS>' + "\n" + proj_nameList[0] + "\n" + proj_nameList[1] + "\n" + '</REEKS>' + "\n")
+            csvfile.write(project_tekst)
+
+            for i, row in enumerate(sorted_points):
+                profiel = str(sorted_points[i]['properties']['prof_ids'])
+                profiel = profiel.split("_")[-1]
+
+                if prefix != None:
+                    profiel = prefix + profiel
+
+                datum = (str(sorted_points[i]['properties']['datum']))[:10]
+                date = parser.parse(datum)
+                new_date = date.strftime("%Y%m%d")
+                code = sorted_points[i]['properties']['code']
+                sub_code = get_string(sorted_points[i]['properties']['sub_code'])
+                tekencode = sorted_points[i]['properties']['tekencode']
+
+                if code in ['22L', '22l', '22R', '22r']:
+                    code = 22
+                if codering == 1:
+                    tekencode = sorted_points[i]['properties']['tekencode']
+                if codering == 2:
+                    if len(str(code)) > 3:
+                        a = str(code).split('_')
+                        code = a[0]
+                        tekencode = a[1]
+
+                if sub_code:
+                    code = sub_code
+
+                x_coord = str(sorted_points[i]['properties']['x_coord'])
+                y_coord = str(sorted_points[i]['properties']['y_coord'])
+                upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+                lower_level = str(sorted_points[i]['properties']['_ok_nap'])
+
+                # check nieuw profiel
+                if current_profile != profiel:
+
+                    # check niet eerste profiel -> dan vorige profiel nog afsluiten
+                    if current_profile != '':
+                        writer.writerow({'regel': profiel_eind})
+
+                    # wegschrijven profielregel
+                    # TODO: remove hardcoded, find different solution
+                    profiel_tekst = ('<PROFIEL>\n' + "OPR" + profiel + ',\n' +
+                                     "KIO_RTK-GPS (NTRIP)_Harde bodem" + ',\n' + #hardcoded
+                                     new_date + ',\n' +
+                                     '0.00,\nNAP,\n' +
+                                     'ABS,\n2,\n' +
+                                     'XY,' + "\n" + x_coord + ',\n' + y_coord + ',\n')
+
+                    # writer.writerow({'regel': profiel_tekst})
+                    csvfile.write(profiel_tekst)
+                    current_profile = profiel
+
+                # wegschrijven meting regels
+                meting_tekst = ('<METING>' + str(code) + ',' + str(tekencode) + ',' +
+                                x_coord + ',' + y_coord + ',' +
+                                lower_level + ',' + upper_level + ',</METING>')
+                writer.writerow({'regel': meting_tekst})
+
+            writer.writerow({'regel': profiel_eind})
+
     
     return
