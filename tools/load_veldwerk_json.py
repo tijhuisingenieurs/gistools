@@ -454,7 +454,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         fixed_point['fotos'] = "-".join([os.path.basename(photo).split('.')[0] for photo in fp.get('photos', [])])
 
-        fixed_point['datumtijd'] = fp.get('created', '')
+        fixed_point['gemeten_op'] = fp.get('created', '')
 
         # TODO: this needs a better solution
         coordinates = [0.0, 0.0]
