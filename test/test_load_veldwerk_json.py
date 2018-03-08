@@ -35,7 +35,8 @@ class TestLoadVeldwerk(unittest.TestCase):
         # 6 point notes in json file
         self.assertEqual(len(fp_col), 6)
 
-        # test in bron volledig correct gevuld profiel
+        # test in bron volledig correct gevuld profiel, except for ok_bron and ok_eenheid filled in for the first
+        # '1' point
         point = None
         for p in point_col.filter():
             if p['properties']['prof_ids'] == '13032' and p['properties']['datumtijd'] == '2018-01-29T10:21:13.291Z':
@@ -77,9 +78,9 @@ class TestLoadVeldwerk(unittest.TestCase):
                               'afst_bron': 'gps',
                               'afst_afw': 0.013,
                               'ok': None,
-                              'ok_bron': '',
+                              'ok_bron': 'manual',
                               'ok_afw': None,
-                              'ok_eenheid': '',
+                              'ok_eenheid': 'cm tov WP',
                               'bk': 0.9979613337723601,
                               'bk_bron': 'gps',
                               'bk_afw': 0.013,
@@ -206,7 +207,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                                       'type': "Vast punt",
                                       'opm': "43D188",
                                       'fotos': "1517214684398-1516367554016",
-                                      'datumtijd': "2018-01-29T08:31:00.235Z",
+                                      'gemeten_op': "2018-01-29T08:31:00.235Z",
                                       'ids': '0',
                                       'x_coord': 72085.4317309772,
                                       'y_coord': 405657.9916649309,

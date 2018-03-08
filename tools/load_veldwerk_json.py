@@ -49,6 +49,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
     ttlr_col = MemCollection(geometry_type='Point')
     fp_col = MemCollection(geometry_type='Point')
     boor_col = MemCollection(geometry_type='Point')
+    sorted_col = MemCollection(geometry_type='Point')
 
     project_id = str(json_dict['id'])
     proj_name = str(json_dict['name'])
@@ -144,8 +145,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
         prof['gps_breed'] = None
 
-        if (ttl and ttr and
-                ttl.get('rd_coordinates') and ttr.get('rd_coordinates')):
+        if (ttl and ttr and ttl.get('rd_coordinates') and ttr.get('rd_coordinates')):
             prof['gps_breed'] = sqrt(
                 (ttl['rd_coordinates'][0] - ttr['rd_coordinates'][0]) ** 2 +
                 (ttl['rd_coordinates'][1] - ttr['rd_coordinates'][1]) ** 2)
@@ -214,7 +214,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         else:
             prof['geom_bron'] = '22L en/of 22R mist en geen meetplan shape opgegeven'
 
-        line = TLine(coordinates)
+        if len(coordinates) == 1:
+            line = TLine(coordinates[0])
+        else:
+            line = TLine(coordinates)
 
         if prof['breedte'] is not None:
             line = line.get_scaled_line_with_length(prof['breedte'], 0.5)
@@ -258,7 +261,6 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                           'coordinates': line.coordinates},
              'properties': prof}])
 
-        # todo: sort profile points
         for i, point in enumerate(profile.get('profile_points', [])):
 
             ############################# 22L en 22R #################################
@@ -298,13 +300,17 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                     meet_prof = [p for p in profile_plan_col if p['properties'][profile_id_field] == tt['ids']]
 
                     if len(meet_prof) > 0:
+                        coordinates = meet_prof[0]['geometry']['coordinates']
+                        if len(coordinates) == 1:
+                            coordinates = coordinates[0]
+
                         if point.get('code', '') == '22L':
-                            tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][0][0]
-                            tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][0][1]
+                            tt['x_coord'] = coordinates[0][0]
+                            tt['y_coord'] = coordinates[0][1]
                             tt['z'] = ''
                         if point.get('code', '') == '22R':
-                            tt['x_coord'] = meet_prof[0]['geometry']['coordinates'][-1][0]
-                            tt['y_coord'] = meet_prof[0]['geometry']['coordinates'][-1][1]
+                            tt['x_coord'] = coordinates[-1][0]
+                            tt['y_coord'] = coordinates[-1][1]
                             tt['z'] = ''
                     else:
                         log.warning('Bij profiel %s mist 22L en/of 22R en is geen profiel gevonden in meetplan shape',
@@ -360,13 +366,13 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             # afgeleiden
 
-            if p['bk_bron'] == 'gps':
+            if p['bk_eenheid'] == 'mNAP':
                 p['_bk_nap'] = p['bk']
                 if prof['wpeil'] is not None and p['bk'] is not None:
                     p['_bk_wp'] = int(round((prof['wpeil'] - p['bk']) * 100))
                 else:
                     p['_bk_wp'] = None
-            elif p['bk_bron'] == 'manual' and p['bk_eenheid'] == 'cm tov WP':
+            elif p['bk_eenheid'] == 'cm tov WP':
                 p['_bk_wp'] = p['bk']
                 if prof['wpeil'] is not None and p['bk'] is not None:
                     p['_bk_nap'] = prof['wpeil'] - (p['bk'] / 100)
@@ -376,16 +382,19 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
                 p['_bk_wp'] = None
                 p['_bk_nap'] = None
 
-            if p['ok_bron'] == 'gps':
+            if p['ok_eenheid'] == 'mNAP':
                 p['_ok_nap'] = p['ok']
                 if prof['wpeil'] is not None and p['ok'] is not None:
                     p['_ok_wp'] = int(round((prof['wpeil'] - p['ok']) * 100))
                 else:
                     p['_ok_wp'] = None
-            elif p['ok_bron'] == 'manual' and p['ok_eenheid'] == 'cm tov WP':
+            elif p['ok_eenheid'] == 'cm tov WP':
                 p['_ok_wp'] = p['ok']
                 if prof['wpeil'] is not None and p['ok'] is not None:
                     p['_ok_nap'] = prof['wpeil'] - (p['ok'] / 100)
+                elif code_point in ['1', '2']:
+                    p['_ok_wp'] = p['_bk_wp']
+                    p['_ok_nap'] = p['_bk_nap']
                 else:
                     p['_ok_nap'] = None
             elif p['ok_bron'] == '' and p['_bk_wp'] is not None:
@@ -394,6 +403,12 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             else:
                 p['_ok_wp'] = None
                 p['_ok_nap'] = None
+
+            if code_point in ['22L', '22R']:
+                p['_bk_nap'] = prof['wpeil']
+                p['_ok_nap'] = prof['wpeil']
+                p['_bk_wp'] = 0
+                p['_ok_wp'] = 0
 
             # Metadata
             location = point['location']
@@ -439,6 +454,20 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
 
             log.warning('records toegevoegd %i', i + 1)
 
+    sorted_list = sorted(point_col.keys(), key=lambda x: (point_col[x]['properties']['prof_ids'],
+                                                         point_col[x]['properties']['afstand']))
+
+    for i in sorted_list:
+        p = point_col[i]
+        props = p['properties']
+        coords = p['geometry']['coordinates']
+
+        sorted_col.writerecords([
+            {'geometry': {'type': 'Point',
+                          'coordinates': coords},
+             'properties': props}])
+
+
     # Extract fixed points from the geojson
     for fp_pk, point_ids in enumerate(json_dict.get('point_notes', {}.items())):
 
@@ -478,7 +507,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             'properties': fixed_point}])
 
     # lever de collection met meetpunten en de dicts voor WDB terug
-    return point_col, prof_col, ttlr_col, fp_col, boor_col
+    return sorted_col, prof_col, ttlr_col, fp_col, boor_col
 
 
 def calc_profile_distance(point, ttl, ttr, manual_width):
