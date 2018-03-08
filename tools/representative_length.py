@@ -1,0 +1,57 @@
+from shapely.geometry import Point, MultiLineString, LineString
+from gistools.utils.collection import MemCollection, OrderedDict
+
+
+def representative_length(line_col, profile_col):
+    prof_pk = 0
+
+    for feature in line_col:
+        points_col = MemCollection(geometry_type='Point')
+
+        if type(feature['geometry']['coordinates'][0][0]) != tuple:
+            line = LineString(feature['geometry']['coordinates'])
+        else:
+            line = MultiLineString(feature['geometry']['coordinates'])
+
+        for profile in profile_col.filter(bbox=line.bounds, precision=10**-6):
+            profile['properties']['prof_pk'] = prof_pk
+            prof_pk += 1
+            if type(profile['geometry']['coordinates'][0][0]) != tuple:
+                prof = LineString(profile['geometry']['coordinates'])
+            else:
+                prof = MultiLineString(profile['geometry']['coordinates'])
+
+            x = line.intersection(prof)
+
+            if x:
+                props = profile['properties']
+                props['distance'] = line.project(x)
+                points_col.writerecords([
+                    {'geometry': {'type': 'Point',
+                                  'coordinates': x.coords[0]},
+                     'properties': props}]
+                )
+
+        for i in range(len(points_col)):
+            distance = points_col[i]['properties']['distance']
+            if i != len(points_col)-1:
+                post_length = (points_col[i+1]['properties']['distance'] - distance)/2
+                if i == 0:
+                    points_col[i]['properties']['voor_lengte'] = distance
+                else:
+                    pre_length = (distance - points_col[i - 1]['properties']['distance']) / 2
+                    points_col[i]['properties']['voor_lengte'] = pre_length
+                points_col[i]['properties']['na_lengte'] = post_length
+            else:
+                pre_length = (distance - points_col[i - 1]['properties']['distance']) / 2
+                post_length = line.length - distance
+                points_col[i]['properties']['voor_lengte'] = pre_length
+                points_col[i]['properties']['na_lengte'] = post_length
+
+        for profile in profile_col.filter(bbox=line.bounds, precision=10 ** -6):
+            for point in points_col.filter(bbox=line.bounds, precision=10 ** -6):
+                if profile['properties']['prof_pk'] == point['properties']['prof_pk']:
+                    profile['properties']['voor_lengte'] = point['properties']['voor_lengte']
+                    profile['properties']['na_lengte'] = point['properties']['na_lengte']
+
+    return profile_col
