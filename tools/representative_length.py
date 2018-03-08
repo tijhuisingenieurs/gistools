@@ -14,8 +14,6 @@ def representative_length(line_col, profile_col):
             line = MultiLineString(feature['geometry']['coordinates'])
 
         for profile in profile_col.filter(bbox=line.bounds, precision=10**-6):
-            profile['properties']['prof_pk'] = prof_pk
-            prof_pk += 1
             if type(profile['geometry']['coordinates'][0][0]) != tuple:
                 prof = LineString(profile['geometry']['coordinates'])
             else:
@@ -24,7 +22,9 @@ def representative_length(line_col, profile_col):
             x = line.intersection(prof)
 
             if x:
-                props = profile['properties']
+                profile['properties']['prof_pk'] = prof_pk
+                prof_pk += 1
+                props = profile['properties'].copy()
                 props['distance'] = line.project(x)
                 points_col.writerecords([
                     {'geometry': {'type': 'Point',
@@ -34,7 +34,11 @@ def representative_length(line_col, profile_col):
 
         for i in range(len(points_col)):
             distance = points_col[i]['properties']['distance']
-            if i != len(points_col)-1:
+            if len(points_col) == 1:
+                post_length = line.length - distance
+                points_col[i]['properties']['voor_lengte'] = distance
+                points_col[i]['properties']['na_lengte'] = post_length
+            elif i != len(points_col)-1:
                 post_length = (points_col[i+1]['properties']['distance'] - distance)/2
                 if i == 0:
                     points_col[i]['properties']['voor_lengte'] = distance
@@ -50,8 +54,10 @@ def representative_length(line_col, profile_col):
 
         for profile in profile_col.filter(bbox=line.bounds, precision=10 ** -6):
             for point in points_col.filter(bbox=line.bounds, precision=10 ** -6):
-                if profile['properties']['prof_pk'] == point['properties']['prof_pk']:
-                    profile['properties']['voor_lengte'] = point['properties']['voor_lengte']
-                    profile['properties']['na_lengte'] = point['properties']['na_lengte']
+                if profile['properties'].get('prof_pk') == point['properties']['prof_pk']:
+                    total_length = point['properties']['voor_lengte'] + point['properties']['na_lengte']
+                    profile['properties']['voor_leng'] = point['properties']['voor_lengte']
+                    profile['properties']['na_leng'] = point['properties']['na_lengte']
+                    profile['properties']['tot_leng'] = total_length
 
     return profile_col
