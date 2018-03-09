@@ -65,3 +65,11 @@ class TestRepresentativeLength(unittest.TestCase):
         self.assertAlmostEqual(profile_dict[6]['properties']['na_leng'], 5.880241, places=6)
         self.assertAlmostEqual(profile_dict[7]['properties']['voor_leng'], 5.880241, places=6)
         self.assertEqual(profile_dict[7]['properties']['na_leng'], 1.0)
+
+        self.assertEqual(profile_dict[1]['properties']['tot_leng'], 9.5)
+        self.assertEqual(profile_dict[2]['properties']['tot_leng'], 10.5)
+        self.assertAlmostEqual(profile_dict[3]['properties']['tot_leng'], 7.4246212, places=7)
+        self.assertAlmostEqual(profile_dict[4]['properties']['tot_leng'], 6.7175144, places=7)
+        self.assertAlmostEqual(profile_dict[5]['properties']['tot_leng'], 4.0036734, places=7)
+        self.assertAlmostEqual(profile_dict[6]['properties']['tot_leng'], 7.883914, places=6)
+        self.assertAlmostEqual(profile_dict[7]['properties']['tot_leng'], 6.880241, places=6)
