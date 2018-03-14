@@ -14,20 +14,16 @@ def representative_length(line_col, profile_col):
         returns MemCollection profile_col with the representative length data added
         """
 
-    # Initialising prof_pk; a unique identifier for each profile
-    prof_pk = 0
-
     # Loop through each line and select the profiles that intersect the line
     for feature in line_col:
-        # Initialize the collections
-        points_col = MemCollection(geometry_type='Point')
-        sorted_col = MemCollection(geometry_type='Point')
-
         # Check if line is LineString or MultiLineString and create the appropiate line object
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = LineString(feature['geometry']['coordinates'])
         else:
             line = MultiLineString(feature['geometry']['coordinates'])
+
+        # Initialize the list that collects the points that intersect with the line
+        points = []
 
         # Loop through the profiles within the bounding box of the line
         for profile in profile_col.filter(bbox=line.bounds, precision=10**-6):
@@ -39,65 +35,44 @@ def representative_length(line_col, profile_col):
             # Making an intersection of the profile with the line creates a point
             x = line.intersection(prof)
 
-            # If the profile has an intersect with the line, and thus a point is created, a unique prof_pk is assigned
-            # to the profile, distance from the beginning of the line to the point is calculated, and it is added to
-            # the points collection.
+            # If the profile has an intersect with the line, and thus a point is created,
+            # distance from the beginning of the line to the point is calculated, and it is added to
+            # the points collection. Also, references to the original profile and line are added.
             if x:
-                profile['properties']['prof_pk'] = prof_pk
-                prof_pk += 1
-                props = profile['properties'].copy()
-                props['distance'] = line.project(x)
-                points_col.writerecords([
-                    {'geometry': {'type': 'Point',
-                                  'coordinates': x.coords[0]},
-                     'properties': props}]
-                )
+                points.append({
+                    'coords': x.coords[0],
+                    'distance': line.project(x),
+                    'profile': profile,
+                    'line': line
+                })
 
-        # After all profiles on a line are defined, sort them by distance so that they are in order
-        sorted_list = sorted(points_col.keys(), key=lambda x: (points_col[x]['properties']['distance']))
+        # After all profiles on a line are defined, sort them by distance so that they are in the correct order
+        sorted_points = sorted(points, key=lambda x: x['distance'])
 
-        # Write the sorted points to another collection (sorted_col)
-        for i in sorted_list:
-            p = points_col[i]
-            props = p['properties']
-            coords = p['geometry']['coordinates']
-
-            sorted_col.writerecords([
-                {'geometry': {'type': 'Point',
-                              'coordinates': coords},
-                 'properties': props}])
-
-        # Loop again through the points to calculate the representative length variables. Four different situations
+        # Loops again through the points to calculate the representative length variables. Four different situations
         # are treated: only one point on the line, the first point on the line, the last point on the line, and
         # points in between other points
-        for i in range(len(sorted_col)):
-            distance = sorted_col[i]['properties']['distance']
-            if len(sorted_col) == 1:
-                post_length = line.length - distance
-                sorted_col[i]['properties']['voor_lengte'] = distance
-                sorted_col[i]['properties']['na_lengte'] = post_length
-            elif i != len(sorted_col)-1:
-                post_length = (sorted_col[i + 1]['properties']['distance'] - distance) / 2
+        for i, point in enumerate(sorted_points):
+            distance = point['distance']
+            if len(sorted_points) == 1:
+                point['na_lengte'] = line.length - distance
+                point['voor_lengte'] = distance
+            elif i != len(sorted_points) - 1:
+                point['na_lengte'] = (sorted_points[i + 1]['distance'] - distance) / 2
                 if i == 0:
-                    sorted_col[i]['properties']['voor_lengte'] = distance
+                    point['voor_lengte'] = distance
                 else:
-                    pre_length = (distance - sorted_col[i - 1]['properties']['distance']) / 2
-                    sorted_col[i]['properties']['voor_lengte'] = pre_length
-                sorted_col[i]['properties']['na_lengte'] = post_length
+                    point['voor_lengte'] = (distance - sorted_points[i - 1]['distance']) / 2
             else:
-                pre_length = (distance - sorted_col[i - 1]['properties']['distance']) / 2
-                post_length = line.length - distance
-                sorted_col[i]['properties']['voor_lengte'] = pre_length
-                sorted_col[i]['properties']['na_lengte'] = post_length
+                point['voor_lengte'] = (distance - sorted_points[i - 1]['distance']) / 2
+                point['na_lengte'] = line.length - distance
 
-        # Using the unique prof_pk identifier, the representative length data is written in the properties of the
-        # profile collection, after which this updated collection is returned.
-        for profile in profile_col.filter(bbox=line.bounds, precision=10 ** -6):
-            for point in sorted_col.filter(bbox=line.bounds, precision=10 ** -6):
-                if profile['properties'].get('prof_pk') == point['properties']['prof_pk']:
-                    total_length = point['properties']['voor_lengte'] + point['properties']['na_lengte']
-                    profile['properties']['voor_leng'] = point['properties']['voor_lengte']
-                    profile['properties']['na_leng'] = point['properties']['na_lengte']
-                    profile['properties']['tot_leng'] = total_length
+        # The representative length data is written in the properties of the
+        # profile collection, after which this updated profile collection is returned.
+        for point in sorted_points:
+            profile = point['profile']
+            profile['properties']['voor_leng'] = point['voor_lengte']
+            profile['properties']['na_leng'] = point['na_lengte']
+            profile['properties']['tot_leng'] = point['voor_lengte'] + point['na_lengte']
 
     return profile_col
