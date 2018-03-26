@@ -66,7 +66,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
         
         if e.tag in ['profiel', 'PROFIEL', 'Profiel']:
             prof_list = e.text.split(',')
-            properties_l['ids'] = prof_list[1]
+            properties_l['ids'] = prof_list[0]
             properties_l['datum'] = prof_list[2]
             properties_l['project_id'] = properties_reeks['project_id']
             
