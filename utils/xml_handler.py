@@ -118,7 +118,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
                 print point_list
                 properties_p['volgnr'] = j
                 properties_p['datum'] = properties_l['datum']                
-                properties_p['prof_ids'] = prof_list[1]
+                properties_p['prof_ids'] = prof_list[0]  
                 properties_p['code'] = point_list[0]
                 properties_p['tekencode'] = point_list[1]                
                 properties_p['x_coord'] = get_float(point_list[2])  
@@ -148,7 +148,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
 #                     print ('22L code gevonden met waterpeil:' + str(properties_p['_bk_nap']))
                     
                     properties_ttlr = {}
-                    properties_ttlr['prof_ids'] = prof_list[1]
+                    properties_ttlr['prof_ids'] = prof_list[0]  
                     properties_ttlr['code'] = '22L'  
                     properties_ttlr['prof_pk'] = pk
                     properties_ttlr['project_id'] = properties_reeks['project_id']
@@ -172,7 +172,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
                     
                     if j > 1:
                         for punt in records_p:
-                            if punt['properties'].get('prof_ids') == prof_list[1]:
+                            if punt['properties'].get('prof_ids') == prof_list[0]:
                                 dist = punt['properties'].get('afstand')
                                 punt['properties'].update(afstand = -dist)
                     
@@ -180,7 +180,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
 #                     print ('22R code gevonden met waterpeil:' + str(properties_p['_bk_nap']))
                     
                     properties_ttlr = {}
-                    properties_ttlr['prof_ids'] = prof_list[1]
+                    properties_ttlr['prof_ids'] = prof_list[0]                     
                     properties_ttlr['code'] = '22R'
                     properties_ttlr['prof_pk'] = pk     
                     properties_ttlr['project_id'] = properties_l['project_id']
