@@ -56,11 +56,11 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
         if type_metfile == "WIT":
             # write version
-            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            version = '<VERSIE>1.0</VERSIE>'
             writer.writerow({'regel': version})
 
             # write project data in REEKS
-            project_tekst = ('<REEKS>' + project + ',</REEKS>')
+            project_tekst = '<REEKS>{0},</REEKS>'.format(project)
             writer.writerow({'regel': project_tekst})
 
             for i, row in enumerate(sorted_points):
@@ -121,12 +121,13 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
         elif type_metfile == "Wetterskip Fryslan":
             # write version
-            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            version = "<VERSIE>1.0</VERSIE>"
             writer.writerow({'regel': version})
+
             csvfile.write("\n")
 
             # write project data in REEKS
-            project_tekst = ('<REEKS>' + "\n" + project + "\n" + '</REEKS>' + "\n\n")
+            project_tekst = "<REEKS>\n{0}\n</REEKS>\n\n".format(project)
             csvfile.write(project_tekst)
 
             for i, row in enumerate(sorted_points):
@@ -137,6 +138,8 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
                 datum = (str(sorted_points[i]['properties']['datum']))
 
+                # Check most occuring date-format first, use general parser when different (to decrease
+                # the possibility of incorrect dates due to ambiguity
                 try:
                     date = datetime.datetime.strptime(datum, "%d/%m/%Y")
                 except ValueError:
@@ -169,13 +172,13 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
                         csvfile.write("\n")
 
                     # wegschrijven profielregel
-                    profiel_tekst = ('<PROFIEL>\n' + profiel + ',,\n' +
-                                     new_date + ',\n' +
-                                     '0.0,NAP,\n' +
-                                     'ABS,2,\n' +
-                                     'XY,' + x_coord + ',' + y_coord + ',\n')
+                    profiel_tekst = "<PROFIEL>\n{0},,\n{1},\n0.0,NAP,\nABS,2,\nXY,{2},{3},\n".format(
+                        profiel,
+                        new_date,
+                        x_coord,
+                        y_coord
+                    )
 
-                    # writer.writerow({'regel': profiel_tekst})
                     csvfile.write(profiel_tekst)
                     current_profile = profiel
 
@@ -194,12 +197,16 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
         elif type_metfile == "Scheldestromen":
             # write version
-            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            version = "<VERSIE>1.0</VERSIE>"
             writer.writerow({'regel': version})
 
             # write project data in REEKS
             proj_nameList = project.split(",")
-            project_tekst = ('<REEKS>' + "\n" + proj_nameList[0] + "\n" + proj_nameList[1] + "\n" + '</REEKS>' + "\n")
+            project_tekst = "<REEKS>\n{0}\n{1}\n</REEKS>\n".format(
+                proj_nameList[0],
+                proj_nameList[1],
+
+            )
             csvfile.write(project_tekst)
 
             for i, row in enumerate(sorted_points):
@@ -248,12 +255,13 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
                     # wegschrijven profielregel
                     # TODO: remove hardcoded, find different solution
-                    profiel_tekst = ('<PROFIEL>\n' + "OPR" + profiel + ',\n' +
-                                     "KIO_RTK-GPS (NTRIP)_Harde bodem" + ',\n' + #hardcoded
-                                     new_date + ',\n' +
-                                     '0.00,\nNAP,\n' +
-                                     'ABS,\n2,\n' +
-                                     'XY,' + "\n" + x_coord + ',\n' + y_coord + ',\n')
+                    profiel_tekst = "<PROFIEL>\nOPR{0},\n{1},\n{2},\n0.00,\nNAP,\nABS,\n2,\nXY,\n{3},\n{4},\n".format(
+                        profiel,
+                        "KIO_RTK-GPS (NTRIP)_Harde bodem",
+                        new_date,
+                        x_coord,
+                        y_coord
+                    )
 
                     # writer.writerow({'regel': profiel_tekst})
                     csvfile.write(profiel_tekst)
@@ -274,8 +282,7 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
         elif type_metfile == "Waternet":
             # write version
-            version = "<VERSIE>1.0"
-            version = ('<VERSIE>' + "1.0" + '</VERSIE>')
+            version = "<VERSIE>1.0</VERSIE>"
             writer.writerow({'regel': version})
 
             # write project data in REEKS
