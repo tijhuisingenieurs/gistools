@@ -56,11 +56,11 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
         if type_metfile == "WIT":
             # write version
-            version = '<VERSIE>1.0</VERSIE>'
+            version = "<VERSIE>1.0</VERSIE>"
             writer.writerow({'regel': version})
 
             # write project data in REEKS
-            project_tekst = '<REEKS>{0},</REEKS>'.format(project)
+            project_tekst = "<REEKS>{0},</REEKS>".format(project)
             writer.writerow({'regel': project_tekst})
 
             for i, row in enumerate(sorted_points):
