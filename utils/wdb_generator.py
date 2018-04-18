@@ -9,7 +9,7 @@ from gistools.utils.conversion_tools import get_float
 log = logging.getLogger(__name__)
 
 
-def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project):
+def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_lengte):
     """ export content of point collection with appropriate attributes to 
     xls tabels for WDB
     
@@ -95,9 +95,18 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project):
         except ValueError:
             prof_id = line_col[j]['properties']['ids']
 
-        fields_profiles = [project, project, prof_id, "", "", "", "", "", "", "", "", "", "",
-                           "", "", "", line_col[j]['properties']['wpeil'], "", "", "", "True", "", afstand / 2,
-                           afstand / 2, line_col[j]['properties']['xb_prof'], line_col[j]['properties']['yb_prof'],
+        if rep_lengte:
+            afstand_voor = round(line_col[j]['properties']['voor_leng'], 1)
+            afstand_na = round(line_col[j]['properties']['na_leng'], 1)
+            afstand_totaal = afstand_voor + afstand_na
+        else:
+            afstand_voor = afstand / 2
+            afstand_na = afstand / 2
+            afstand_totaal = ""
+
+        fields_profiles = [project, project, prof_id, "", afstand_totaal, "", "", "", "", "", "", "", "",
+                           "", "", "", line_col[j]['properties']['wpeil'], "", "", "", "True", "", afstand_voor,
+                           afstand_na, line_col[j]['properties']['xb_prof'], line_col[j]['properties']['yb_prof'],
                            line_col[j]['properties']['xe_prof'], line_col[j]['properties']['ye_prof']]
 
         for m, fieldname in enumerate(fields_profiles):
