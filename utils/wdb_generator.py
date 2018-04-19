@@ -96,8 +96,8 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
             prof_id = line_col[j]['properties']['ids']
 
         if rep_lengte:
-            afstand_voor = round(line_col[j]['properties']['voor_leng'], 1)
-            afstand_na = round(line_col[j]['properties']['na_leng'], 1)
+            afstand_voor = int(round(float(line_col[j]['properties']['voor_leng']), 0))
+            afstand_na = int(round(float(line_col[j]['properties']['na_leng']), 0))
             afstand_totaal = afstand_voor + afstand_na
         else:
             afstand_voor = afstand / 2
