@@ -10,7 +10,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def import_xml_to_memcollection(xml_file, zvalues):
+def import_xml_to_memcollection(xml_file, zvalues, id_location):
     """ import content of a xml file with measurement points and attributes
     
     receives file location + name for xml 
@@ -19,6 +19,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
                 or z2z1 (bovenkant_onderkant)
                 or z1 (alleen onderkant)
                 or z2 (alleen bovenkant)
+            id_location; location of the profile ID to be used in the metfile
     
     returns Memcollection of points with attributes"""
     
@@ -41,7 +42,6 @@ def import_xml_to_memcollection(xml_file, zvalues):
     with open(xml_file, "a") as myfile:
         myfile.write('\n</data>')
 
-
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
@@ -56,20 +56,23 @@ def import_xml_to_memcollection(xml_file, zvalues):
         properties_l['xe_prof'] = 0.0
         properties_l['ye_prof'] = 0.0
         
-        print ('Element gevonden; ' + str(e.tag) + ' ' +  str(e.text))
+        print ('Element gevonden; ' + str(e.tag) + ' ' + str(e.text))
         
         if e.tag in ['reeks', 'REEKS', 'Reeks']:
             properties_reeks = {}
-            reeks_list = e.text.split(',')
+            reeks_list = e.text.replace('\n', '').split(',')
             properties_reeks['project_id'] = reeks_list[0]
             print ('Project informatie gevonden in reeks: ' + str(reeks_list[0]))
         
         if e.tag in ['profiel', 'PROFIEL', 'Profiel']:
-            prof_list = e.text.split(',')
-            properties_l['ids'] = prof_list[1]
+            prof_list = e.text.replace('\n', '').split(',')
+            if id_location == "Eerste plaats":
+                properties_l['ids'] = prof_list[0]
+            else:
+                properties_l['ids'] = prof_list[1]
+
             properties_l['datum'] = prof_list[2]
             properties_l['project_id'] = properties_reeks['project_id']
-            
 
             i = 0
             j = 0   
@@ -90,35 +93,32 @@ def import_xml_to_memcollection(xml_file, zvalues):
                 point_list = p.text.split(',')
                 if point_list[0] == '22':
                     wpeilen_list.append(get_float(point_list[4]))  
-                    if  t == 0:
+                    if t == 0:
                         nulpunt_x = point_list[2]
                         nulpunt_y = point_list[3]
-                    if  t == 1:
+                    if t == 1:
                         eindpunt_x = point_list[2]
                         eindpunt_y = point_list[3]
-                        properties_l['breedte'] = sqrt(pow(get_float(eindpunt_x) - 
-                                                   get_float(nulpunt_x), 2) 
-                                               + pow(get_float(eindpunt_y) - 
-                                                     get_float(nulpunt_y),2))
+                        properties_l['breedte'] = sqrt(pow(get_float(eindpunt_x) -
+                                                           get_float(nulpunt_x), 2) +
+                                                       pow(get_float(eindpunt_y) -
+                                                           get_float(nulpunt_y), 2))
                         
                     t = t + 1
             properties_l['wpeil'] = max(wpeilen_list)
 
-                
             print ('Gemiddeld peil: ' + str(properties_l['wpeil']))  
             
             for p in e:
                 properties_p = {}
-                print ('Child gevonden; ' + str(p.tag) + ' ' +  str(p.text))
-                j=j+1
-                
+                print ('Child gevonden; ' + str(p.tag) + ' ' + str(p.text))
+                j += 1
 
-                
-                point_list = p.text.split(',')
+                point_list = p.text.replace('\n', '').split(',')
                 print point_list
                 properties_p['volgnr'] = j
                 properties_p['datum'] = properties_l['datum']                
-                properties_p['prof_ids'] = prof_list[1]
+                properties_p['prof_ids'] = properties_l['ids']
                 properties_p['code'] = point_list[0]
                 properties_p['tekencode'] = point_list[1]                
                 properties_p['x_coord'] = get_float(point_list[2])  
@@ -148,7 +148,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
 #                     print ('22L code gevonden met waterpeil:' + str(properties_p['_bk_nap']))
                     
                     properties_ttlr = {}
-                    properties_ttlr['prof_ids'] = prof_list[1]
+                    properties_ttlr['prof_ids'] = properties_l['ids']
                     properties_ttlr['code'] = '22L'  
                     properties_ttlr['prof_pk'] = pk
                     properties_ttlr['project_id'] = properties_reeks['project_id']
@@ -172,7 +172,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
                     
                     if j > 1:
                         for punt in records_p:
-                            if punt['properties'].get('prof_ids') == prof_list[1]:
+                            if punt['properties'].get('prof_ids') == properties_l['ids']:
                                 dist = punt['properties'].get('afstand')
                                 punt['properties'].update(afstand = -dist)
                     
@@ -180,7 +180,7 @@ def import_xml_to_memcollection(xml_file, zvalues):
 #                     print ('22R code gevonden met waterpeil:' + str(properties_p['_bk_nap']))
                     
                     properties_ttlr = {}
-                    properties_ttlr['prof_ids'] = prof_list[1]
+                    properties_ttlr['prof_ids'] = properties_l['ids']
                     properties_ttlr['code'] = '22R'
                     properties_ttlr['prof_pk'] = pk     
                     properties_ttlr['project_id'] = properties_l['project_id']
