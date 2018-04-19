@@ -62,7 +62,7 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
                            'grf_stapy', 'grf_manual_bounds', 'grf_includeAnchor', 'grf_anchor']
 
     fields_location = [project, project, 0, project, point_col[0]['properties']['datum'], "",
-                       "", "", "", "", "", "", "ONWAAR", "ONWAAR", ""]
+                       "", "", "", "", "", "", "False", "False", ""]
 
     for i, fieldname in enumerate(fieldnames_location):
         ws.write(0, i, fieldname, style_str)
