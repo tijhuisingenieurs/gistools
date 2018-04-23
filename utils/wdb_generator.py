@@ -1,17 +1,17 @@
-import json
 import csv
+import logging
+import os
 import os.path
 
-from collection import MemCollection, OrderedDict
+import xlwt
 from gistools.utils.conversion_tools import get_float
 
-import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project):
+def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_lengte):
     """ export content of point collection with appropriate attributes to 
-    csv tabels for WDB
+    xls tabels for WDB
     
     receives collection of points with some project and profile info, and point 
     specific data, at least:
@@ -36,125 +36,120 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project):
     
     and file location for wdb tables
     
-    returns csv files in WDB dialect"""
+    returns xls files in WDB dialect"""
     
-   # opzetten gebied tabel
-    gebied_csv = os.path.join(wdb_path, 'gebied.csv')
-    with open(gebied_csv, 'wb') as csvfile1:
-     
-        fieldnames1 = ['id_opp_water', 'omschrijving']
-        writer1 = csv.DictWriter(csvfile1, fieldnames=fieldnames1, delimiter=',',
-                                quoting=csv.QUOTE_NONE,
-                                quotechar='', escapechar='\\')
-        writer1.writeheader()
-    
-        # wegschrijven gebied tabel (code kan compacter, maar expliciet uitgeschreven
-        # zodat bij toekomstige doorontwikkeling makkelijk aanpassingen gedaan kunnen worden)
-        id_opp_water = str(project)
-        omschrijving = id_opp_water
-        writer1.writerow({'id_opp_water': id_opp_water ,'omschrijving': omschrijving })
+    # opzetten gebied tabel
+    style_str = xlwt.easyxf('font: name Calibri, height 220')
 
-    
+    wb_gebied = xlwt.Workbook()
+    ws = wb_gebied.add_sheet('Gebied')
+
+    ws.write(0, 0, 'id_opp_water', style_str)
+    ws.write(0, 1, 'omschrijving', style_str)
+    ws.write(1, 0, project, style_str)
+    ws.write(1, 1, project, style_str)
+
+    file_path = os.path.join(wdb_path, 'gebied.xls')
+    wb_gebied.save(file_path)
+
     # opzetten locatie tabel
-    locatie_csv = os.path.join(wdb_path, 'locatie.csv')
-    with open(locatie_csv, 'wb') as csvfile2:
-    
-        fieldnames2 = ['id_opp_water', 'id_vak', 'polderpeil', 'projekt', 
-                  'datum_uitvoering', 'situateTekNr', 'grf_xmin', 
-                  'grf_xmax', 'grf_ymax', 'grf_ymin', 'grf_stapx', 
-                  'grf_stapy', 'grf_manual_bounds', 'grf_includeAnchor', 'grf_anchor']
+    wb_locatie = xlwt.Workbook()
+    ws = wb_locatie.add_sheet('Locatie')
 
-        writer2 = csv.DictWriter(csvfile2, fieldnames=fieldnames2)  
-        writer2.writeheader()     
-        
-        for i, row in enumerate(line_col):
-            id_opp_water = str(project)
-            id_vak = str(line_col[i]['properties']['ids'])
-            datum_uitvoering = (str(point_col[i]['properties']['datum']))[:10]
-            projekt =  str(project)
-                                            
-            # wegschrijven locatie regels
-            writer2.writerow({'id_opp_water': id_opp_water, 'id_vak': id_vak, 
-                             'projekt': projekt, 
-                             'datum_uitvoering': datum_uitvoering,
-                             'polderpeil': '0',
-                             'grf_manual_bounds': 'ONWAAR',
-                             'grf_includeAnchor': 'ONWAAR'
-                              })
+    fieldnames_location = ['id_opp_water', 'id_vak', 'polderpeil', 'projekt',
+                           'datum_uitvoering', 'situateTekNr', 'grf_xmin',
+                           'grf_xmax', 'grf_ymax', 'grf_ymin', 'grf_stapx',
+                           'grf_stapy', 'grf_manual_bounds', 'grf_includeAnchor', 'grf_anchor']
 
+    fields_location = [project, project, 0, project, point_col[0]['properties']['datum'], "",
+                       "", "", "", "", "", "", "False", "False", ""]
 
+    for i, fieldname in enumerate(fieldnames_location):
+        ws.write(0, i, fieldname, style_str)
+        ws.write(1, i, fields_location[i], style_str)
+
+    file_path = os.path.join(wdb_path, 'locatie.xls')
+    wb_locatie.save(file_path)
 
     # opzetten profielen tabel
-    profielen_csv = os.path.join(wdb_path, 'profielen.csv')
-    with open(profielen_csv, 'wb') as csvfile3:
-        
-        fieldnames3 = ['id_opp_water', 'id_vak', 'id_profiel', 'wl_breedte', 
-                      'afstand', 'bagger', 'water', 'baggerInLegger', 
-                      'grondInLegger', 'waterdiepte', 'bodemdiepte', 
-                      'natPercentage', 'waterBuitenLegger', 'baggerVerw', 
-                      'grondVerw', 'datum_opname', 'opnamepeil', 
-                      'datum_uitpeiling', 'uitpeilingpeil', 'beschrijving', 
-                      'check_y2', 'check_up', 'afstandVoor', 'afstandNa', 
-                      'Xb_profiel', 'Yb_profiel', 'Xe_profiel', 'Ye_profiel']
+    wb_profielen = xlwt.Workbook()
+    ws = wb_profielen.add_sheet('Profielen')
 
-        writer3 = csv.DictWriter(csvfile3, fieldnames=fieldnames3)      
-        writer3.writeheader()
-        
-        for i, row in enumerate(line_col):
-            id_opp_water = str(project)   
-            id_vak = str(line_col[i]['properties']['ids'])
-            id_profiel = str(line_col[i]['properties']['ids'])
-            opnamepeil = str(line_col[i]['properties']['wpeil']) 
-            # in geval van oude Access versies moet check_y2 gelijk zijn aan -1
-            # in geval van MDB viewer moet dit 'True' zijn
-            # implementatie nu voor Access
-            check_y2 = '-1'
-            afstandVoor = str(afstand / 2)
-            afstandNa = str(afstand / 2)
-            Xb_profiel = str(line_col[i]['properties']['xb_prof'])   
-            Yb_profiel = str(line_col[i]['properties']['yb_prof'])   
-            Xe_profiel = str(line_col[i]['properties']['xe_prof'])   
-            Ye_profiel = str(line_col[i]['properties']['ye_prof'])   
-                                            
-            # wegschrijven profiel regels
-            writer3.writerow({'id_opp_water': id_opp_water, 'id_vak': id_vak, 
-                             'id_profiel': id_profiel, 'opnamepeil': opnamepeil,
-                             'check_y2': check_y2, 'afstandVoor': afstandVoor,
-                             'afstandNa': afstandNa,
-                             'Xb_profiel': Xb_profiel, 'Yb_profiel': Yb_profiel, 
-                             'Xe_profiel': Xe_profiel, 'Ye_profiel': Ye_profiel })
+    fieldnames_profielen = ['id_opp_water', 'id_vak', 'id_profiel', 'wl_breedte',
+                            'afstand', 'bagger', 'water', 'baggerInLegger',
+                            'grondInLegger', 'waterdiepte', 'bodemdiepte',
+                            'natPercentage', 'waterBuitenLegger', 'baggerVerw',
+                            'grondVerw', 'datum_opname', 'opnamepeil',
+                            'datum_uitpeiling', 'uitpeilingpeil', 'beschrijving',
+                            'check_y2', 'check_up', 'afstandVoor', 'afstandNa',
+                            'Xb_profiel', 'Yb_profiel', 'Xe_profiel', 'Ye_profiel']
 
+    for i, fieldname in enumerate(fieldnames_profielen):
+        ws.write(0, i, fieldname, style_str)
+
+    for j, row in enumerate(line_col):
+        index = j + 1
+
+        try:
+            prof_id = int(line_col[j]['properties']['ids'])
+        except ValueError:
+            prof_id = line_col[j]['properties']['ids']
+
+        if rep_lengte:
+            afstand_voor = int(round(float(line_col[j]['properties']['voor_leng']), 0))
+            afstand_na = int(round(float(line_col[j]['properties']['na_leng']), 0))
+            afstand_totaal = afstand_voor + afstand_na
+        else:
+            afstand_voor = afstand / 2
+            afstand_na = afstand / 2
+            afstand_totaal = ""
+
+        fields_profiles = [project, project, prof_id, "", afstand_totaal, "", "", "", "", "", "", "", "",
+                           "", "", "", line_col[j]['properties']['wpeil'], "", "", "", "True", "", afstand_voor,
+                           afstand_na, line_col[j]['properties']['xb_prof'], line_col[j]['properties']['yb_prof'],
+                           line_col[j]['properties']['xe_prof'], line_col[j]['properties']['ye_prof']]
+
+        for m, fieldname in enumerate(fields_profiles):
+            ws.write(index, m, fieldname, style_str)
+
+    file_path = os.path.join(wdb_path, 'profielen.xls')
+    wb_profielen.save(file_path)
            
     # opzetten metingen tabel
-    metingen_csv = os.path.join(wdb_path, 'metingen.csv')
-    with open(metingen_csv, 'wb') as csvfile4:
-        
-        fieldnames4 = ['id_opp_water', 'id_vak', 'id_profiel', 'raai', 
-                       'bagger', 'vast', 'uitpeiling', 'PBPSOORT', 
-                       'X_GPS_bk', 'Y_GPS_bk', 'X_pr_gps_bk', 'Y_pr_gps_bk', 
-                       'X_GPS_ok', 'Y_GPS_ok', 'X_pr_gps_ok', 'Y_pr_gps_ok']
-        
-        writer4 = csv.DictWriter(csvfile4, fieldnames=fieldnames4)      
-        writer4.writeheader()
-        
-        for i, row in enumerate(point_col):
-            id_opp_water = str(project)
-            id_vak = str(point_col[i]['properties']['prof_ids'])
-            id_profiel = str(point_col[i]['properties']['prof_ids'])
-            raai = str(point_col[i]['properties']['afstand'])
-            
-            # poging afvangen lege velden upper en lower level lukt nog niet !!!
-            bagger = str(get_float(point_col[i]['properties'].get('_bk_wp', '0.00')))
-            vast = str(get_float(point_col[i]['properties'].get('_ok_wp', '0.00')))
-            
-            pbpsoort = (str(point_col[i]['properties']['code']))[:2]
-            
-            
-            # wegschrijven meting regels
-            writer4.writerow({'id_opp_water': id_opp_water, 'id_vak': id_vak, 
-                             'id_profiel': id_profiel, 'raai': raai,
-                             'bagger': bagger, 'vast': vast,
-                             'uitpeiling': '0', 'PBPSOORT': pbpsoort})
+    wb_metingen = xlwt.Workbook()
+    ws = wb_metingen.add_sheet('Metingen')
+
+    fieldnames_metingen = ['id_opp_water', 'id_vak', 'id_profiel', 'raai',
+                           'bagger', 'vast', 'uitpeiling', 'PBPSOORT',
+                           'X_GPS_bk', 'Y_GPS_bk', 'X_pr_gps_bk', 'Y_pr_gps_bk',
+                           'X_GPS_ok', 'Y_GPS_ok', 'X_pr_gps_ok', 'Y_pr_gps_ok']
+
+    for i, fieldname in enumerate(fieldnames_metingen):
+        ws.write(0, i, fieldname, style_str)
+
+    for j, row in enumerate(point_col):
+        index = j + 1
+
+        try:
+            prof_id = int(point_col[j]['properties']['prof_ids'])
+        except ValueError:
+            prof_id = point_col[j]['properties']['prof_ids']
+
+        try:
+            pbpsoort = int((str(point_col[j]['properties']['code']))[:2])
+        except ValueError:
+            pbpsoort = (str(point_col[j]['properties']['code']))[:2]
+
+        fields_profiles = [project, project, prof_id,
+                           point_col[j]['properties']['afstand'],
+                           get_float(point_col[j]['properties'].get('_bk_wp', '0.00')),
+                           get_float(point_col[j]['properties'].get('_ok_wp', '0.00')),
+                           0, pbpsoort, "", "", "", "", "", "", "", ""]
+
+        for m, fieldname in enumerate(fields_profiles):
+            ws.write(index, m, fieldname, style_str)
+
+    file_path = os.path.join(wdb_path, 'metingen.xls')
+    wb_metingen.save(file_path)
     
     return
-    
