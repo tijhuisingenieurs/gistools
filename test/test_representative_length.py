@@ -47,7 +47,7 @@ class TestRepresentativeLength(unittest.TestCase):
 
     def test_repLength(self):
 
-        rep_length_col = representative_length(self.lines, self.profiles)
+        rep_length_col, rep_lines_col = representative_length(self.lines, self.profiles)
         profile_dict = {profile['properties']['ids']: profile for profile in rep_length_col}
 
         self.assertEqual(profile_dict[1]['properties']['voor_leng'], 4)
@@ -73,3 +73,5 @@ class TestRepresentativeLength(unittest.TestCase):
         self.assertAlmostEqual(profile_dict[5]['properties']['tot_leng'], 4.0036734, places=7)
         self.assertAlmostEqual(profile_dict[6]['properties']['tot_leng'], 7.883914, places=6)
         self.assertAlmostEqual(profile_dict[7]['properties']['tot_leng'], 6.880241, places=6)
+
+        # TODO: Add tests for the split lines
