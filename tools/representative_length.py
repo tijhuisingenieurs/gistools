@@ -3,6 +3,38 @@ from shapely.ops import split
 from gistools.utils.collection import MemCollection
 
 
+def cut(line, distance):
+    # Cuts a line in two at a distance from its starting point
+    # This is taken from shapely manual
+    if distance <= 0.0 or distance >= line.length:
+        return [LineString(line)]
+    coords = list(line.coords)
+    for i, p in enumerate(coords):
+        pd = line.project(Point(p))
+        if pd == distance:
+            return [
+                LineString(coords[:i+1]),
+                LineString(coords[i:])]
+        if pd > distance:
+            cp = line.interpolate(distance)
+            return [
+                LineString(coords[:i] + [(cp.x, cp.y)]),
+                LineString([(cp.x, cp.y)] + coords[i:])]
+
+
+def split_line_with_distances(line, distance_list):
+    """Splits a line string in several segments considering a list of distances.
+    The distances are assumed to be in the order of appearance they have in the line string.
+    """
+    segments = []
+    current_line = line
+    for dist in distance_list:
+        seg, current_line = cut(current_line, dist)
+        segments.append(seg)
+    segments.append(current_line)
+    return segments
+
+
 def representative_length(line_col, profile_col):
     """ creates a MemCollection with a line geometry, attributes copied from the input profile file,
         and three added fields for the representative length: pre length, post length and total
@@ -16,7 +48,7 @@ def representative_length(line_col, profile_col):
         """
 
     # Initalize new line collection
-    rep_lines_col = MemCollection(geometry_type='LineString')
+    rep_lines_col = MemCollection(geometry_type='MultiLineString')
 
     # Loop through each line and select the profiles that intersect the line
     for feature in line_col:
@@ -57,6 +89,7 @@ def representative_length(line_col, profile_col):
         # replace old complete line with second part, repeat process.
 
         list_points = []
+        list_distances = []
 
         # Loops again through the points to calculate the representative length variables. Four different situations
         # are treated: only one point on the line, the first point on the line, the last point on the line, and
@@ -73,19 +106,28 @@ def representative_length(line_col, profile_col):
                 else:
                     point['voor_lengte'] = (distance - sorted_points[i - 1]['distance']) / 2
                     split_distance = distance - ((distance - sorted_points[i - 1]['distance']) / 2)
+                    list_distances.append(split_distance)
                     split_point = line.interpolate(split_distance)
                     list_points.append(split_point)
             else:
                 point['voor_lengte'] = (distance - sorted_points[i - 1]['distance']) / 2
                 split_distance = distance - ((distance - sorted_points[i - 1]['distance']) / 2)
+                list_distances.append(split_distance)
                 split_point = line.interpolate(split_distance)
                 list_points.append(split_point)
                 point['na_lengte'] = line.length - distance
 
         if list_points:
-            multi_points = MultiPoint(list_points)
-            split_line = split(line, multi_points)
-            for i, l in enumerate(split_line):
+            # multi_points = MultiPoint(list_points)
+            # split_line = split(line, multi_points)
+
+            if line.geom_type == 'LineString':
+                segments = split_line_with_distances(line, list_distances)
+            else:
+                segments = []
+
+
+            for i, l in enumerate(segments):
                 rep_lines_col.writerecords([
                     {'geometry': {'type': 'LineString',
                                   'coordinates': [p for p in reversed(l.coords)]},
