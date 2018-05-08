@@ -47,7 +47,7 @@ class TestRepresentativeLength(unittest.TestCase):
 
     def test_repLength(self):
 
-        rep_length_col, rep_lines_col = representative_length(self.lines, self.profiles)
+        rep_length_col, rep_lines_col = representative_length(self.lines, self.profiles, 'ids')
         profile_dict = {profile['properties']['ids']: profile for profile in rep_length_col}
 
         self.assertEqual(profile_dict[1]['properties']['voor_leng'], 4)
