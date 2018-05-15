@@ -26,11 +26,11 @@ def make_lineString_object(line_collection):
 
 def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=False, keep_only_in_points=True):
 
-    # todo:sort
-
-    # todo: check and warning, don't throw exception
     dist_ttr_in = float([point for point in out_points if point['properties']['code'] in ('22', '22R')][-1]['properties']['afstand'])
     dist_ttr_uit = float([point for point in out_points if point['properties']['code'] in ('22', '22R')][-1]['properties']['afstand'])
+
+    # todo:sort
+    # todo: check and warning, don't throw exception
 
     # step1: distance
     for point in out_points:
@@ -48,7 +48,6 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
                 point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
 
     # step 2: match inpeiling
-
     for key in ['_bk_nap', '_ok_nap']:
         array_dist = np.array([point['properties']['afstand']
                                for point in out_points if point['properties'].get(key) is not None])
@@ -64,27 +63,6 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
                 point['properties']['uit'+ key] = np.interp(point['properties']['afstand'], array_dist, array_level)
 
     return in_points
-
-
-    #scaled_distance = point['properties']['afstand'] * scale_factor
-    #scaled_point = in_linestring.interpolate(scaled_distance)
-
-    # point['properties']['afstand'] = scaled_distance
-    # point['geometry']['coordinates'] = scaled_point.coords[0]
-    # point['properties']['x_coord'] = point['geometry']['coordinates'][0]
-    # point['properties']['y_coord'] = point['geometry']['coordinates'][1]
-    #
-    # uit_x.append(point['properties']['afstand'])
-    # uit_y.append(point['properties']['_bk_nap'])
-
-    # array_x = np.array(uit_x)
-    # array_y = np.array(uit_y)
-
-
-    # in_dis = point['properties']['afstand']
-    # point['properties']['uit_bk_nap'] = np.interp(in_dis, array_x, array_y)
-
-
 
 
 def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_treshold=0.05):
