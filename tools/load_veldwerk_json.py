@@ -413,7 +413,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             # Metadata
             location = point['location']
 
-            p['fotos'] = "-".join([os.path.basename(photo).split('.')[0] for photo in point.get('photos', [])])
+            p['fotos'] = "-".join([os.path.basename(photo) for photo in point.get('photos', [])])
             p['datumtijd'] = point.get('created', '')
             p['method'] = point['metadata'].get('method', '')
 
@@ -481,7 +481,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         fixed_point['type'] = fp.get('note_type', '')
         fixed_point['opm'] = fp.get('remarks', '').replace('\n', '')
 
-        fixed_point['fotos'] = "-".join([os.path.basename(photo).split('.')[0] for photo in fp.get('photos', [])])
+        fixed_point['fotos'] = "-".join([os.path.basename(photo) for photo in fp.get('photos', [])])
 
         fixed_point['gemeten_op'] = fp.get('created', '')
 
