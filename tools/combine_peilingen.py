@@ -4,6 +4,7 @@ import numpy as np
 
 from shapely.geometry import MultiLineString, LineString
 from gistools.utils.xml_handler import import_xml_to_memcollection
+from gistools.utils.metfile_generator import export_points_to_metfile
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +61,8 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
 
         for point in in_points:
             if left <= point['properties']['afstand'] <= right:
-                point['properties']['uit'+ key] = np.interp(point['properties']['afstand'], array_dist, array_level)
+                point['properties']['uit'+ key] = np.interp(point['properties']['afstand'], array_dist,
+                                                                  array_level)
 
     return in_points
 
@@ -108,9 +110,10 @@ def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_treshold=0.05
         combined_points = combine_profiles(
             uit_points,
             in_points,
-            scale_factor=uit_width/ prof_width,
+            scale_factor=uit_width/prof_width,
             scale_bank_distance=False,
             keep_only_in_points=True
         )
 
     return in_point_col
+

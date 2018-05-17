@@ -8,7 +8,8 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def export_points_to_metfile(point_col, project, metfile_name, codering, type_metfile, type_peiling = None):
+def export_points_to_metfile(point_col, project, metfile_name, codering, type_metfile, type_peiling = None,
+                             order="z2z1"):
     """ export content of point collection with appropriate attributes to 
     metfile in dicts
     
@@ -24,6 +25,13 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
     - _ok_nap -> height of top of sediment in mNAP
     
     and file location + name for metfile
+
+    Metfiles can be written in different formats:
+    - WIT
+    - Wetterskip Fryslan
+    - Scheldestromen
+    - Waternet
+    - Combined In- en Uitpeiling
     
     returns csv file in metfile dialect"""
     
@@ -366,6 +374,108 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
                     lower_level,
                     upper_level
                 )
+
+                writer.writerow({'regel': meting_tekst})
+
+            writer.writerow({'regel': profile_end})
+
+        elif type_metfile == "combined_peilingen":
+            # write version
+            version = "<VERSIE>1.0</VERSIE>"
+            writer.writerow({'regel': version})
+
+            # write project data in REEKS
+            proj_nameList = project.split(",")
+            project_tekst = "<REEKS>{0},{1},</REEKS>".format(
+                proj_nameList[0],
+                proj_nameList[1]
+            )
+            writer.writerow({'regel': project_tekst})
+
+            for i, row in enumerate(sorted_points):
+                profile = str(sorted_points[i]['properties']['prof_ids'])
+                profile = profile.split("_")[-1]
+
+                if prefix != None:
+                    profile = prefix + profile
+
+                profile_1 = "{0}_{1}".format(
+                    proj_nameList[0],
+                    profile
+                )
+
+                profile_2 = "Profiel_{0}".format(profile)
+
+                datum = (str(sorted_points[i]['properties']['datum']))
+
+                try:
+                    date = datetime.datetime.strptime(datum, "%d/%m/%Y")
+                except ValueError:
+                    date = parser.parse(datum)
+
+                new_date = date.strftime("%Y%m%d")
+                code = sorted_points[i]['properties']['code']
+                tekencode = sorted_points[i]['properties']['tekencode']
+
+                if code in ['22L', '22l', '22R', '22r']:
+                    code = 22
+                if codering == 1:
+                    tekencode = sorted_points[i]['properties']['tekencode']
+                if codering == 2:
+                    if len(str(code)) > 3:
+                        a = str(code).split('_')
+                        code = a[0]
+                        tekencode = a[1]
+
+                x_coord = str(sorted_points[i]['properties']['x_coord'])
+                y_coord = str(sorted_points[i]['properties']['y_coord'])
+                upper_level = str(sorted_points[i]['properties'].get('uit_bk_nap'))
+                if not upper_level:
+                    upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+                lower_level = str(sorted_points[i]['properties']['_ok_nap'])
+
+                if upper_level < lower_level:
+                    lower_level = str(sorted_points[i]['properties'].get('uit_ok_nap'))
+
+                # check nieuw profiel
+                if current_profile != profile:
+
+                    # check niet eerste profiel -> dan vorige profiel nog afsluiten
+                    if current_profile != '':
+                        writer.writerow({'regel': profile_end})
+
+                    # wegschrijven profielregel
+                    profiel_tekst = "<PROFIEL>{0},{1},{2},0.00,NAP,ABS,2,XY,{3},{4},".format(
+                        profile_1,
+                        profile_2,
+                        new_date,
+                        x_coord,
+                        y_coord
+                    )
+
+                    # writer.writerow({'regel': profiel_tekst})
+                    writer.writerow({'regel': profiel_tekst})
+                    current_profile = profile
+
+                # wegschrijven meting regels
+                if order == "z2z1":
+                    meting_tekst = "<METING>{0},{1},{2},{3},{4},{5},</METING>".format(
+                        code,
+                        tekencode,
+                        x_coord,
+                        y_coord,
+                        upper_level,
+                        lower_level
+                    )
+                else:
+                    meting_tekst = "<METING>{0},{1},{2},{3},{4},{5},</METING>".format(
+                        code,
+                        tekencode,
+                        x_coord,
+                        y_coord,
+                        lower_level,
+                        upper_level
+                    )
 
                 writer.writerow({'regel': meting_tekst})
 
