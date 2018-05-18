@@ -429,10 +429,14 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
 
                 x_coord = str(sorted_points[i]['properties']['x_coord'])
                 y_coord = str(sorted_points[i]['properties']['y_coord'])
+
                 upper_level = str(sorted_points[i]['properties'].get('uit_bk_nap'))
                 if not upper_level:
                     upper_level = str(sorted_points[i]['properties']['_bk_nap'])
+
                 lower_level = str(sorted_points[i]['properties']['_ok_nap'])
+                if not lower_level:
+                    lower_level = str(sorted_points[i]['properties']['_ok_nap'])
 
                 if upper_level < lower_level:
                     lower_level = str(sorted_points[i]['properties'].get('uit_ok_nap'))

@@ -4,6 +4,7 @@ import numpy as np
 
 from shapely.geometry import MultiLineString, LineString
 from gistools.utils.xml_handler import import_xml_to_memcollection
+from gistools.utils.collection import MemCollection
 from gistools.utils.metfile_generator import export_points_to_metfile
 
 log = logging.getLogger(__name__)
@@ -11,9 +12,10 @@ log = logging.getLogger(__name__)
 
 def link_table_to_dict(link_table):
     with open(link_table, mode='r') as infile:
-        reader = csv.reader(infile, delimiter=";")
+        dialect = csv.Sniffer().sniff(infile.read(1024), delimiters=';,')
+        infile.seek(0)
+        reader = csv.reader(infile, dialect)
         link_dict = {rows[0]: rows[1] for rows in reader}
-
     return link_dict
 
 
@@ -61,19 +63,20 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
 
         for point in in_points:
             if left <= point['properties']['afstand'] <= right:
-                point['properties']['uit'+ key] = np.interp(point['properties']['afstand'], array_dist,
-                                                                  array_level)
+                point['properties']['uit'+ key] = round(np.interp(point['properties']['afstand'], array_dist,
+                                                                  array_level), 2)
 
     return in_points
 
 
-def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_treshold=0.05):
+def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_threshold=0.05, scale_bank_distance=False):
     in_point_col, in_line_col, in_tt_col, in_errors = import_xml_to_memcollection(inpeil_file, 'z2z1', "Tweede plaats")
 
     uit_point_col, uit_line_col, uit_tt_col, uit_errors = import_xml_to_memcollection(uitpeil_file, 'z2z1',
                                                                                       "Tweede plaats")
 
     link_dict = link_table_to_dict(link_table)
+    out_points = []
 
     for i, in_line in enumerate(in_line_col):
         prof_id = in_line['properties']['ids']
@@ -97,12 +100,13 @@ def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_treshold=0.05
         uit_width = uit_line['properties']['breedte']
         perc_change = ((uit_width - prof_width) / prof_width)
 
-        if abs(perc_change) > scale_treshold:
-            log.warning('Inpeiling profiel %s en uitpeiling profiel %s verschillen meer dan %.0f% in breedte',
+        if abs(perc_change) > scale_threshold:
+            log.warning('Inpeiling profiel %s en uitpeiling profiel %s verschillen meer dan %.2f%% in breedte',
                         prof_id,
                         link_dict[prof_id],
-                        scale_treshold * 100
+                        scale_threshold * 100
                         )
+            continue
 
         in_points = list(in_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
         uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [link_dict[prof_id]]}))
@@ -110,10 +114,14 @@ def combine_peilingen(inpeil_file, uitpeil_file, link_table, scale_treshold=0.05
         combined_points = combine_profiles(
             uit_points,
             in_points,
-            scale_factor=uit_width/prof_width,
-            scale_bank_distance=False,
+            scale_factor=prof_width/uit_width,
+            scale_bank_distance=scale_bank_distance,
             keep_only_in_points=True
         )
+        out_points += combined_points
 
-    return in_point_col
+    # Make new collection with only those profiles that should be scaled and combined
+    output_collection = MemCollection(geometry_type='Point')
+    output_collection.writerecords(out_points)
 
+    return output_collection
