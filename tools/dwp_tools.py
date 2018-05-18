@@ -9,7 +9,7 @@ log = logging.getLogger(__file__)
 
 
 def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
-                                       default_length=15.0, length_field=None):
+                                       default_length=15.0, length_field=None, source="points"):
     """ returns MemCollection with perpendicular lines at given points on line
     with specific logic"""
 
@@ -19,14 +19,17 @@ def get_haakselijnen_on_points_on_line(line_col, point_col, copy_fields=list(),
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
         else:
-            line = TMultiLineString(feature['geometry']['coordinates'])        
+            line = TMultiLineString(feature['geometry']['coordinates'])
 
-        length = feature['properties'].get(length_field, default_length)
+        if source == "lines":
+            length = feature['properties'].get(length_field, default_length)
 
         for p in point_col.filter(bbox=line.bounds, precision=10**-6):
             log.warning('point within bbox line')
             if line.almost_intersect_with_point(Point(p['geometry']['coordinates'])):
                 log.warning('found intersection')
+                if source == "points":
+                    length = p['properties'].get(length_field, default_length)
                 props = {}
                 for field in copy_fields:
                     props[field] = p['properties'].get(field, None)
