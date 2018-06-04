@@ -4,10 +4,8 @@ import numpy as np
 import datetime
 import dateutil.parser as parser
 
-from shapely.geometry import MultiLineString, LineString
 from gistools.utils.xml_handler import import_xml_to_memcollection
 from gistools.utils.collection import MemCollection
-from gistools.utils.conversion_tools import get_string
 
 log = logging.getLogger(__name__)
 
@@ -21,12 +19,13 @@ def link_table_to_dict(link_table):
     return link_dict
 
 
-# def make_linestring_object(line_collection):
-#     if type(line_collection['geometry']['coordinates'][0][0]) != tuple:
-#         line = LineString(line_collection['geometry']['coordinates'])
-#     else:
-#         line = MultiLineString(line_collection['geometry']['coordinates'])
-#     return line
+def results_dict_to_csv(results_list, results_file):
+    with open(results_file, 'wb') as resultsfile:
+        resultsfile.write("Inpeiling;Uitpeiling;Foutenrapport\n")
+        for row in results_list:
+            s = "{0};{1};{2}.\n".format(row[0], row[1], row[2])
+            resultsfile.write(s)
+    return
 
 
 def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=False):
@@ -75,7 +74,7 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
 
 def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeiling, loc_inpeiling, loc_uitpeiling,
                       link_table, scale_threshold=0.05, scale_bank_distance=False):
-    # TODO: Eerste plaats en tweede plaats moeten ook optioneel zijn
+
     in_point_col, in_line_col, in_tt_col, in_errors = import_xml_to_memcollection(inpeil_file, order_inpeiling,
                                                                                   loc_inpeiling)
 
@@ -83,6 +82,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
                                                                                       loc_uitpeiling)
 
     link_dict = link_table_to_dict(link_table)
+    results_list = []
     out_points = []
 
     for i, in_line in enumerate(in_line_col):
@@ -91,15 +91,18 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
 
         if prof_id not in link_dict:
             log.info('profiel %s is niet gelinkt aan een uitpeiling.', prof_id)
+            results_list.append([prof_id, "", "Profiel is niet gelinkt aan een uitpeiling"])
             continue
 
         uit_lines = list(uit_line_col.filter(property={'key': 'ids', 'values': [link_dict[prof_id]]}))
 
         if len(uit_lines) != 1:
             if len(uit_lines) == 0:
-                log.warning('kan opgegeven uipeiling met id %s van profiel %s niet vinden', link_dict[prof_id], prof_id)
+                log.warning('kan opgegeven uitpeiling met id %s van profiel %s niet vinden', link_dict[prof_id], prof_id)
+                results_list.append([prof_id, link_dict['prof_id'], "Kan opgegeven uitpeiling niet vinden"])
             else:
-                log.warning('meerdere uipeilingen met id %s aanwezig', link_dict[prof_id])
+                log.warning('meerdere uitpeilingen met id %s aanwezig', link_dict[prof_id])
+                results_list.append([prof_id, link_dict[prof_id], "Meerdere uitpeilingen aanwezig"])
             continue
 
         uit_line = uit_lines[0]
@@ -113,6 +116,8 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
                         link_dict[prof_id],
                         scale_threshold * 100
                         )
+            message = "Inpeiling en uitpeiling verschillen {0}% in breedte".format(round(abs(perc_change*100), 2))
+            results_list.append([prof_id, link_dict[prof_id], message])
             continue
 
         in_points = list(in_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
@@ -130,10 +135,10 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
     output_collection = MemCollection(geometry_type='Point')
     output_collection.writerecords(out_points)
 
-    return output_collection
+    return output_collection, results_list
 
 
-def convert_to_metfile(point_col, project, metfile_name, order="z2z1", level_peiling="Inpeiling",
+def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2z1", level_peiling="Inpeiling",
                        shore_peiling="Inpeiling"):
 
     with open(metfile_name, 'wb') as csvfile:
@@ -171,6 +176,9 @@ def convert_to_metfile(point_col, project, metfile_name, order="z2z1", level_pei
         for i, row in enumerate(sorted_points):
             profile = str(sorted_points[i]['properties']['prof_ids'])
 
+            if current_profile != profile:
+                count_22 = 0
+
             profile_1 = "{0}_{1}".format(
                 proj_nameList[0],
                 profile
@@ -197,7 +205,8 @@ def convert_to_metfile(point_col, project, metfile_name, order="z2z1", level_pei
                 count_22 += 1
 
             if count_22 > 2:
-                log.error('meerdere 22 punten aanwezig bij profiel ', profile)
+                log.error('meerdere 22 punten aanwezig bij profiel %s', profile)
+                results_list.append([profile, "", "Meerdere 22 punten aanwezig"])
 
             x_coord = str(sorted_points[i]['properties']['x_coord'])
             y_coord = str(sorted_points[i]['properties']['y_coord'])
@@ -271,4 +280,4 @@ def convert_to_metfile(point_col, project, metfile_name, order="z2z1", level_pei
 
         writer.writerow({'regel': profile_end})
 
-    return
+    return results_list
