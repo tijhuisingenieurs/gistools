@@ -206,7 +206,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                                       'proj_name': 'TI17247_scheldestromen_DG1_SM',
                                       'type': "Vast punt",
                                       'opm': "43D188",
-                                      'fotos': "1517214684398-1516367554016",
+                                      'fotos': "1517214684398.jpg-1516367554016.jpg",
                                       'gemeten_op': "2018-01-29T08:31:00.235Z",
                                       'ids': '0',
                                       'x_coord': 72085.4317309772,
@@ -217,12 +217,12 @@ class TestLoadVeldwerk(unittest.TestCase):
 
             # point 0 has two photos
             if p['properties']['ids'] == '0':
-                self.assertEqual(p['properties']['fotos'], "1517214684398-1516367554016")
+                self.assertEqual(p['properties']['fotos'], "1517214684398.jpg-1516367554016.jpg")
                 self.assertEqual(p['properties']['type'], "Vast punt")
 
             # point 1 has been set manually on the map
             if p['properties']['ids'] == '1':
-                self.assertEqual(p['properties']['fotos'], "1517220431127")
+                self.assertEqual(p['properties']['fotos'], "1517220431127.jpg")
                 self.assertEqual(p['properties']['z_nap'], -9999)
                 self.assertEqual(p['properties']['type'], "Inventarisatie")
 
@@ -252,7 +252,7 @@ class TestLoadVeldwerk(unittest.TestCase):
                                       'ok_eenheid': None,
                                       'opm': '',
                                       '_bk_nap': None,
-                                      'fotos': '1517225956486',
+                                      'fotos': '1517225956486.jpg',
                                       'datumtijd': '2018-01-29T11:41:57.994Z',
                                       'gps_rd_x': None,
                                       'gps_rd_y': None,
