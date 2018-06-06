@@ -71,6 +71,7 @@ class TestCombineerTool(unittest.TestCase):
         uitpeilingen = os.path.join(os.path.dirname(__file__), 'data', 'Uitpeiling.met')
         link_table = os.path.join(os.path.dirname(__file__), 'data', 'linkTable.csv')
 
-        vals = combine_peilingen(inpeilingen, uitpeilingen, link_table)
+        vals = combine_peilingen(inpeilingen, uitpeilingen, "z2z1", "z2z1", "Eerste plaats", "Tweede plaats",
+                                 link_table, scale_threshold=0.05, scale_bank_distance=False)
 
         vals
