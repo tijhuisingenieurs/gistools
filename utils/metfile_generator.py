@@ -30,7 +30,6 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
     - Wetterskip Fryslan
     - Scheldestromen
     - Waternet
-    - Combined In- en Uitpeiling
     
     returns csv file in metfile dialect"""
     
