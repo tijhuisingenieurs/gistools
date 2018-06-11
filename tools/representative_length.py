@@ -131,7 +131,7 @@ def representative_length(line_col, profile_col, id_field):
 
                 rep_lines_col.writerecords([
                     {'geometry': {'type': 'MultiLineString',
-                                  'coordinates': [[p for p in reversed(l.coords)] for l in segment]},
+                                  'coordinates': [[p for p in l.coords] for l in segment]},
                      'properties': props}])
 
                 # If the split point was the last to be treated, also add the remaining part of the line to the
@@ -143,7 +143,7 @@ def representative_length(line_col, profile_col, id_field):
 
                     rep_lines_col.writerecords([
                         {'geometry': {'type': 'MultiLineString',
-                                      'coordinates': [[p for p in reversed(l.coords)] for l in current_line]},
+                                      'coordinates': [[p for p in l.coords] for l in current_line]},
                          'properties': props}])
 
         else:
@@ -152,7 +152,7 @@ def representative_length(line_col, profile_col, id_field):
             props['tot_leng'] = line.length
             rep_lines_col.writerecords([
                     {'geometry': {'type': 'MultiLineString',
-                                  'coordinates': [[p for p in reversed(l.coords)] for l in line]},
+                                  'coordinates': [[p for p in l.coords] for l in line]},
                      'properties': props}])
 
         # The representative length data is written in the properties of the
