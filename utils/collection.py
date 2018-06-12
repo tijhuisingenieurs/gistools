@@ -85,7 +85,6 @@ class MemCollection(object):
 
         bbox = kwds.get('bbox')
         bbox_precision = kwds.get('precision', 0.0)
-        mask = kwds.get('mask')
 
         if bbox is not None:
             bbox = (
@@ -97,9 +96,14 @@ class MemCollection(object):
             
             selected.intersection_update(set(self._spatial_index.intersection(bbox)))
 
-        if mask:
-            # todo
-            pass
+        key_value = kwds.get('property')
+        if key_value:
+            if type(key_value['values']) == list:
+                values = key_value['values']
+            else:
+                values = [key_value['values']]
+
+            selected = [key for key in selected if self.ordered_dict[key]['properties'].get(key_value['key']) in values]
 
         return selected
 
