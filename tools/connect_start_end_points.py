@@ -59,12 +59,15 @@ def get_points_on_line(line_col, copy_fields=list(),
                        fixed_distance=100.0,
                        distance_field=None,
                        max_repr_length=150,
-                       all_lines = False):
+                       rep_field=None,
+                       all_lines=False):
     """ returns MemCollection with points on line with special logic"""
 
     point_col = MemCollection(geometry_type='Point')
 
     for feature in line_col.filter():
+        rep_length = float(feature['properties'].get(rep_field, max_repr_length))
+
         if type(feature['geometry']['coordinates'][0][0]) != tuple:
             line = TLine(feature['geometry']['coordinates'])
         else:
@@ -84,7 +87,7 @@ def get_points_on_line(line_col, copy_fields=list(),
         rest_length = line.length % distance
 
         # Max representative length cannot be exceeded, otherwise extra point is needed.
-        if (max_repr_length < rest_length + distance) and line.length > distance:
+        if (rep_length < rest_length + distance) and line.length > distance:
             nr = nr + 1
 
         if line.length < distance and all_lines:
