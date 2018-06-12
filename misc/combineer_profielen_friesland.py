@@ -186,12 +186,15 @@ point_col_complete_23, line_col_complete_23 = combine_profiles_in_folder(input_f
 point_col_bovenkant_8, line_col_bovenkant_8 = read_folder(input_folder_bovenkant_8, 'DWP')
 point_col_bovenkant_23, line_col_bovenkant_23 = read_folder(input_folder_bovenkant_23, 'DWP')
 
+
+# Initialize new geometry collections for the second step
 new_point_col_bovenkant_8 = MemCollection(geometry_type='Point')
 new_point_col_bovenkant_23 = MemCollection(geometry_type='Point')
 
 ## -------------------------------------- Step 2: Combineer profielen ---------------------------------------------- ##
 
 
+# Function to read the link csv file
 def link_table_to_dict(link_table):
     with open(link_table, mode='r') as infile:
         dialect = csv.Sniffer().sniff(infile.read(1024), delimiters=';,')
@@ -201,16 +204,22 @@ def link_table_to_dict(link_table):
     return link_dictionary
 
 
+# Make link dictionary to know which profile belongs to which complete profile
 link_dict = link_table_to_dict(link_table)
 
+
+# Loop through all profiles that have only a slib layer and combine them with the corresponding complete profile
 for l in line_col_bovenkant_23:
     prof_id = l['properties']['prof_ids']
 
+    # If not linked to a complete profile, ignore the profile
     if not link_dict.get(prof_id):
         continue
 
     l['properties']['compleet'] = link_dict[prof_id]
 
+    # Obtain the points belonging to the profile, and the points and lines belonging to the corresponding complete
+    # profile
     bovenkant_points = list(point_col_bovenkant_23.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
 
     complete_line = list(line_col_complete_23.filter(property={'key': 'prof_ids',
@@ -218,19 +227,57 @@ for l in line_col_bovenkant_23:
     complete_points = list(point_col_complete_23.filter(property={'key': 'prof_ids',
                                                                   'values': [link_dict[prof_id]]}))
 
-    array_dist = np.array([point['properties']['afstand']
-                           for point in complete_points if point['properties'].get('ok_nap') is not None])
-    array_level = np.array([point['properties']['ok_nap']
-                           for point in complete_points if point['properties'].get('ok_nap') is not None])
-
+    # Convert line of both profiles to LineString object and obtain length
     bline = TLine(l['geometry']['coordinates'])
     line_complete_length = complete_line[0]['properties']['breedte']
     cline = TLine(complete_line[0]['geometry']['coordinates'])
     line_bovenkant_length = l['properties']['breedte']
 
+    # Check if profile is longer or shorter than complete profile
+    # If longer: complete profile will be stretched internally to fit the profile and vaste bodem is interpolated and
+    # added to the profile. If shorter: profile will be stretched to fit complete profile and new values will be saved
+    # to the profile. Vaste bodem is again interpolated and added as well to the profile.
     if line_bovenkant_length > line_complete_length:
         l['properties']['situation'] = 'Langer dan compleet'
+
+        new_line = cline.get_extended_line_with_length(line_bovenkant_length, 'both')
+
+        ttl_point = new_line.coords[0]
+
+        array_level = np.array([point['properties']['ok_nap']
+                                for point in complete_points if point['properties'].get('ok_nap') is not None])
+        distance_list = []
+
+        for p in complete_points:
+            distance = Point(ttl_point).distance(Point(p['geometry']['coordinates']))
+
+            if p['properties']['code'] == '22l':
+                distance_list.append(0)
+            else:
+                distance_list.append(distance)
+
+        array_dist = np.array(distance_list)
+
+        for p in bovenkant_points:
+            p['properties']['situation'] = 'Langer dan compleet'
+            p['properties']['compleet'] = link_dict[prof_id]
+
+            distance = p['properties']['afstand']
+            if p['properties']['code'] not in ['22l', '22r']:
+                ok_nap = round(np.interp(distance, array_dist, array_level), 3)
+                if ok_nap > p['properties']['bk_nap']:
+                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                else:
+                    p['properties']['ok_nap'] = ok_nap
+
+        new_point_col_bovenkant_23.writerecords(bovenkant_points)
+
     else:
+
+        array_dist = np.array([point['properties']['afstand']
+                               for point in complete_points if point['properties'].get('ok_nap') is not None])
+        array_level = np.array([point['properties']['ok_nap']
+                               for point in complete_points if point['properties'].get('ok_nap') is not None])
         new_line = bline.get_extended_line_with_length(line_complete_length, 'both')
 
         ttl_point = new_line.coords[0]
@@ -240,6 +287,7 @@ for l in line_col_bovenkant_23:
             distance = Point(ttl_point).distance(Point(p['geometry']['coordinates']))
 
             p['properties']['compleet'] = link_dict[prof_id]
+            p['properties']['situation'] = "Korter dan compleet"
 
             if p['properties']['code'] == '22l':
                 p['geometry']['coordinates'] = ttl_point
@@ -254,10 +302,12 @@ for l in line_col_bovenkant_23:
                 else:
                     p['properties']['ok_nap'] = ok_nap
         l['geometry']['coordinates'] = new_line.coords
+        l['properties']['situation'] = 'Korter dan compleet'
 
         new_point_col_bovenkant_23.writerecords(bovenkant_points)
 
 
+# the above methodology repeated for the second part of the input data
 for l in line_col_bovenkant_8:
     prof_id = l['properties']['prof_ids']
 
@@ -285,6 +335,39 @@ for l in line_col_bovenkant_8:
 
     if line_bovenkant_length > line_complete_length:
         l['properties']['situation'] = 'Langer dan compleet'
+
+        new_line = cline.get_extended_line_with_length(line_bovenkant_length, 'both')
+
+        ttl_point = new_line.coords[0]
+
+        array_level = np.array([point['properties']['ok_nap']
+                                for point in complete_points if point['properties'].get('ok_nap') is not None])
+        distance_list = []
+
+        for p in complete_points:
+            distance = Point(ttl_point).distance(Point(p['geometry']['coordinates']))
+
+            if p['properties']['code'] == '22l':
+                distance_list.append(0)
+            else:
+                distance_list.append(distance)
+
+        array_dist = np.array(distance_list)
+
+        for p in bovenkant_points:
+            p['properties']['situation'] = 'Langer dan compleet'
+            p['properties']['compleet'] = link_dict[prof_id]
+
+            distance = p['properties']['afstand']
+            if p['properties']['code'] not in ['22l', '22r']:
+                ok_nap = round(np.interp(distance, array_dist, array_level), 3)
+                if ok_nap > p['properties']['bk_nap']:
+                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                else:
+                    p['properties']['ok_nap'] = ok_nap
+
+        new_point_col_bovenkant_8.writerecords(bovenkant_points)
+
     else:
         new_line = bline.get_extended_line_with_length(line_complete_length, 'both')
 
@@ -295,6 +378,7 @@ for l in line_col_bovenkant_8:
             distance = Point(ttl_point).distance(Point(p['geometry']['coordinates']))
 
             p['properties']['compleet'] = link_dict[prof_id]
+            p['properties']['situation'] = "Korter dan compleet"
 
             if p['properties']['code'] == '22l':
                 p['geometry']['coordinates'] = ttl_point
@@ -309,11 +393,12 @@ for l in line_col_bovenkant_8:
                 else:
                     p['properties']['ok_nap'] = ok_nap
         l['geometry']['coordinates'] = new_line.coords
+        l['properties']['situation'] = 'Korter dan compleet'
 
         new_point_col_bovenkant_8.writerecords(bovenkant_points)
 
 
-## --------------------------- Step x: convert these geometry collections to shapefile ------------------------------ ##
+## --------------------------- Step 3: convert these geometry collections to shapefile ------------------------------ ##
 
 
 def convert_to_point_shapefile(output_folder, file_name, point_collection):
@@ -325,7 +410,7 @@ def convert_to_point_shapefile(output_folder, file_name, point_collection):
     arcpy.AddField_management(output_points, 'bk_nap', "TEXT")
     arcpy.AddField_management(output_points, 'ok_nap', "TEXT")
     arcpy.AddField_management(output_points, 'compleet', "TEXT")
-
+    arcpy.AddField_management(output_points, 'situation', "TEXT")
 
     dataset = arcpy.InsertCursor(output_points)
 
@@ -342,6 +427,7 @@ def convert_to_point_shapefile(output_folder, file_name, point_collection):
         row.setValue('bk_nap', p['properties'].get('bk_nap', None))
         row.setValue('ok_nap', p['properties'].get('ok_nap', None))
         row.setValue('compleet', p['properties'].get('compleet', None))
+        row.setValue('situation', p['properties'].get('situation', None))
 
         dataset.insertRow(row)
 
@@ -375,42 +461,20 @@ def convert_to_line_shapefile(output_folder, file_name, line_collection):
         row.setValue('prof_ids', line['properties'].get('prof_ids', None))
         row.setValue('breedte', line['properties'].get('breedte', None))
         row.setValue('compleet', line['properties'].get('compleet', None))
-        row.setValue('compleet', line['properties'].get('situation', None))
+        row.setValue('situation', line['properties'].get('situation', None))
 
         dataset.insertRow(row)
 
     return
 
 
-# convert_to_point_shapefile(output_folder, bovenkant_8_name, new_point_col_bovenkant_8)
-# convert_to_point_shapefile(output_folder, bovenkant_23_name, new_point_col_bovenkant_23)
-# convert_to_point_shapefile(output_folder, complete_8_name, point_col_complete_8)
-# convert_to_point_shapefile(output_folder, complete_23_name, point_col_complete_23)
+convert_to_point_shapefile(output_folder, bovenkant_8_name, new_point_col_bovenkant_8)
+convert_to_point_shapefile(output_folder, bovenkant_23_name, new_point_col_bovenkant_23)
+convert_to_point_shapefile(output_folder, complete_8_name, point_col_complete_8)
+convert_to_point_shapefile(output_folder, complete_23_name, point_col_complete_23)
 
 convert_to_line_shapefile(output_folder, bovenkant_line_8_name, line_col_bovenkant_8)
 convert_to_line_shapefile(output_folder, bovenkant_line_23_name, line_col_bovenkant_23)
 convert_to_line_shapefile(output_folder, complete_line_8_name, line_col_complete_8)
 convert_to_line_shapefile(output_folder, complete_line_23_name, line_col_complete_23)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
