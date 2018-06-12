@@ -9,7 +9,7 @@ from gistools.utils.conversion_tools import get_float
 log = logging.getLogger(__name__)
 
 
-def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_lengte):
+def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_length):
     """ export content of point collection with appropriate attributes to 
     xls tabels for WDB
     
@@ -71,50 +71,6 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
     file_path = os.path.join(wdb_path, 'locatie.xls')
     wb_locatie.save(file_path)
 
-    # opzetten profielen tabel
-    wb_profielen = xlwt.Workbook()
-    ws = wb_profielen.add_sheet('Profielen')
-
-    fieldnames_profielen = ['id_opp_water', 'id_vak', 'id_profiel', 'wl_breedte',
-                            'afstand', 'bagger', 'water', 'baggerInLegger',
-                            'grondInLegger', 'waterdiepte', 'bodemdiepte',
-                            'natPercentage', 'waterBuitenLegger', 'baggerVerw',
-                            'grondVerw', 'datum_opname', 'opnamepeil',
-                            'datum_uitpeiling', 'uitpeilingpeil', 'beschrijving',
-                            'check_y2', 'check_up', 'afstandVoor', 'afstandNa',
-                            'Xb_profiel', 'Yb_profiel', 'Xe_profiel', 'Ye_profiel']
-
-    for i, fieldname in enumerate(fieldnames_profielen):
-        ws.write(0, i, fieldname, style_str)
-
-    for j, row in enumerate(line_col):
-        index = j + 1
-
-        try:
-            prof_id = int(line_col[j]['properties']['ids'])
-        except ValueError:
-            prof_id = line_col[j]['properties']['ids']
-
-        if rep_lengte:
-            afstand_voor = int(round(float(line_col[j]['properties']['voor_leng']), 0))
-            afstand_na = int(round(float(line_col[j]['properties']['na_leng']), 0))
-            afstand_totaal = afstand_voor + afstand_na
-        else:
-            afstand_voor = afstand / 2
-            afstand_na = afstand / 2
-            afstand_totaal = ""
-
-        fields_profiles = [project, project, prof_id, "", afstand_totaal, "", "", "", "", "", "", "", "",
-                           "", "", "", line_col[j]['properties']['wpeil'], "", "", "", "True", "", afstand_voor,
-                           afstand_na, line_col[j]['properties']['xb_prof'], line_col[j]['properties']['yb_prof'],
-                           line_col[j]['properties']['xe_prof'], line_col[j]['properties']['ye_prof']]
-
-        for m, fieldname in enumerate(fields_profiles):
-            ws.write(index, m, fieldname, style_str)
-
-    file_path = os.path.join(wdb_path, 'profielen.xls')
-    wb_profielen.save(file_path)
-           
     # opzetten metingen tabel
     wb_metingen = xlwt.Workbook()
     ws = wb_metingen.add_sheet('Metingen')
@@ -140,16 +96,70 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
         except ValueError:
             pbpsoort = (str(point_col[j]['properties']['code']))[:2]
 
-        fields_profiles = [project, project, prof_id,
-                           point_col[j]['properties']['afstand'],
+        fields_profiles = [project, project, prof_id, point_col[j]['properties']['afstand'],
                            get_float(point_col[j]['properties'].get('_bk_wp', '0.00')),
                            get_float(point_col[j]['properties'].get('_ok_wp', '0.00')),
                            0, pbpsoort, "", "", "", "", "", "", "", ""]
 
         for m, fieldname in enumerate(fields_profiles):
             ws.write(index, m, fieldname, style_str)
+        current_profile = prof_id
 
     file_path = os.path.join(wdb_path, 'metingen.xls')
     wb_metingen.save(file_path)
+
+    # opzetten profielen tabel
+    wb_profielen = xlwt.Workbook()
+    ws = wb_profielen.add_sheet('Profielen')
+
+    fieldnames_profielen = ['id_opp_water', 'id_vak', 'id_profiel', 'wl_breedte',
+                            'afstand', 'bagger', 'water', 'baggerInLegger',
+                            'grondInLegger', 'waterdiepte', 'bodemdiepte',
+                            'natPercentage', 'waterBuitenLegger', 'baggerVerw',
+                            'grondVerw', 'datum_opname', 'opnamepeil',
+                            'datum_uitpeiling', 'uitpeilingpeil', 'beschrijving',
+                            'check_y2', 'check_up', 'afstandVoor', 'afstandNa',
+                            'Xb_profiel', 'Yb_profiel', 'Xe_profiel', 'Ye_profiel']
+
+    for i, fieldname in enumerate(fieldnames_profielen):
+        ws.write(0, i, fieldname, style_str)
+
+    for j, row in enumerate(line_col):
+        index = j + 1
+        opm = ""
+
+        try:
+            prof_id = int(line_col[j]['properties']['ids'])
+        except ValueError:
+            prof_id = line_col[j]['properties']['ids']
+
+        prof_points = list(point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
+        for point in prof_points:
+            pass
+
+        if rep_length:
+            afstand_voor = line_col[j]['properties']['voor_leng']
+            afstand_na = line_col[j]['properties']['na_leng']
+            afstand_totaal = line_col[j]['properties']['tot_leng']
+        else:
+            afstand_voor = afstand / 2
+            afstand_na = afstand / 2
+            afstand_totaal = ""
+
+        remark = line_col[j]['properties']['opm']
+        if remark not in ["", " "]:
+            opm = '{0}. {1}'.format(remark, remarks)
+
+        fields_profiles = [project, project, prof_id, "", afstand_totaal, "", "", "", "", "", "", "", "",
+                           "", "", line_col[j]['properties']['datum'], line_col[j]['properties']['wpeil'],
+                           "", "", opm, "True", "", afstand_voor,
+                           afstand_na, line_col[j]['properties']['xb_prof'], line_col[j]['properties']['yb_prof'],
+                           line_col[j]['properties']['xe_prof'], line_col[j]['properties']['ye_prof']]
+
+        for m, fieldname in enumerate(fields_profiles):
+            ws.write(index, m, fieldname, style_str)
+
+    file_path = os.path.join(wdb_path, 'profielen.xls')
+    wb_profielen.save(file_path)
     
     return
