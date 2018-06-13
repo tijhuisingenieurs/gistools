@@ -69,7 +69,8 @@ def create_fieldwork_output_shapes(line_col, point_col, boringen_col):
                     'x_coord': round(xy[0], 3),
                     'y_coord': round(xy[1], 3),
                     'wpeil': l['wpeil'],
-                    'fotos': point_props['fotos']
+                    'fotos': point_props['fotos'],
+                    'opm': point_props['opm']
                 }
 
                 # indien alle hoogtes bekend, vul waarden in

@@ -160,8 +160,9 @@ def representative_length(line_col, profile_col, id_field):
         # lines is returned.
         for point in sorted_points:
             profile = point['profile']
-            profile['properties']['voor_leng'] = point['voor_lengte']
-            profile['properties']['na_leng'] = point['na_lengte']
-            profile['properties']['tot_leng'] = point['voor_lengte'] + point['na_lengte']
+            profile['properties']['voor_leng'] = int(round(float(point['voor_lengte']), 0))
+            profile['properties']['na_leng'] = int(round(float(point['na_lengte']), 0))
+            profile['properties']['tot_leng'] = profile['properties']['voor_leng'] + profile['properties']['na_leng']
 
     return profile_col, rep_lines_col
+

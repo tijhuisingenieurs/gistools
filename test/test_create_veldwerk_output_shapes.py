@@ -30,7 +30,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '-3.0',
                             '_bk_wp': '-80',
-                            '_ok_wp': '-80'}},
+                            '_ok_wp': '-80',
+                            'opm': "profielpuntopmerking 1"}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(11.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -40,7 +41,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '-1.0',
                             '_bk_wp': '-20',
-                            '_ok_wp': '-20'}},
+                            '_ok_wp': '-20',
+                            'opm': ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(11.5, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -50,7 +52,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '0',
                             '_bk_wp': '0',
-                            '_ok_wp': '0'}},
+                            '_ok_wp': '0',
+                            'opm': ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(12.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -60,7 +63,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '1.0',
                             '_bk_wp': '10',
-                            '_ok_wp': '30'}},
+                            '_ok_wp': '30',
+                            'opm': "Profielpuntopmerking 2"}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(13.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -70,7 +74,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '3.0',
                             '_bk_wp': '20',
-                            '_ok_wp': '35'}},
+                            '_ok_wp': '35',
+                            'opm': ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(14.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -80,7 +85,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '5.0',
                             '_bk_wp': '15',
-                            '_ok_wp': '25'}},
+                            '_ok_wp': '25',
+                            'opm': ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(14.5, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -90,7 +96,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '6.0',
                             '_bk_wp': '0',
-                            '_ok_wp': '0'}},
+                            '_ok_wp': '0',
+                            "opm": ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(15.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -100,7 +107,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '7.0',
                             '_bk_wp': '-30',
-                            '_ok_wp': '-30'}},
+                            '_ok_wp': '-30',
+                            'opm': ""}},
             {'geometry': {'type': 'Point',
                           'coordinates': [(16.0, 0.0)]},
              'properties': {'prof_ids': 'test123',
@@ -110,7 +118,8 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'fotos': "",
                             'afstand': '9.0',
                             '_bk_wp': '-90',
-                            '_ok_wp': '-90'}}
+                            '_ok_wp': '-90',
+                            'opm': ""}}
         ])
 
         input_point_col2.writerecords([
@@ -121,6 +130,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'sub_code': '99',
                             'tekencode': '999',
                             'fotos': "",
+                            'opm': "",
                             'afstand': '-3.0',
                             '_bk_wp': '',
                             '_ok_wp': '-80'}},
@@ -131,6 +141,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'sub_code': '1',
                             'tekencode': '999',
                             'fotos': "",
+                            'opm': "",
                             'afstand': '-1.0',
                             '_bk_wp': '-20',
                             '_ok_wp': ''}},
@@ -141,6 +152,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'sub_code': '',
                             'tekencode': '999',
                             'fotos': "",
+                            'opm': "",
                             'afstand': '0',
                             '_bk_wp': '',
                             '_bk_nap': '-5.36',
@@ -152,6 +164,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                             'sub_code': '',
                             'tekencode': '999',
                             'fotos': "",
+                            'opm': "Profielpuntopmerking",
                             'afstand': '1.0',
                             '_bk_wp': '',
                             '_ok_wp': ''}}
@@ -258,6 +271,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 7.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': 'profielpuntopmerking 1',
                               'sub_code': '99'})
 
         self.assertEqual(len(point_col1), 9)
@@ -276,6 +290,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 7.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': 'profielpuntopmerking 1',
                               'sub_code': '99'})
 
         self.assertEqual(len(point_col2), 4)
@@ -294,6 +309,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 7.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': '99'})
 
         self.assertDictEqual(point_col2[1]['properties'],
@@ -310,6 +326,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 9.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': '1'})
 
         self.assertDictEqual(point_col2[2]['properties'],
@@ -326,6 +343,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 10.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': ''})
 
         self.assertDictEqual(point_col2[3]['properties'],
@@ -342,6 +360,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 11.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': 'Profielpuntopmerking',
                               'sub_code': ''})
 
         self.assertEqual(len(point_col3), 4)
@@ -360,6 +379,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 7.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': '99'})
 
         self.assertDictEqual(point_col3[1]['properties'],
@@ -376,6 +396,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 9.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': '1'})
 
         self.assertDictEqual(point_col3[2]['properties'],
@@ -392,6 +413,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 10.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': '',
                               'sub_code': ''})
 
         self.assertDictEqual(point_col3[3]['properties'],
@@ -408,6 +430,7 @@ class TestCreateFieldworkOutputShapes(unittest.TestCase):
                               'x_coord': 11.0,
                               'y_coord': 0.0,
                               'fotos': '',
+                              'opm': 'Profielpuntopmerking',
                               'sub_code': ''})
         # Test boorpunt
         self.assertDictEqual(boor_col[0]['properties'],
