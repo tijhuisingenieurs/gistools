@@ -126,16 +126,22 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
 
     for j, row in enumerate(line_col):
         index = j + 1
-        opm = ""
+        remarks = ""
 
         try:
             prof_id = int(line_col[j]['properties']['ids'])
         except ValueError:
             prof_id = line_col[j]['properties']['ids']
 
-        prof_points = list(point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
+        prof_points = list(point_col.filter(property={'key': 'prof_ids', 'values': [str(prof_id)]}))
         for point in prof_points:
-            pass
+            remark = point['properties']['opm']
+            if remark not in ["", " "]:
+                remarks = "{0} Op afstand {1}: {2}.".format(
+                    remarks,
+                    point['properties']['afstand'],
+                    remark
+                )
 
         if rep_length:
             afstand_voor = line_col[j]['properties']['voor_leng']
@@ -149,6 +155,8 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
         remark = line_col[j]['properties']['opm']
         if remark not in ["", " "]:
             opm = '{0}. {1}'.format(remark, remarks)
+        else:
+            opm = remarks
 
         fields_profiles = [project, project, prof_id, "", afstand_totaal, "", "", "", "", "", "", "", "",
                            "", "", line_col[j]['properties']['datum'], line_col[j]['properties']['wpeil'],
@@ -161,5 +169,5 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
 
     file_path = os.path.join(wdb_path, 'profielen.xls')
     wb_profielen.save(file_path)
-    
+
     return
