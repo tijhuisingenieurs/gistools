@@ -24,6 +24,12 @@ def export_points_to_metfile(point_col, project, metfile_name, codering, type_me
     - _ok_nap -> height of top of sediment in mNAP
     
     and file location + name for metfile
+
+    Metfiles can be written in different formats:
+    - WIT
+    - Wetterskip Fryslan
+    - Scheldestromen
+    - Waternet
     
     returns csv file in metfile dialect"""
     

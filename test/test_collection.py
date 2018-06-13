@@ -2,7 +2,6 @@ import unittest
 from gistools.utils.collection import MemCollection
 import os.path
 
-
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
@@ -12,9 +11,9 @@ class TestMemCollection(unittest.TestCase):
         self.collection = MemCollection()
 
         self.rec_one = {'geometry': {'type': 'Point', 'coordinates': (4, 4)},
-                          'properties': {'name': 'test 1'}}
+                        'properties': {'name': 'test 1'}}
         self.rec_two = {'geometry': {'type': 'Point', 'coordinates': (2, 2)},
-                          'properties': {'name': 'test 2'}}
+                        'properties': {'name': 'test 2'}}
 
         self.collection.write(self.rec_one)
         self.collection.write(self.rec_two)
@@ -23,7 +22,6 @@ class TestMemCollection(unittest.TestCase):
         self.assertEqual(len(self.collection), 2)
 
     def test_first_element(self):
-
         feature = self.collection[0]
         self.assertEqual(feature['geometry']['coordinates'], (4, 4))
         self.assertEqual(feature['id'], 0)
@@ -52,9 +50,30 @@ class TestMemCollection(unittest.TestCase):
         self.assertSetEqual(self.collection.keys(bbox=[2, 2, 4, 4]), set([0, 1]))
         self.assertSetEqual(self.collection.keys(bbox=[2.01, 2, 4, 3.99]), set([]))
 
-    def test_keys_mask(self):
-        # todo: mask is not yet supported
-        pass
+    def test_property_filter(self):
+        filtered_set = self.collection.filter(property={'key': 'name', 'values': ['test 1']})
+        l = [item for item in filtered_set]
+        self.assertEqual(len(l), 1)
+        self.assertEqual(l[0]['properties']['name'], 'test 1')
+
+    def test_property_filter_multiple(self):
+        filtered_set = self.collection.filter(property={'key': 'name', 'values': ['test 1', 'test 2']})
+        l = [item for item in filtered_set]
+        self.assertEqual(len(l), 2)
+
+    def test_property_filter_none(self):
+        filtered_set = self.collection.filter(property={'key': 'name', 'values': ['test 3', 'test 4']})
+        l = [item for item in filtered_set]
+        self.assertEqual(len(l), 0)
+
+    def test_property_filter_wrong_key(self):
+        filtered_set = self.collection.filter(property={'key': 'wrong_key', 'values': ['test 1', 'test 2']})
+        l = [item for item in filtered_set]
+        self.assertEqual(len(l), 0)
+
+        filtered_set = self.collection.filter(property={'key': 'wrong_key', 'values': [None]})
+        l = [item for item in filtered_set]
+        self.assertEqual(len(l), 2)
 
     def test_keys_combined(self):
         self.assertSetEqual(self.collection.keys(stop=1, bbox=[3, 3, 5, 5]), set([0]))
