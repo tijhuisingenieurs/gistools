@@ -33,23 +33,14 @@ def import_xml_to_memcollection(xml_file, zvalues, id_location):
     records_errors = []     
 
     pk = 0
-    
-    # add root element to file for correct parsing
-    with open(xml_file, "r") as original:   
-        data = original.read() 
-    with open(xml_file, "w") as myfile:
-        myfile.write('<data>\n' + data)
-    with open(xml_file, "a") as myfile:
-        myfile.write('\n</data>')
 
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+    with open(xml_file, 'r') as metfile:
+        met = metfile.read().replace('\n', '').replace('\r', '')
 
-    # remove root element from file to restore original data
-    with open(xml_file, "w") as restored:   
-        restored.write(data)
+    parse_met = '<data>{0}</data>'.format(met)
+    root = ET.fromstring(parse_met)
         
-    for e in root:   
+    for e in root:
         properties_l = {}
         properties_l['xb_prof'] = 0.0
         properties_l['yb_prof'] = 0.0
