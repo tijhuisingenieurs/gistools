@@ -56,6 +56,10 @@ def representative_length(line_col, profile_col, id_field):
                     'line': line
                 })
 
+        # No profiles on the line
+        if not points:
+            continue
+
         # After all profiles on a line are defined, sort them by distance so that they are in the correct order
         sorted_points = sorted(points, key=lambda x: x['distance'])
 
