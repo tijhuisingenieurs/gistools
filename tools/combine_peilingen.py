@@ -131,7 +131,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
             if len(uit_lines) == 0:
                 log.warning('kan opgegeven uitpeiling met id %s van profiel %s niet vinden',
                             link_dict[prof_id], prof_id)
-                results_list.append([prof_id, link_dict['prof_id'], "Kan opgegeven uitpeiling niet vinden"])
+                results_list.append([prof_id, link_dict[prof_id], "Kan opgegeven uitpeiling niet vinden"])
             else:
                 log.warning('meerdere uitpeilingen met id %s aanwezig', link_dict[prof_id])
                 results_list.append([prof_id, link_dict[prof_id], "Meerdere uitpeilingen aanwezig"])
