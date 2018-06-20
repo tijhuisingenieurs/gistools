@@ -6,6 +6,7 @@ import dateutil.parser as parser
 
 from gistools.utils.xml_handler import import_xml_to_memcollection
 from gistools.utils.collection import MemCollection
+from gistools.utils.geometry import TLine
 
 log = logging.getLogger(__name__)
 
@@ -28,31 +29,60 @@ def results_dict_to_csv(results_list, results_file):
     return
 
 
-def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=False):
+def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line, scale_bank_distance=False):
 
-    dist_ttr_in = float([point for point in in_points if point['properties']['code'] in ('22', '22R', '22r')][-1]['properties']['afstand'])
-    dist_ttr_uit = float([point for point in out_points if point['properties']['code'] in ('22', '22R', '22r')][-1]['properties']['afstand'])
+    dist_ttr_in = float([point for point in in_points if point['properties']['code'] in
+                         ('22', '22R', '22r')][-1]['properties']['afstand'])
+    dist_ttr_uit = float([point for point in out_points if point['properties']['code'] in
+                          ('22', '22R', '22r')][-1]['properties']['afstand'])
 
-    # todo:sort
+    # todo: sort
     # todo: check and warning, don't throw exception
 
     # step1: distance
     count_22 = 0
-    for point in out_points:
+    if width_peiling == "Inpeiling":
+        for point in out_points:
 
-        if point['properties']['code'] in ['22', '22R', '22r', '22L', '22l']:
-            point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
-            count_22 += 1
-        elif count_22 == 0:
-            if scale_bank_distance:
+            if point['properties']['code'] in ['22', '22R', '22r', '22L', '22l']:
                 point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
-        elif count_22 == 2:
-            if scale_bank_distance:
-                point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                count_22 += 1
+            elif count_22 == 0:
+                if scale_bank_distance:
+                    point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+            elif count_22 == 2:
+                if scale_bank_distance:
+                    point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                else:
+                    point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
             else:
-                point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
-        else:
-            point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
+                point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+    else:
+        scale_factor = 1/scale_factor
+        for point in in_points:
+            if point['properties']['code'] in ['22', '22R', '22r', '22L', '22l']:
+                point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                count_22 += 1
+                if count_22 > 0:
+                    new_coords = in_line.get_projected_point_at_distance(point['properties']['afstand'])
+                    point['geometry']['coordinates'] = new_coords
+                    point['properties']['x_coord'] = new_coords[0]
+                    point['properties']['y_coord'] = new_coords[1]
+            else:
+                if count_22 == 0:
+                    if scale_bank_distance:
+                        point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                elif count_22 == 2:
+                    if scale_bank_distance:
+                        point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                    else:
+                        point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
+                else:
+                    point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
+                new_coords = in_line.get_projected_point_at_distance(point['properties']['afstand'])
+                point['geometry']['coordinates'] = new_coords
+                point['properties']['x_coord'] = new_coords[0]
+                point['properties']['y_coord'] = new_coords[1]
 
     # step 2: match inpeiling
     for key in ['_bk_nap', '_ok_nap']:
@@ -66,14 +96,14 @@ def combine_profiles(out_points, in_points, scale_factor, scale_bank_distance=Fa
 
         for point in in_points:
             if left <= round(point['properties']['afstand'], 8) <= right:
-                point['properties']['uit'+ key] = round(np.interp(point['properties']['afstand'], array_dist,
+                point['properties']['uit' + key] = round(np.interp(point['properties']['afstand'], array_dist,
                                                                   array_level), 2)
 
     return in_points
 
 
 def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeiling, loc_inpeiling, loc_uitpeiling,
-                      link_table, scale_threshold=0.05, scale_bank_distance=False):
+                      link_table, width_peilingen="Inpeiling", scale_threshold=0.05, scale_bank_distance=False):
 
     in_point_col, in_line_col, in_tt_col, in_errors = import_xml_to_memcollection(inpeil_file, order_inpeiling,
                                                                                   loc_inpeiling)
@@ -84,6 +114,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
     link_dict = link_table_to_dict(link_table)
     results_list = []
     out_points = []
+    unscaled_points = []
 
     for i, in_line in enumerate(in_line_col):
         prof_id = in_line['properties']['ids']
@@ -98,7 +129,8 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
 
         if len(uit_lines) != 1:
             if len(uit_lines) == 0:
-                log.warning('kan opgegeven uitpeiling met id %s van profiel %s niet vinden', link_dict[prof_id], prof_id)
+                log.warning('kan opgegeven uitpeiling met id %s van profiel %s niet vinden',
+                            link_dict[prof_id], prof_id)
                 results_list.append([prof_id, link_dict['prof_id'], "Kan opgegeven uitpeiling niet vinden"])
             else:
                 log.warning('meerdere uitpeilingen met id %s aanwezig', link_dict[prof_id])
@@ -118,6 +150,9 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
                         )
             message = "Inpeiling en uitpeiling verschillen {0}% in breedte".format(round(abs(perc_change*100), 2))
             results_list.append([prof_id, link_dict[prof_id], message])
+
+            uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [link_dict[prof_id]]}))
+            unscaled_points += uit_points
             continue
 
         in_points = list(in_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
@@ -127,6 +162,8 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
             uit_points,
             in_points,
             scale_factor=prof_width/uit_width,
+            width_peiling=width_peilingen,
+            in_line=TLine(in_line['geometry']['coordinates']),
             scale_bank_distance=scale_bank_distance
         )
         out_points += combined_points
@@ -135,7 +172,14 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
     output_collection = MemCollection(geometry_type='Point')
     output_collection.writerecords(out_points)
 
-    return output_collection, results_list
+    # Make new collection with uitpeilingen that were not scaled
+    if unscaled_points:
+        unscaled_collection = MemCollection(geometry_type='Point')
+        unscaled_collection.writerecords(unscaled_points)
+    else:
+        unscaled_collection = None
+
+    return output_collection, results_list, unscaled_collection
 
 
 def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2z1", level_peiling="Inpeiling",
