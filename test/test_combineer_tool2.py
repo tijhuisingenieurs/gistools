@@ -2,6 +2,7 @@ import os.path
 import unittest
 
 from gistools.tools.combine_peilingen import combine_peilingen, combine_profiles
+from gistools.utils.geometry import TLine
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'combineer_tool')
 
@@ -24,8 +25,10 @@ class TestCombineerTool(unittest.TestCase):
             {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4}},
             {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
         ]
+        line = TLine()
 
-        profile_matched = combine_profiles(profile_b, self.profile_a, scale_factor=10.0 / 11.0)
+        profile_matched = combine_profiles(profile_b, self.profile_a, scale_factor=10.0 / 11.0,
+                                           width_peiling="Inpeiling", in_line=line)
 
         self.assertEqual(0.0, profile_matched[1]['properties']['afstand'])
         self.assertEqual(1.0, profile_matched[2]['properties']['afstand'])
@@ -44,8 +47,10 @@ class TestCombineerTool(unittest.TestCase):
             {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
             {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1}},
         ]
+        line = TLine()
 
-        profile_matched = combine_profiles(profile_b, self.profile_a, scale_factor=10.0 / 11.0)
+        profile_matched = combine_profiles(profile_b, self.profile_a, scale_factor=10.0 / 11.0,
+                                           width_peiling="Inpeiling", in_line=line)
 
         self.assertIsNotNone(profile_matched[0]['properties'].get('uit_ok_nap'))
         self.assertIsNotNone(profile_matched[-1]['properties'].get('uit_ok_nap'))
@@ -59,8 +64,10 @@ class TestCombineerTool(unittest.TestCase):
             {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
             {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1}},
         ]
+        line = TLine()
 
         profile_matched = combine_profiles(profile_b, self.profile_a, scale_factor=10.0 / 11.0,
+                                           width_peiling="Inpeiling", in_line=line,
                                            scale_bank_distance=True)
 
         self.assertIsNone(profile_matched[0]['properties'].get('uit_ok_nap'))
