@@ -180,6 +180,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         else:
             prof['wpeil_bron'] = '-'
 
+        if profile.get('reference_level'):
+            prof['wpeil'] = get_float(profile.get('reference_level'))
+            prof['wpeil_bron'] = 'server'
+
         prof['aantal_1'] = count_one
         prof['aantal_22L'] = count_ttl
         prof['aantal_99'] = count_nn

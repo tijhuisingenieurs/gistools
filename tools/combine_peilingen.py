@@ -285,7 +285,6 @@ def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2
                 # check niet eerste profiel -> dan vorige profiel nog afsluiten
                 if current_profile != '':
                     writer.writerow({'regel': profile_end})
-                    count_22 = 0
 
                 # wegschrijven profielregel
                 profiel_tekst = "<PROFIEL>{0},{1},{2},0.00,NAP,ABS,2,XY,{3},{4},".format(
