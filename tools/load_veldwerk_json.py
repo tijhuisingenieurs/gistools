@@ -130,10 +130,10 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             elif p.get('lower_level_source', '') == 'manual':
                 count_manual += 1
 
-        if ttl and ttl['rd_coordinates'] and None in ttl['rd_coordinates']:
+        if ttl and ttl['rd_coordinates'] and None in ttl['rd_coordinates'][0:2]:
             ttl['rd_coordinates'] = None
 
-        if ttr and ttr['rd_coordinates'] and None in ttr['rd_coordinates']:
+        if ttr and ttr['rd_coordinates'] and None in ttr['rd_coordinates'][0:2]:
             ttr['rd_coordinates'] = None
 
         prof['methode'] = ", ".join(set(method_list))
