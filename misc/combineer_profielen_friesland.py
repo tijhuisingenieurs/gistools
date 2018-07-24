@@ -12,7 +12,7 @@ from shapely.geometry import Point, LineString
 
 ## ------------------------------------------ Set input parameters ------------------------------------------------- ##
 # Complete: contains both slib and vaste bodem
-waterlevel = -0.54
+waterlevel = -0.52
 extra_length_tt = 0.10
 link_table = "K:\Projecten\\2018\TI18135 Onderhoudsplan aanlegplaatsen gemeente Heerenveen\Tekening\Conversie_tekst" \
              "_bestanden_naar_shapes\link_tabel.csv"
@@ -61,11 +61,11 @@ def read_file(file_path, prof_name, waterlevel, bodem_values=None):
         infile.seek(0)
         for i, row in enumerate(reader):
             properties = {}
-            properties['bk_nap'] = float(row[2])
+            properties['_bk_nap'] = float(row[2])
             properties['prof_ids'] = prof_name
             properties['code'] = '99'
             if bodem_values:
-                properties['ok_nap'] = bodem_values[i]
+                properties['_ok_nap'] = bodem_values[i]
             point = Point(float(row[0]), float(row[1]))
 
             point_list.append(
@@ -92,8 +92,8 @@ def read_file(file_path, prof_name, waterlevel, bodem_values=None):
                       'coordinates': start_point},
          'properties': {'prof_ids': prof_name,
                         'code': '22l',
-                        'bk_nap': waterlevel,
-                        'ok_nap': waterlevel}}
+                        '_bk_nap': waterlevel,
+                        '_ok_nap': waterlevel}}
     )
 
     tt_point_list.extend(point_list)
@@ -103,8 +103,8 @@ def read_file(file_path, prof_name, waterlevel, bodem_values=None):
                        'coordinates': end_point},
          'properties': {'prof_ids': prof_name,
                         'code': '22r',
-                        'bk_nap': waterlevel,
-                        'ok_nap': waterlevel}}]
+                        '_bk_nap': waterlevel,
+                        '_ok_nap': waterlevel}}]
     )
 
     # Calculate distances for each point
@@ -244,8 +244,8 @@ for l in line_col_bovenkant_23:
 
         ttl_point = new_line.coords[0]
 
-        array_level = np.array([point['properties']['ok_nap']
-                                for point in complete_points if point['properties'].get('ok_nap') is not None])
+        array_level = np.array([point['properties']['_ok_nap']
+                                for point in complete_points if point['properties'].get('_ok_nap') is not None])
         distance_list = []
 
         for p in complete_points:
@@ -261,23 +261,24 @@ for l in line_col_bovenkant_23:
         for p in bovenkant_points:
             p['properties']['situation'] = 'Langer dan compleet'
             p['properties']['compleet'] = link_dict[prof_id]
+            p['properties']['datum'] = "00/00/0000"
 
             distance = p['properties']['afstand']
             if p['properties']['code'] not in ['22l', '22r']:
                 ok_nap = round(np.interp(distance, array_dist, array_level), 3)
-                if ok_nap > p['properties']['bk_nap']:
-                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                if ok_nap > p['properties']['_bk_nap']:
+                    p['properties']['_ok_nap'] = p['properties']['_bk_nap']
                 else:
-                    p['properties']['ok_nap'] = ok_nap
+                    p['properties']['_ok_nap'] = ok_nap
 
         new_point_col_bovenkant_23.writerecords(bovenkant_points)
 
     else:
 
         array_dist = np.array([point['properties']['afstand']
-                               for point in complete_points if point['properties'].get('ok_nap') is not None])
-        array_level = np.array([point['properties']['ok_nap']
-                               for point in complete_points if point['properties'].get('ok_nap') is not None])
+                               for point in complete_points if point['properties'].get('_ok_nap') is not None])
+        array_level = np.array([point['properties']['_ok_nap']
+                               for point in complete_points if point['properties'].get('_ok_nap') is not None])
         new_line = bline.get_extended_line_with_length(line_complete_length, 'both')
 
         ttl_point = new_line.coords[0]
@@ -288,6 +289,7 @@ for l in line_col_bovenkant_23:
 
             p['properties']['compleet'] = link_dict[prof_id]
             p['properties']['situation'] = "Korter dan compleet"
+            p['properties']['datum'] = "00/00/0000"
 
             if p['properties']['code'] == '22l':
                 p['geometry']['coordinates'] = ttl_point
@@ -297,10 +299,10 @@ for l in line_col_bovenkant_23:
             else:
                 p['properties']['afstand'] = distance
                 ok_nap = round(np.interp(distance, array_dist, array_level), 3)
-                if ok_nap > p['properties']['bk_nap']:
-                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                if ok_nap > p['properties']['_bk_nap']:
+                    p['properties']['_ok_nap'] = p['properties']['_bk_nap']
                 else:
-                    p['properties']['ok_nap'] = ok_nap
+                    p['properties']['_ok_nap'] = ok_nap
         l['geometry']['coordinates'] = new_line.coords
         l['properties']['situation'] = 'Korter dan compleet'
 
@@ -324,9 +326,9 @@ for l in line_col_bovenkant_8:
                                                                  'values': [link_dict[prof_id]]}))
 
     array_dist = np.array([point['properties']['afstand']
-                           for point in complete_points if point['properties'].get('ok_nap') is not None])
-    array_level = np.array([point['properties']['ok_nap']
-                           for point in complete_points if point['properties'].get('ok_nap') is not None])
+                           for point in complete_points if point['properties'].get('_ok_nap') is not None])
+    array_level = np.array([point['properties']['_ok_nap']
+                           for point in complete_points if point['properties'].get('_ok_nap') is not None])
 
     bline = TLine(l['geometry']['coordinates'])
     line_complete_length = complete_line[0]['properties']['breedte']
@@ -340,8 +342,8 @@ for l in line_col_bovenkant_8:
 
         ttl_point = new_line.coords[0]
 
-        array_level = np.array([point['properties']['ok_nap']
-                                for point in complete_points if point['properties'].get('ok_nap') is not None])
+        array_level = np.array([point['properties']['_ok_nap']
+                                for point in complete_points if point['properties'].get('_ok_nap') is not None])
         distance_list = []
 
         for p in complete_points:
@@ -357,14 +359,15 @@ for l in line_col_bovenkant_8:
         for p in bovenkant_points:
             p['properties']['situation'] = 'Langer dan compleet'
             p['properties']['compleet'] = link_dict[prof_id]
+            p['properties']['datum'] = "00/00/0000"
 
             distance = p['properties']['afstand']
             if p['properties']['code'] not in ['22l', '22r']:
                 ok_nap = round(np.interp(distance, array_dist, array_level), 3)
-                if ok_nap > p['properties']['bk_nap']:
-                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                if ok_nap > p['properties']['_bk_nap']:
+                    p['properties']['_ok_nap'] = p['properties']['_bk_nap']
                 else:
-                    p['properties']['ok_nap'] = ok_nap
+                    p['properties']['_ok_nap'] = ok_nap
 
         new_point_col_bovenkant_8.writerecords(bovenkant_points)
 
@@ -379,6 +382,7 @@ for l in line_col_bovenkant_8:
 
             p['properties']['compleet'] = link_dict[prof_id]
             p['properties']['situation'] = "Korter dan compleet"
+            p['properties']['datum'] = "00/00/0000"
 
             if p['properties']['code'] == '22l':
                 p['geometry']['coordinates'] = ttl_point
@@ -388,10 +392,10 @@ for l in line_col_bovenkant_8:
             else:
                 p['properties']['afstand'] = distance
                 ok_nap = round(np.interp(distance, array_dist, array_level), 3)
-                if ok_nap > p['properties']['bk_nap']:
-                    p['properties']['ok_nap'] = p['properties']['bk_nap']
+                if ok_nap > p['properties']['_bk_nap']:
+                    p['properties']['_ok_nap'] = p['properties']['_bk_nap']
                 else:
-                    p['properties']['ok_nap'] = ok_nap
+                    p['properties']['_ok_nap'] = ok_nap
         l['geometry']['coordinates'] = new_line.coords
         l['properties']['situation'] = 'Korter dan compleet'
 
@@ -407,10 +411,14 @@ def convert_to_point_shapefile(output_folder, file_name, point_collection):
     arcpy.AddField_management(output_points, 'prof_ids', "TEXT")
     arcpy.AddField_management(output_points, 'code', 'TEXT')
     arcpy.AddField_management(output_points, 'afstand', 'DOUBLE')
-    arcpy.AddField_management(output_points, 'bk_nap', "TEXT")
-    arcpy.AddField_management(output_points, 'ok_nap', "TEXT")
+    arcpy.AddField_management(output_points, '_bk_nap', "TEXT")
+    arcpy.AddField_management(output_points, '_ok_nap', "TEXT")
     arcpy.AddField_management(output_points, 'compleet', "TEXT")
     arcpy.AddField_management(output_points, 'situation', "TEXT")
+    arcpy.AddField_management(output_points, 'datum', "TEXT")
+    arcpy.AddField_management(output_points, 'x_coords', "DOUBLE")
+    arcpy.AddField_management(output_points, 'y_coords', "DOUBLE")
+
 
     dataset = arcpy.InsertCursor(output_points)
 
@@ -424,10 +432,13 @@ def convert_to_point_shapefile(output_folder, file_name, point_collection):
         row.setValue('prof_ids', p['properties'].get('prof_ids', None))
         row.setValue('code', p['properties'].get('code', None))
         row.setValue('afstand', p['properties'].get('afstand', None))
-        row.setValue('bk_nap', p['properties'].get('bk_nap', None))
-        row.setValue('ok_nap', p['properties'].get('ok_nap', None))
+        row.setValue('_bk_nap', p['properties'].get('_bk_nap', None))
+        row.setValue('_ok_nap', p['properties'].get('_ok_nap', None))
         row.setValue('compleet', p['properties'].get('compleet', None))
         row.setValue('situation', p['properties'].get('situation', None))
+        row.setValue('datum', p['properties'].get('datum', None))
+        row.setValue('x_coord', p['geometry']['coordinates'][0])
+        row.setValue('y_coord', p['geometry']['coordinates'][1])
 
         dataset.insertRow(row)
 

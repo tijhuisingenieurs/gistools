@@ -1,6 +1,7 @@
 import numpy
 
 from shapely.geometry import MultiLineString, LineString
+from shapely.geometry import MultiPoint
 from shapely.ops import split
 
 from gistools.utils.collection import MemCollection
@@ -45,10 +46,15 @@ def representative_length(line_col, profile_col, id_field):
             # Making an intersection of the profile with the line creates a point
             x = line.intersection(prof)
 
+            if isinstance(x, MultiPoint):
+                raise ValueError('Profiel {0} heeft meerdere intersecties met de onderliggende watergang.'.format(
+                    profile['properties'][id_field]
+                ))
+
             # If the profile has an intersect with the line, and thus a point is created,
             # distance from the beginning of the line to the point is calculated, and it is added to
             # the points collection. Also, references to the original profile and line are added.
-            if x:
+            if not x.is_empty:
                 points.append({
                     'coords': x.coords[0],
                     'distance': line.project(x),
