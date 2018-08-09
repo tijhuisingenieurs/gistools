@@ -2,7 +2,6 @@ import csv
 import logging
 import os
 import os.path
-
 import xlwt
 from gistools.utils.conversion_tools import get_float
 
@@ -135,7 +134,7 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
 
         prof_points = list(point_col.filter(property={'key': 'prof_ids', 'values': [str(prof_id)]}))
         for point in prof_points:
-            remark = point['properties']['opm']
+            remark = point['properties'].get('opm', "")
             if remark not in ["", " "]:
                 remarks = "{0} Op afstand {1}: {2}.".format(
                     remarks,
