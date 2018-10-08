@@ -1,4 +1,5 @@
 import csv
+import copy
 import logging
 import numpy as np
 import datetime
@@ -11,13 +12,50 @@ from gistools.utils.geometry import TLine
 log = logging.getLogger(__name__)
 
 
-def link_table_to_dict(link_table):
+def link_table_to_dict(link_table, id_peiling):
     with open(link_table, mode='r') as infile:
         dialect = csv.Sniffer().sniff(infile.read(1024), delimiters=';,')
         infile.seek(0)
         reader = csv.reader(infile, dialect)
-        link_dict = {rows[0]: rows[1] for rows in reader}
-    return link_dict
+        link_list = [[rows[0], rows[1]] for rows in reader]
+
+        # Get unique list in same order
+        unique_link_list = []
+        for x in link_list:
+            if x not in unique_link_list:
+                unique_link_list.append(x)
+
+        # Avoid non-unique profile-ID's
+        unique_link_list.sort(key=lambda x: x[id_peiling])
+        id_peilingen_list = []
+        index = 2
+        previous = None
+
+        for x in unique_link_list:
+            if x[id_peiling] != previous:
+                index = 2
+            if id_peiling == 0:
+                if x[0] in id_peilingen_list:
+                    new = "{0}_{1}".format(x[0], index)
+                    index += 1
+                    x.append(new)
+                    id_peilingen_list.append(new)
+                else:
+                    id_peilingen_list.append(x[0])
+                    x.append(x[0])
+
+            else:
+                if x[1] in id_peilingen_list:
+                    new = "{0}_{1}".format(x[1], index)
+                    index += 1
+                    id_peilingen_list.append(new)
+                    x.append(new)
+                else:
+                    id_peilingen_list.append(x[1])
+                    x.append(x[1])
+            previous = x[id_peiling]
+
+    return unique_link_list
 
 
 def results_dict_to_csv(results_list, results_file):
@@ -30,7 +68,7 @@ def results_dict_to_csv(results_list, results_file):
 
 
 def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line, scale_bank_distance=False):
-
+    date = out_points[0]['properties']['datum']
     dist_ttr_in = float([point for point in in_points if point['properties']['code'] in
                          ('22', '22R', '22r')][-1]['properties']['afstand'])
     dist_ttr_uit = float([point for point in out_points if point['properties']['code'] in
@@ -39,11 +77,17 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
     # todo: sort
     # todo: check and warning, don't throw exception
 
+    for i, point in enumerate(out_points):
+        out_points[i] = copy.deepcopy(point)
+
+    for i, point in enumerate(in_points):
+        in_points[i] = copy.deepcopy(point)
+        in_points[i]['properties']['datum'] = date
+
     # step1: distance
     count_22 = 0
     if width_peiling == "Inpeiling":
         for point in out_points:
-
             if point['properties']['code'] in ['22', '22R', '22r', '22L', '22l']:
                 point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
                 count_22 += 1
@@ -103,7 +147,7 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
 
 
 def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeiling, loc_inpeiling, loc_uitpeiling,
-                      link_table, width_peilingen="Inpeiling", scale_threshold=0.05, scale_bank_distance=False):
+                      link_table, width_peilingen="Inpeiling", id_peiling=1, scale_threshold=0.05, scale_bank_distance=False):
 
     in_point_col, in_line_col, in_tt_col, in_errors = import_xml_to_memcollection(inpeil_file, order_inpeiling,
                                                                                   loc_inpeiling)
@@ -111,30 +155,52 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
     uit_point_col, uit_line_col, uit_tt_col, uit_errors = import_xml_to_memcollection(uitpeil_file, order_uitpeiling,
                                                                                       loc_uitpeiling)
 
-    link_dict = link_table_to_dict(link_table)
+    link_list = link_table_to_dict(link_table, id_peiling)
     results_list = []
     out_points = []
     unscaled_points = []
 
-    for i, in_line in enumerate(in_line_col):
-        prof_id = in_line['properties']['ids']
-        prof_width = in_line['properties']['breedte']
+    for i, in_uit in enumerate(link_list):
+        # ID inpeiling
+        prof_id = in_uit[0]
+        if prof_id == "07CE06":
+            a=1
+        # ID uitpeiling
+        prof_id_uit = in_uit[1]
+        # ID uiteindelijke punt in metfile
+        prof_id_name = in_uit[2]
 
-        if prof_id not in link_dict:
-            log.info('profiel %s is niet gelinkt aan een uitpeiling.', prof_id)
-            results_list.append([prof_id, "", "Profiel is niet gelinkt aan een uitpeiling"])
+        in_lines = list(in_line_col.filter(property={'key': 'ids', 'values': [prof_id]}))
+
+        if len(in_lines) != 1:
+            if len(in_lines) == 0:
+                log.warning('kan opgegeven inpeiling met id %s niet vinden',
+                            prof_id)
+                results_list.append([prof_id, "", "Kan opgegeven inpeiling niet vinden"])
+            else:
+                log.warning('meerdere inpeilingen met id %s aanwezig', prof_id)
+                results_list.append([prof_id, "", "Meerdere inpeilingen aanwezig"])
             continue
 
-        uit_lines = list(uit_line_col.filter(property={'key': 'ids', 'values': [link_dict[prof_id]]}))
+        in_line = in_lines[0]
+
+        prof_width = in_line['properties']['breedte']
+
+        # if prof_id not in link_dict:
+        #     log.info('profiel %s is niet gelinkt aan een uitpeiling.', prof_id)
+        #     results_list.append([prof_id, "", "Profiel is niet gelinkt aan een uitpeiling"])
+        #     continue
+
+        uit_lines = list(uit_line_col.filter(property={'key': 'ids', 'values': [prof_id_uit]}))
 
         if len(uit_lines) != 1:
             if len(uit_lines) == 0:
                 log.warning('kan opgegeven uitpeiling met id %s van profiel %s niet vinden',
-                            link_dict[prof_id], prof_id)
-                results_list.append([prof_id, link_dict[prof_id], "Kan opgegeven uitpeiling niet vinden"])
+                            prof_id_uit, prof_id)
+                results_list.append([prof_id, prof_id_uit, "Kan opgegeven uitpeiling niet vinden"])
             else:
-                log.warning('meerdere uitpeilingen met id %s aanwezig', link_dict[prof_id])
-                results_list.append([prof_id, link_dict[prof_id], "Meerdere uitpeilingen aanwezig"])
+                log.warning('meerdere uitpeilingen met id %s aanwezig', prof_id_uit)
+                results_list.append([prof_id, prof_id_uit, "Meerdere uitpeilingen aanwezig"])
             continue
 
         uit_line = uit_lines[0]
@@ -145,18 +211,18 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
         if abs(perc_change) > scale_threshold:
             log.warning('Inpeiling profiel %s en uitpeiling profiel %s verschillen meer dan %.2f%% in breedte',
                         prof_id,
-                        link_dict[prof_id],
+                        prof_id_uit,
                         scale_threshold * 100
                         )
             message = "Inpeiling en uitpeiling verschillen {0}% in breedte".format(round(abs(perc_change*100), 2))
-            results_list.append([prof_id, link_dict[prof_id], message])
+            results_list.append([prof_id, prof_id_uit, message])
 
-            uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [link_dict[prof_id]]}))
+            uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id_uit]}))
             unscaled_points += uit_points
             continue
 
         in_points = list(in_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id]}))
-        uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [link_dict[prof_id]]}))
+        uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id_uit]}))
 
         combined_points = combine_profiles(
             uit_points,
@@ -166,6 +232,10 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
             in_line=TLine(in_line['geometry']['coordinates']),
             scale_bank_distance=scale_bank_distance
         )
+
+        for combined_point in combined_points:
+            combined_point['properties']['prof_ids'] = prof_id_name
+
         out_points += combined_points
 
     # Make new collection with only those profiles that should be scaled and combined
