@@ -5,7 +5,8 @@ import pandas as pd
 # ------------ Part1: Check the metfile
 def check_metfile(input_file, output_file):
     ''' Functie die een metfile leest en dan checkt of de profielinformatie en de metingen genoeg elementen hebben. En
-    allemaal een afsluiting. Geeft een excelbestand terug met daarin de profielnamen waarin een fout zit'''
+    allemaal een afsluiting. Geeft een excelbestand terug met daarin de profielnamen waarin een fout zit
+    LET OP: deze tool kan de fout in de <PROFIEL> niet vinden'''
 
     # dict om alle informatie op te slaan voor output excel
     headers = ['Profielnaam', 'Missende afsluiting profiel', 'Fout in profielinformatie', 'Fout in afsluiting meting',
@@ -70,6 +71,35 @@ def check_metfile(input_file, output_file):
                     resultaten_list[4] = 'ja'
                     fout_aanwezig = True
                     #print 'Fout in meting'
+
+                # Check of de elementen wel de juiste waarde/format hebben
+                for ind, e in enumerate(meetpunt_elementen[:-1]):
+                    # Test of de eerste waardes hele getallen zijn en een juiste code aangeven
+
+                    if ind == 0 or ind == 1:
+                        try:
+                            e = int(e)
+                        except:
+                            resultaten_list[4] = 'ja'
+                            fout_aanwezig = True
+                            #print 'fout:01'
+                        # if ind == 0 and e not in [1,2,5,6,7,22,99]:
+                        #     resultaten_list[4] = 'ja'
+                        #     fout_aanwezig = True
+                        #     #print 'fout:00'
+                        # if ind == 1 and e not in [92,999]:
+                        #     resultaten_list[4] = 'ja'
+                        #     fout_aanwezig = True
+                        #     #print 'fout:11'
+
+                    # Test of de laatste waardes kommagetallen zijn
+                    if ind in (2,3,4,5):
+                        try:
+                            e = float(e)
+                        except:
+                            resultaten_list[4] = 'ja'
+                            fout_aanwezig = True
+                            #print 'fout:2-5'
 
             # Als er inderdaad een fout gevonden is, wordt deze toegevoegd aan de resultaten, die straks naar
             # excel worden geschreven
