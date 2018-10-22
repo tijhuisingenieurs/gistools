@@ -5,7 +5,9 @@ import pandas as pd
 # ------------ Part1: Check the metfile
 def check_metfile(input_file, output_file):
     ''' Functie die een metfile leest en dan checkt of de profielinformatie en de metingen genoeg elementen hebben. En
-    allemaal een afsluiting. Geeft een excelbestand terug met daarin de profielnamen waarin een fout zit
+    allemaal een afsluiting. Geeft een excelbestand terug met daarin de profielnamen waarin een fout zit.
+    Daarbij geeft de tool in een eigen tabblad het overzicht welke codes er in het profiel voorkomen. Deze
+    informatie kan gebruikt worden om via draaitabel te checken of de codes kloppen.
     LET OP: deze tool kan de fout in de <PROFIEL> niet vinden'''
 
     # dict om alle informatie op te slaan voor output excel
@@ -13,10 +15,11 @@ def check_metfile(input_file, output_file):
                'Fout in metinginformatie']
     resultaten_dict = dict((each, []) for each in headers)
 
+    # Maak een list om de codes van alle profielen op te slaan
+    codes_list = []
+
     # Opening metfile en data inlezen
     with open (input_file, 'r') as metfile:
-        #print 'Metfile geopend: ', metfile
-
         # Maakt de info als 1 lange text, handig om in te zoeken
         met = metfile.read().replace('\n', '').replace('\r', '')
 
@@ -27,7 +30,6 @@ def check_metfile(input_file, output_file):
         for each in profielen[1:]:
             profiel_elementen_totaal = each.split(',')
             profielnaam = profiel_elementen_totaal[0]
-            #print 'Profiel: ', profielnaam
 
             # Checkparameter of er een fout is, dus het profiel naar de output moet worden geschreven
             fout_aanwezig = False
@@ -75,22 +77,23 @@ def check_metfile(input_file, output_file):
                 # Check of de elementen wel de juiste waarde/format hebben
                 for ind, e in enumerate(meetpunt_elementen[:-1]):
                     # Test of de eerste waardes hele getallen zijn en een juiste code aangeven
+                    if ind == 0:
+                        try:
+                            e = int(e)
+                            # Maak een lijst van de codes die dit profiel heeft
+                            codes_list.append((profielnaam,e))
+                        except:
+                            resultaten_list[4] = 'ja'
+                            fout_aanwezig = True
+                            #print 'fout:0'
 
-                    if ind == 0 or ind == 1:
+                    if ind == 1:
                         try:
                             e = int(e)
                         except:
                             resultaten_list[4] = 'ja'
                             fout_aanwezig = True
-                            #print 'fout:01'
-                        # if ind == 0 and e not in [1,2,5,6,7,22,99]:
-                        #     resultaten_list[4] = 'ja'
-                        #     fout_aanwezig = True
-                        #     #print 'fout:00'
-                        # if ind == 1 and e not in [92,999]:
-                        #     resultaten_list[4] = 'ja'
-                        #     fout_aanwezig = True
-                        #     #print 'fout:11'
+                            #print 'fout:1'
 
                     # Test of de laatste waardes kommagetallen zijn
                     if ind in (2,3,4,5):
@@ -115,15 +118,20 @@ def check_metfile(input_file, output_file):
     #print resultaten_dict
 
     # ------------ Part 2: write resultaten to xslx file --------------------------------
-    # Create dataframe
+    # Create dataframe van de tabel met fouten
     df = pd.DataFrame.from_dict(resultaten_dict)
     #Order the colunms
     df=df[headers]
 
+    # Create dataframe van de profielcodes
+    df_codes = pd.DataFrame(codes_list, columns = ['Profielnaam','code'])
+
     # create a excel writer
     writer = pd.ExcelWriter(output_file)
+
     # Convert the dataframe to an  Excel object.
-    df.to_excel(writer, sheet_name='Sheet1')
+    df.to_excel(writer, sheet_name='fouten_report')
+    df_codes.to_excel(writer, sheet_name='overzicht_profielcodes')
 
     # Close the Pandas Excel writer and output the Excel file.
     writer.save()
