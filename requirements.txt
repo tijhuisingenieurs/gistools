@@ -3,3 +3,4 @@ rtree
 xlrd
 xlwt
 python-dateutil
+pandas
