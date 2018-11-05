@@ -8,12 +8,15 @@ def check_metfile(input_file, output_file):
     allemaal een afsluiting. Geeft een excelbestand terug met daarin de profielnamen waarin een fout zit.
     Daarbij geeft de tool in een eigen tabblad het overzicht welke codes er in het profiel voorkomen. Deze
     informatie kan gebruikt worden om via draaitabel te checken of de codes kloppen.
-    LET OP: deze tool kan de fout in de <PROFIEL> niet vinden'''
+    LET OP: deze tool kan de fout in de <PROFIEL> niet vinden
+    input_file (str): path van metfile die gecontroleerd moet worden
+    output_file (str): path van excelfile met fout opmerkingen
+    return: -'''
 
     # dict om alle informatie op te slaan voor output excel
     headers = ['Profielnaam', 'Missende afsluiting profiel', 'Fout in profielinformatie', 'Fout in afsluiting meting',
                'Fout in metinginformatie']
-    resultaten_dict = dict((each, []) for each in headers)
+    resultaten_dict = dict((header, []) for header in headers)
 
     # Maak een list om de codes van alle profielen op te slaan
     codes_list = []
@@ -27,9 +30,9 @@ def check_metfile(input_file, output_file):
         profielen = met.split('<PROFIEL>')
 
         # Ga elk profiel af
-        for each in profielen[1:]:
-            profiel_elementen_totaal = each.split(',')
-            profielnaam = profiel_elementen_totaal[0]
+        for profiel in profielen[1:]:
+            profiel_elementen = profiel.split(',')
+            profielnaam = profiel_elementen[0]
 
             # Checkparameter of er een fout is, dus het profiel naar de output moet worden geschreven
             fout_aanwezig = False
@@ -39,24 +42,24 @@ def check_metfile(input_file, output_file):
             resultaten_list[0] = profielnaam
 
             # Check of elk profiel ook een afsluitcommand heeft
-            if profiel_elementen_totaal[-1] != '</METING></PROFIEL>':
+            if profiel_elementen[-1] != '</METING></PROFIEL>':
                 resultaten_list[1] = 'ja'
                 fout_aanwezig = True
-                #print 'Afsluiting missend: </PROFIEL>'
+                #print('Afsluiting missend: </PROFIEL>')
 
             # Check of er fouten zitten in de profielinfo, normaal gezien zou het 10e element de eerste meting bevatten,
             # zo niet dan zit er hoogstwaarschijnlijk een fout in de info
-            if len(profiel_elementen_totaal) < 10:
+            if len(profiel_elementen) < 10:
                 resultaten_list[2] = 'ja'
                 fout_aanwezig = True
-                #print 'Fout in profielinfo'
-            elif profiel_elementen_totaal[10].find('<METING>') < 0:
+                #print('Fout in profielinfo')
+            elif profiel_elementen[10].find('<METING>') < 0:
                 resultaten_list[2] = 'ja'
                 fout_aanwezig = True
-                #print 'Fout in profielinfo'
+                #print('Fout in profielinfo')
 
             # Split het profiel op metingniveau
-            metingen = each[1:].split('<METING>')
+            metingen = profiel[1:].split('<METING>')
             # Check of er fouten zitten in de metingen, ga elk meetpunt af
             for meetpunt in metingen[1:]:
                 meetpunt_elementen = meetpunt.split(',')
@@ -65,44 +68,44 @@ def check_metfile(input_file, output_file):
                 if meetpunt_elementen[-1]!= '</METING>' and meetpunt_elementen[-1]!= '</METING></PROFIEL>':
                     resultaten_list[3] = 'ja'
                     fout_aanwezig = True
-                    #print  'Afsluiting missend: </METING>'
+                    #print('Afsluiting missend: </METING>')
 
                 # Check op het aantal elementen in de meting, normaliter zijn dat er 6
                 aantal_elementen =  len(meetpunt_elementen)-1 # de </meting> is ook een element, vandaar -1
                 if aantal_elementen != 6:
                     resultaten_list[4] = 'ja'
                     fout_aanwezig = True
-                    #print 'Fout in meting'
+                    #print('Fout in meting')
 
                 # Check of de elementen wel de juiste waarde/format hebben
-                for ind, e in enumerate(meetpunt_elementen[:-1]):
+                for ind, waarde in enumerate(meetpunt_elementen[:-1]):
                     # Test of de eerste waardes hele getallen zijn en een juiste code aangeven
                     if ind == 0:
                         try:
-                            e = int(e)
+                            waarde = int(waarde)
                             # Maak een lijst van de codes die dit profiel heeft
-                            codes_list.append((profielnaam,e))
+                            codes_list.append((profielnaam,waarde))
                         except:
                             resultaten_list[4] = 'ja'
                             fout_aanwezig = True
-                            #print 'fout:0'
+                            #print('fout:0')
 
                     if ind == 1:
                         try:
-                            e = int(e)
+                            waarde = int(waarde)
                         except:
                             resultaten_list[4] = 'ja'
                             fout_aanwezig = True
-                            #print 'fout:1'
+                            #print('fout:1')
 
                     # Test of de laatste waardes kommagetallen zijn
                     if ind in (2,3,4,5):
                         try:
-                            e = float(e)
+                            waarde = float(waarde)
                         except:
                             resultaten_list[4] = 'ja'
                             fout_aanwezig = True
-                            #print 'fout:2-5'
+                            #print('fout:2-5')
 
             # Als er inderdaad een fout gevonden is, wordt deze toegevoegd aan de resultaten, die straks naar
             # excel worden geschreven
@@ -112,10 +115,10 @@ def check_metfile(input_file, output_file):
 
     metfile.close()
 
-    #print 'Deze profielen zijn incorrect:'
-    #print resultaten_dict['Profielnaam']
-    #print 'Aantal incorrecte profielen: ',len(resultaten_dict['Profielnaam'])
-    #print resultaten_dict
+    #print('Deze profielen zijn incorrect:')
+    #print(resultaten_dict['Profielnaam'])
+    #print('Aantal incorrecte profielen: ',len(resultaten_dict['Profielnaam']))
+    #print(resultaten_dict)
 
     # ------------ Part 2: write resultaten to xslx file --------------------------------
     # Create dataframe van de tabel met fouten
