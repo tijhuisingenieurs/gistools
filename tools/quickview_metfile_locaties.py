@@ -1,5 +1,9 @@
 '''Een metfile wordt ingelezen en per profiel wordt 1 punt gemaakt als shapefile,
-Zo heb je een quickview waar de profiellocaties zijn.'''
+Zo heb je een quickview waar de profiellocaties zijn.
+input (list): een list met de pathnames van de metfile bestanden
+output: -
+return (memcollection): een memcollection met daarin van elk profiel uit de metfile de coordinaten en daarbij de
+ profielinformatie (naam metfile, profielnaam1, profielnaam2, datum)'''
 import os
 from gistools.utils.collection import MemCollection
 
@@ -13,10 +17,10 @@ def quickview_metfile_locaties(list_metfile_names):
     # Take each metfile and store the information
     for eachfile in list_metfile_names:
         # Check whether it is a metfile or not
-        if eachfile[-3:] == 'met' or eachfile[-3:] == 'MET':
+        if eachfile[-3:].lower() == 'met':
             path_metfile = eachfile
             with open (path_metfile, 'r') as metfile:
-                print 'Metfile geopend: ', eachfile
+                print('Metfile geopend: ', eachfile)
                 met = metfile.read().replace('\n', '').replace('\r', '')
                 ind_meting = 0
 
@@ -32,7 +36,7 @@ def quickview_metfile_locaties(list_metfile_names):
                     info = each[:ind_meting]
                     naam_metfile = os.path.split(path_metfile)[1]
                     # Voeg de informatie toe aan de dict, zodat je uiteindelijk alle info bij elkaar hebt staan
-                    info_samengevoegd = (naam_metfile+','+info).split(',')
+                    info_samengevoegd = (naam_metfile + ',' + info).split(',')
                     coordinates = info_samengevoegd[9:11]
                     # Storage of properties in a dict
                     for ind, p in enumerate(list_properties):
