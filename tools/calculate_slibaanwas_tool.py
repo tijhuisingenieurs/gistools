@@ -4,6 +4,7 @@ import pandas as pd
 import logging
 import os.path
 import sys
+import numpy as np
 from shapely.geometry import Point, MultiLineString, LineString
 import matplotlib.pyplot as plt
 import arcpy
@@ -141,26 +142,77 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
     de eerste meting)
     return: waarde van de hoeveelheid slibaanwas'''
+
+    # parameters om de gegevens in op te slaan
     afstand_in = []
     afstand_uit = []
     bk_in = []
     bk_uit = []
+    # Als je wat met de 22 codes wilt doen.
+    code_in = []
+    code_uit = []
+    ind_22_in = []
+    ind_22_uit = []
 
     # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP
-    for meetpunt in point_list_in:
+    for ind, meetpunt in enumerate(point_list_in):
         afstand_in.append(meetpunt['properties']['afstand'])
         bk_in.append(meetpunt['properties']['_bk_nap'])
+        code_in.append(meetpunt['properties']['code'])
+        if meetpunt['properties']['code'] == '22':
+            ind_22_in.append(ind)
 
     # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP
-    for meetpunt in point_list_uit:
+    for ind, meetpunt in enumerate(point_list_uit):
         afstand_uit.append(meetpunt['properties']['afstand'])
         bk_uit.append(meetpunt['properties']['_bk_nap'])
+        code_uit.append(meetpunt['properties']['code'])
+        if meetpunt['properties']['code'] == '22':
+            ind_22_uit.append(ind)
 
+    # Reeks waarop de interpolatie plaatsvindt
+    # Maak een vanaf de eerste t/m de laatste meting punten om de 10 cm
+    minimale_afstand = min(min(afstand_in),min(afstand_in))
+    maximale_afstand = max(max(afstand_in),max(afstand_in))
+    aantal_punten = (abs(minimale_afstand) +maximale_afstand)*100
+
+    reeks_10cm = np.linspace(minimale_afstand,maximale_afstand,aantal_punten)
+
+    # Interpolatie van de meetpunten
+    intp_bk_in = np.interp(reeks_10cm,afstand_in,bk_in)
+    intp_bk_uit = np.interp(reeks_10cm, afstand_uit, bk_uit)
+
+    # Bereken vanaf het 22 punt de bounding box
+    afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
+    afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
+
+    # Vind hier de bijbehorende waarde van de reeks_10cm. Tussen deze 2 moeten de intp_bk worden gesommeerd en dam maal 10 cm
+    for ind, value in enumerate(reeks_10cm):
+        if round(value*100) == round(afstand_begin*100):
+            ind_begin = ind
+        if round(value*100) == round(afstand_eind*100):
+            ind_eind = ind
+    # bereken hoeveelheid slib binnen box van interesse
+
+    # Test figures om de dataset te bekijken
     print afstand_in
     print bk_in
     plt.figure()
-    plt.plot(afstand_in,bk_in)
-    print 'test'
+    plt.plot(reeks_10cm,intp_bk_uit,'ro')
+    plt.hold(True)
+    plt.plot(reeks_10cm, intp_bk_in,'.')
+    plt.hold(False)
+
+    plt.figure()
+    #plt.plot(afstand_uit,bk_uit,'ro')
+    plt.hold(True)
+    #plt.plot(afstand_in, bk_in,'.')
+    plt.plot(afstand_in[ind_22_in[0]], bk_in[ind_22_in[0]], '*')
+    plt.plot(afstand_uit[ind_22_uit[0]], bk_uit[ind_22_uit[0]], 'r*')
+    plt.plot(afstand_in[ind_22_in[1]], bk_in[ind_22_in[1]], '*')
+    plt.plot(afstand_uit[ind_22_uit[1]], bk_uit[ind_22_uit[1]], 'r*')
+    plt.hold(False)
+    plt.show()
 
 def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, meter_factor=1):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
@@ -188,4 +240,4 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
         CalcSlibaanwas(prof_list_in, prof_list_uit)
-        print test
+        print 'test'
