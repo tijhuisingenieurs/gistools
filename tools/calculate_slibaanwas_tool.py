@@ -5,6 +5,7 @@ import logging
 import os.path
 import sys
 import numpy as np
+from numpy.core.umath import add
 from shapely.geometry import Point, MultiLineString, LineString
 import matplotlib.pyplot as plt
 import arcpy
@@ -23,15 +24,11 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
      list van de profielnamen van de inpeilingen, list van de profielnamen van de uitpeilingen'''
 
     # ---------- Omzetten van shapefile input naar memcollection----------------
-    # Initialize point collection -> inpeilingen
+    # --- Initialize point collection -> inpeilingen
     point_col_in = MemCollection(geometry_type='MultiPoint')
     records_in = []
     rows_in = arcpy.SearchCursor(input_inpeil)
     fields_in = arcpy.ListFields(input_inpeil)
-    point_in = arcpy.Point()
-
-    oid_fieldname = fields_in[0].name
-
     # Fill the point collection
     for row in rows_in:
         geom = row.getValue('SHAPE')
@@ -51,18 +48,14 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
         records_in.append({'geometry': {'type': 'Point',
                                       'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
                          'properties': properties})
-
+    # Schrijf de gegegevens naar de collection
     point_col_in.writerecords(records_in)
 
-    # Initialize point collection -> uipeilingen
+    # --- Initialize point collection -> uipeilingen
     point_col_uit = MemCollection(geometry_type='MultiPoint')
     records_uit = []
     rows_uit = arcpy.SearchCursor(input_uitpeil)
     fields_uit = arcpy.ListFields(input_uitpeil)
-    point_uit = arcpy.Point()
-
-    oid_fieldname = fields_uit[0].name
-
     # Fill the point collection
     for row in rows_uit:
         geom = row.getValue('SHAPE')
@@ -82,11 +75,11 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
         records_uit.append({'geometry': {'type': 'Point',
                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
                         'properties': properties})
-
+    # Schrijf de gegegevens naar de collection
     point_col_uit.writerecords(records_uit)
 
     # ---------- Get unieke waardes van profielnamen en hun middelpunt----------------
-    # Van de inpeilingen
+    # --- Van de inpeilingen
     profiel_namen_in = set(p['properties']['prof_ids'] for p in point_col_in.filter())
 
     # Initialize point collection -> middelpunten (inpeilingen)
@@ -103,7 +96,7 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
     # sla deze middelpunten op in een memcollection
     point_col_mid_in.writerecords(records_mid_in)
 
-    # van de uitpeilingen
+    # --- Van de uitpeilingen
     profiel_namen_uit = set(p['properties']['prof_ids'] for p in point_col_uit.filter())
 
     # Initialize point collection -> middelpunten (inpeilingen)
@@ -126,9 +119,11 @@ def Createbuffer(point_col, radius=5):
     ''' Maakt van elk punt een polgon, door middel van een buffer met de ingegeven radius (default=5).
     input: pointcollection
     result: list met profielnaam en de shapelypolygon'''
+
+    # Initialize voor opslag polygonen
     records = []
 
-    # Fill the point collection
+    # Ga elk meetpunt langs en create een polygon. Sla de polygon op in records
     for meetpunt in point_col.filter():
         profielnaam = meetpunt['properties']['prof_ids']
         punt = Point(meetpunt['geometry']['coordinates'])
@@ -140,7 +135,7 @@ def Createbuffer(point_col, radius=5):
 def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
     '''Deze functie berekent de slibaanwas tussen 2 profielen.
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
-    de eerste meting)
+    de eerste meting, welke mee wordt genomen in de slibaanwas berekening (dus meters vanaf kant))
     return: waarde van de hoeveelheid slibaanwas'''
 
     # parameters om de gegevens in op te slaan
@@ -148,33 +143,30 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
     afstand_uit = []
     bk_in = []
     bk_uit = []
-    # Als je wat met de 22 codes wilt doen.
-    code_in = []
-    code_uit = []
     ind_22_in = []
     ind_22_uit = []
 
-    # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP
+    # ------- Inlezen van de gegegens
+    # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
     for ind, meetpunt in enumerate(point_list_in):
         afstand_in.append(meetpunt['properties']['afstand'])
         bk_in.append(meetpunt['properties']['_bk_nap'])
-        code_in.append(meetpunt['properties']['code'])
         if meetpunt['properties']['code'] == '22':
             ind_22_in.append(ind)
 
-    # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP
+    # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
     for ind, meetpunt in enumerate(point_list_uit):
         afstand_uit.append(meetpunt['properties']['afstand'])
         bk_uit.append(meetpunt['properties']['_bk_nap'])
-        code_uit.append(meetpunt['properties']['code'])
         if meetpunt['properties']['code'] == '22':
             ind_22_uit.append(ind)
 
+    # -------- Berekenen interpolatie
     # Reeks waarop de interpolatie plaatsvindt
     # Maak een vanaf de eerste t/m de laatste meting punten om de 10 cm
     minimale_afstand = min(min(afstand_in),min(afstand_in))
     maximale_afstand = max(max(afstand_in),max(afstand_in))
-    aantal_punten = (abs(minimale_afstand) +maximale_afstand)*100
+    aantal_punten = (abs(minimale_afstand) +maximale_afstand)*10
 
     reeks_10cm = np.linspace(minimale_afstand,maximale_afstand,aantal_punten)
 
@@ -182,37 +174,32 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
     intp_bk_in = np.interp(reeks_10cm,afstand_in,bk_in)
     intp_bk_uit = np.interp(reeks_10cm, afstand_uit, bk_uit)
 
-    # Bereken vanaf het 22 punt de bounding box
+    # Bereken vanaf het 22 punt de bounding box met daarbij de meters vanaf de kant
     afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
     afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
+    box_lengte = afstand_eind-afstand_begin
 
-    # Vind hier de bijbehorende waarde van de reeks_10cm. Tussen deze 2 moeten de intp_bk worden gesommeerd en dam maal 10 cm
+    # Vind hier de bijbehorende waarde van de reeks_10cm.
     for ind, value in enumerate(reeks_10cm):
-        if round(value*100) == round(afstand_begin*100):
+        if round(value*10) == round(afstand_begin*10):
             ind_begin = ind
-        if round(value*100) == round(afstand_eind*100):
+        if round(value*10) == round(afstand_eind*10):
             ind_eind = ind
-    # bereken hoeveelheid slib binnen box van interesse
 
-    # Test figures om de dataset te bekijken
-    print afstand_in
-    print bk_in
-    plt.figure()
-    plt.plot(reeks_10cm,intp_bk_uit,'ro')
-    plt.hold(True)
-    plt.plot(reeks_10cm, intp_bk_in,'.')
-    plt.hold(False)
+    # ------- Bereken hoeveelheid slib binnen box van interesse
+    # Hoeveelheid slib in m2 in het hele profiel
+    slibaanwas_totaal = np.sum((intp_bk_in[ind_begin:ind_eind]-intp_bk_uit[ind_begin:ind_eind]))*0.1
+    # Hoeveelheid slib in m per lengte-eenheid
+    slibaanwas_lengte = slibaanwas_totaal/((box_lengte))
 
-    plt.figure()
-    #plt.plot(afstand_uit,bk_uit,'ro')
-    plt.hold(True)
-    #plt.plot(afstand_in, bk_in,'.')
-    plt.plot(afstand_in[ind_22_in[0]], bk_in[ind_22_in[0]], '*')
-    plt.plot(afstand_uit[ind_22_uit[0]], bk_uit[ind_22_uit[0]], 'r*')
-    plt.plot(afstand_in[ind_22_in[1]], bk_in[ind_22_in[1]], '*')
-    plt.plot(afstand_uit[ind_22_uit[1]], bk_uit[ind_22_uit[1]], 'r*')
-    plt.hold(False)
-    plt.show()
+    # ------- Test figures om de dataset te bekijken
+    # plt.figure()
+    # plt.plot(reeks_10cm,intp_bk_uit,'ro')
+    # plt.hold(True)
+    # plt.plot(reeks_10cm, intp_bk_in,'.')
+    # plt.hold(False)
+
+    return slibaanwas_lengte, box_lengte
 
 def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, meter_factor=1):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
@@ -226,6 +213,8 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     result: memcollection lines met bij elke lijn een slibaanwas en de meter_factor vermeld.'''
 
     in_uit_combi = []
+    slibaanwas_all = []
+    box_lengte_all = []
 
     # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt
     for profiel_naam, buffer_p in buffer_list:
@@ -239,5 +228,23 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     for prof_in, prof_uit in in_uit_combi:
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
-        CalcSlibaanwas(prof_list_in, prof_list_uit)
-        print 'test'
+        slibaanwas_profiel, box_lengte = CalcSlibaanwas(prof_list_in, prof_list_uit)
+        slibaanwas_all.append(slibaanwas_profiel)
+        box_lengte_all.append(box_lengte)
+
+    #plt.show()
+
+    # Maken van de output-shape
+    # Maak een shape van de middelpunten van de inpeiling, voeg daar de kolommen aan toe:
+    # profielnaam_in
+    # profielnaam_uit
+    # lengte_in
+    # lengte_uit
+    # lengte_slibaanwas
+    # slibaanwas
+    # meter_factor
+    # datum_in
+    # datum_uit
+
+
+    return slibaanwas_all, box_lengte_all
