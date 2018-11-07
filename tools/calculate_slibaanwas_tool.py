@@ -201,7 +201,7 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
 
     return slibaanwas_lengte, box_lengte, meter_factor
 
-def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, meter_factor=1):
+def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, meter_factor=1):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
     input:
     memcollection van de inpeiling
@@ -220,11 +220,13 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     meter_factor_all = []
     datum_in_all = []
     datum_uit_all = []
+    coordinates_in_all = []
 
     # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt
     for profiel_naam, buffer_p in buffer_list:
         for p in point_col_mid_uit.filter():
             punt_uit = Point(p['geometry']['coordinates'])
+            coordinates_in_all.append(p['geometry']['coordinates'])
             if punt_uit.within(buffer_p):
                 in_uit_combi.append([profiel_naam,p['properties']['prof_ids']])
     print in_uit_combi
@@ -233,7 +235,7 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     for prof_in, prof_uit in in_uit_combi:
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
-        slibaanwas_profiel, , meter_factor = CalcSlibaanwas(prof_list_in, prof_list_uit)
+        slibaanwas_profiel, box_lengte, meter_factor = CalcSlibaanwas(prof_list_in, prof_list_uit)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
         meter_factor_all.append(meter_factor)
@@ -241,56 +243,67 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
         datum_uit_all.append(prof_list_uit[0]['properties']['datum'])
     #plt.show()
 
-    # Maken van de output-shape
-    # Maak een shape van de middelpunten van de inpeiling, voeg daar de kolommen aan toe:
-    # profielnaam_in
-    # profielnaam_uit
-    # lengte_in
-    # lengte_uit
-    # lengte_slibaanwas
-    # slibaanwas
-    # meter_factor
-    # datum_in
-    # datum_uit
+    info_list = {}
+    info_list['geometrie'] = coordinates_in_all
+    info_list['slibaanwas'] = slibaanwas_all
+    info_list['box_lengte'] = box_lengte_all
+    info_list['datum_in'] = datum_in_all
+    info_list['datum_uit'] = datum_uit_all
+    info_list['meter_factor'] = meter_factor_all
 
-    point = arcpy.Point()
-    output_in_points = arcpy.CreateFeatureclass_management(output_dir, output_name_l, 'POINT',
-                                                          spatial_reference=28992)
+    return in_uit_combi, info_list
 
-    arcpy.AddField_management(output_in_points, 'p_ids_in', "TEXT")
-    arcpy.AddField_management(output_in_points, 'p_ids_uit', "TEXT")
-    arcpy.AddField_management(output_in_points, 'slibaanwas', "DOUBLE")
-    arcpy.AddField_management(output_in_points, 'ps_breedte', "DOUBLE")
-    arcpy.AddField_management(output_in_points, 'datum_in', "TEXT")
-    arcpy.AddField_management(output_in_points, 'datum_uit', "TEXT")
-    arcpy.AddField_management(output_in_points, 'm_factor', "DOUBLE")
 
-    dataset = arcpy.InsertCursor(output_in_points)
-    fields_lines = next(line_col.filter())['properties'].keys()
+def WriteListtoCollection(output_dir, in_uit_combi, info_list):
+    '''Hierin wordt de memcollectie gevuld met de resultaten uit de Getslibaanwas tool
+    input: output_dir (path van de folder waar de output wordt opgeslagen),
+    output: shapefile met de informatie weggeschreven in outputfolder'''
 
-    for l in line_col.filter():
-        arcpy.AddMessage('profiel: ' + str(l['properties']['ids']))
-        arcpy.AddMessage('geometrie: ' + str(l['geometry']['coordinates']))
+    # specific file name and data
+    output_name = 'Test456.shp'
+    output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
 
-        mline = arcpy.Array()
-        array = arcpy.Array()
-        for p in l['geometry']['coordinates']:
-            point.X = p[0]
-            point.Y = p[1]
-            array.add(point)
+    # op volgorde fields toevoegen en typeren
+    arcpy.AddField_management(output_file, 'p_ids_in', "TEXT")
+    arcpy.AddField_management(output_file, 'p_ids_uit', "TEXT")
+    arcpy.AddField_management(output_file, 'slibaanwas', "DOUBLE")
+    arcpy.AddField_management(output_file, 'ps_breedte', "DOUBLE")
+    arcpy.AddField_management(output_file, 'datum_in', "TEXT")
+    arcpy.AddField_management(output_file, 'datum_uit', "TEXT")
+    arcpy.AddField_management(output_file, 'm_factor', "DOUBLE")
 
-        mline.add(array)
+    dataset = arcpy.InsertCursor(output_file)
 
+    # Geef de velden weer die aan de keys van de properties zijn
+    fields = info_list.keys()
+    fields.remove('geometrie')
+
+    # Vul de shapefile in met de waardes
+    for ind, p in enumerate(in_uit_combi):
         row = dataset.newRow()
-        row.Shape = mline
+        # Voeg de coordinaten toe aan het punt
+        point = arcpy.Point()
+        point.X = info_list['geometrie'][ind][0]
+        point.Y = info_list['geometrie'][ind][1]
 
-        for field in fields_lines:
-            row.setValue(field, l['properties'].get(field, ''))
+        # Voeg de properties toe aan de attribuuttable
+        row.Shape = point
+        row.setValue('p_ids_in', p[0])
+        row.setValue('p_ids_uit', p[1])
+
+        for field in fields:
+            row.setValue(field, info_list[field][ind])
+
+        # row.setValue('slibaanwas', slibaanwas_all[ind])
+        # row.setValue('ps_breedte', box_lengte_all[ind])
+        # row.setValue('slibaanwas', slibaanwas_all[ind])
+        # row.setValue('datum_in', datum_in_all[ind])
+        # row.setValue('datum_uit', datum_uit_all[ind])
+        # row.setValue('m_factor', m_factor_all[ind])
 
         dataset.insertRow(row)
 
-    add_result_to_display(output_in_points, output_name_l)
+    #add_result_to_display(output_file, output_name)
 
 
 
-return slibaanwas_all, box_lengte_all
