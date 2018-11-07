@@ -199,7 +199,7 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
     # plt.plot(reeks_10cm, intp_bk_in,'.')
     # plt.hold(False)
 
-    return slibaanwas_lengte, box_lengte
+    return slibaanwas_lengte, box_lengte, meter_factor
 
 def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, meter_factor=1):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
@@ -215,6 +215,11 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     in_uit_combi = []
     slibaanwas_all = []
     box_lengte_all = []
+    #prof_len_in = []
+    #prof_len_uit = []
+    meter_factor_all = []
+    datum_in_all = []
+    datum_uit_all = []
 
     # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt
     for profiel_naam, buffer_p in buffer_list:
@@ -224,14 +229,16 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
                 in_uit_combi.append([profiel_naam,p['properties']['prof_ids']])
     print in_uit_combi
 
-    # Ga elk profiel af en bereken de slibaanwas
+    # Ga elk profiel af en bereken de slibaanwas en verzamel info voor de output
     for prof_in, prof_uit in in_uit_combi:
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
-        slibaanwas_profiel, box_lengte = CalcSlibaanwas(prof_list_in, prof_list_uit)
+        slibaanwas_profiel, , meter_factor = CalcSlibaanwas(prof_list_in, prof_list_uit)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
-
+        meter_factor_all.append(meter_factor)
+        datum_in_all.append(prof_list_in[0]['properties']['datum'])
+        datum_uit_all.append(prof_list_uit[0]['properties']['datum'])
     #plt.show()
 
     # Maken van de output-shape
@@ -246,5 +253,44 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit,buffer_list, met
     # datum_in
     # datum_uit
 
+    point = arcpy.Point()
+    output_in_points = arcpy.CreateFeatureclass_management(output_dir, output_name_l, 'POINT',
+                                                          spatial_reference=28992)
 
-    return slibaanwas_all, box_lengte_all
+    arcpy.AddField_management(output_in_points, 'p_ids_in', "TEXT")
+    arcpy.AddField_management(output_in_points, 'p_ids_uit', "TEXT")
+    arcpy.AddField_management(output_in_points, 'slibaanwas', "DOUBLE")
+    arcpy.AddField_management(output_in_points, 'ps_breedte', "DOUBLE")
+    arcpy.AddField_management(output_in_points, 'datum_in', "TEXT")
+    arcpy.AddField_management(output_in_points, 'datum_uit', "TEXT")
+    arcpy.AddField_management(output_in_points, 'm_factor', "DOUBLE")
+
+    dataset = arcpy.InsertCursor(output_in_points)
+    fields_lines = next(line_col.filter())['properties'].keys()
+
+    for l in line_col.filter():
+        arcpy.AddMessage('profiel: ' + str(l['properties']['ids']))
+        arcpy.AddMessage('geometrie: ' + str(l['geometry']['coordinates']))
+
+        mline = arcpy.Array()
+        array = arcpy.Array()
+        for p in l['geometry']['coordinates']:
+            point.X = p[0]
+            point.Y = p[1]
+            array.add(point)
+
+        mline.add(array)
+
+        row = dataset.newRow()
+        row.Shape = mline
+
+        for field in fields_lines:
+            row.setValue(field, l['properties'].get(field, ''))
+
+        dataset.insertRow(row)
+
+    add_result_to_display(output_in_points, output_name_l)
+
+
+
+return slibaanwas_all, box_lengte_all
