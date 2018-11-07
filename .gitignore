@@ -7,3 +7,4 @@
 .project
 .pydevproject
 *.stackdump
+tools/test_klad.py
