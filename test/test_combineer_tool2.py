@@ -10,20 +10,20 @@ test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data',
 class TestCombineerTool(unittest.TestCase):
     def setUp(self):
         self.profile_a = [
-            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1}},
-            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '22R', 'afstand': 10, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '2', 'afstand': 11, '_bk_nap': -1, '_ok_nap': -1}},
+            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
+            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '22R', 'afstand': 10, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '2', 'afstand': 11, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
         ]
 
     def test_width_adjustment(self):
         profile_b = [
-            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
+            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
         ]
         line = TLine()
 
@@ -40,12 +40,12 @@ class TestCombineerTool(unittest.TestCase):
 
     def test_width_bank_no_adjustment(self):
         profile_b = [
-            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1}},
-            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1}},
+            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
+            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
         ]
         line = TLine()
 
@@ -57,12 +57,12 @@ class TestCombineerTool(unittest.TestCase):
 
     def test_width_bank_adjustment(self):
         profile_b = [
-            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1}},
-            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4}},
-            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2}},
-            {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1}},
+            {'properties': {'code': '1', 'afstand': -1, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
+            {'properties': {'code': '22L', 'afstand': 0, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 1, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '99', 'afstand': 9, '_bk_nap': -3, '_ok_nap': -4,'datum':'20100912'}},
+            {'properties': {'code': '22R', 'afstand': 11, '_bk_nap': -2, '_ok_nap': -2,'datum':'20100912'}},
+            {'properties': {'code': '2', 'afstand': 13, '_bk_nap': -1, '_ok_nap': -1,'datum':'20100912'}},
         ]
         line = TLine()
 

@@ -3,3 +3,6 @@ rtree
 xlrd
 xlwt
 python-dateutil
+pandas
+openpyxl
+numpy

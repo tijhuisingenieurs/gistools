@@ -5,8 +5,6 @@ import numpy as np
 
 from gistools.tools.check_metfile import check_metfile
 
-''' Deze test test de tool check_metfile, maar test alleen het fouten_report. De andere tabbladen worden niet getest.'''
-
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 # Create dataframeresult of the test, that should be the result
@@ -23,6 +21,7 @@ df_original_profielen = pd.DataFrame([['fout_in_afsluiting','ja','-','-','-'],[n
 df_original_correct = pd.DataFrame([], columns = headers)
 
 class TestCheckMetfile(unittest.TestCase):
+    ''' Deze test test de tool check_metfile, maar test alleen het fouten_report. De andere tabbladen worden niet getest.'''
     def setUp(self):
         pass
 
