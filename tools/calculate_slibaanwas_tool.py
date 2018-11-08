@@ -260,8 +260,9 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     output: shapefile met de informatie weggeschreven in outputfolder'''
 
     # specific file name and data
-    output_name = 'Test456.shp'
+    output_name = 'Test{0}.shp'.format(np.random.random_integers(1,100))
     output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
+    print('Outputname: ', output_name)
 
     # op volgorde fields toevoegen en typeren
     arcpy.AddField_management(output_file, 'p_ids_in', "TEXT")
@@ -291,18 +292,20 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
         row.setValue('p_ids_in', p[0])
         row.setValue('p_ids_uit', p[1])
 
-        for field in fields:
-            row.setValue(field, info_list[field][ind])
+        # for field in fields:
+        #     print(field)
+        #     print(info_list[field][ind])
+        #     print('--')
+        #     row.setValue(field, info_list[field][ind])
 
-        # row.setValue('slibaanwas', slibaanwas_all[ind])
-        # row.setValue('ps_breedte', box_lengte_all[ind])
-        # row.setValue('slibaanwas', slibaanwas_all[ind])
-        # row.setValue('datum_in', datum_in_all[ind])
-        # row.setValue('datum_uit', datum_uit_all[ind])
-        # row.setValue('m_factor', m_factor_all[ind])
+        row.setValue('slibaanwas', info_list['slibaanwas'][ind])
+        row.setValue('ps_breedte', info_list['box_lengte'][ind])
+        row.setValue('datum_in', info_list['datum_in'][ind])
+        row.setValue('datum_uit', info_list['datum_uit'][ind])
+        row.setValue('m_factor', info_list['meter_factor'][ind])
 
         dataset.insertRow(row)
-
+    print('weggeschreven als file')
     #add_result_to_display(output_file, output_name)
 
 
