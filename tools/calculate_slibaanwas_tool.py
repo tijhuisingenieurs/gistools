@@ -6,7 +6,7 @@ import os.path
 import sys
 import numpy as np
 from numpy.core.umath import add
-from shapely.geometry import Point, MultiLineString, LineString
+from shapely.geometry import Point, MultiLineString, LineString, Polygon
 import matplotlib.pyplot as plt
 import arcpy
 
@@ -17,6 +17,7 @@ from gistools.utils.collection import MemCollection
 
 def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
     ''' Deze functie maakt van de metingen een overzicht van de profielen in deze shape en een middelpunt.
+      Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
      input: input_inpeil(shapefile), input_uitpeil(shapefile)
      return:
      pointcollection input inpeilingen, pointcollection input uitpeilingen,
@@ -51,7 +52,7 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
     # Schrijf de gegegevens naar de collection
     point_col_in.writerecords(records_in)
 
-    # --- Initialize point collection -> uipeilingen
+    # --- Initialize point collection -> uitpeilingen
     point_col_uit = MemCollection(geometry_type='MultiPoint')
     records_uit = []
     rows_uit = arcpy.SearchCursor(input_uitpeil)
@@ -133,7 +134,8 @@ def Createbuffer(point_col, radius=5):
     return records
 
 def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
-    '''Deze functie berekent de slibaanwas tussen 2 profielen.
+    '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij wordt gebruik gemaakt van lineaire interpolatie
+    tussen de meetpunten.
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
     de eerste meting, welke mee wordt genomen in de slibaanwas berekening (dus meters vanaf kant))
     return: waarde van de hoeveelheid slibaanwas'''
@@ -201,16 +203,88 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
 
     return slibaanwas_lengte, box_lengte, meter_factor
 
+def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=1):
+    '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij worden polygonen gebruikt.
+    input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
+    de eerste meting, welke mee wordt genomen in de slibaanwas berekening (dus meters vanaf kant))
+    return: waarde van de hoeveelheid slibaanwas'''
+
+    # parameters om de gegevens in op te slaan
+    afstand_in = []
+    afstand_uit = []
+    bk_in = []
+    bk_uit = []
+    ind_22_in = []
+    ind_22_uit = []
+    coor_in = []
+    coor_uit = []
+
+    # ------- Inlezen van de gegegens
+    # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
+    for ind, meetpunt in enumerate(point_list_in):
+        afstand_in.append(meetpunt['properties']['afstand'])
+        bk_in.append(meetpunt['properties']['_bk_nap'])
+        coor_in.append((meetpunt['properties']['afstand'],meetpunt['properties']['_bk_nap']))
+        if meetpunt['properties']['code'] == '22':
+            ind_22_in.append(ind)
+
+    # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
+    for ind, meetpunt in enumerate(point_list_uit):
+        afstand_uit.append(meetpunt['properties']['afstand'])
+        bk_uit.append(meetpunt['properties']['_bk_nap'])
+        coor_uit.append((meetpunt['properties']['afstand'], meetpunt['properties']['_bk_nap']))
+        if meetpunt['properties']['code'] == '22':
+            ind_22_uit.append(ind)
+
+    # -------- Maak polygons -------------------
+    # Polygons van de in- en uitpeiling
+    poly_in = Polygon(coor_in[ind_22_in[0]:ind_22_in[1]+1])
+    poly_uit = Polygon(coor_uit[ind_22_in[0]:ind_22_uit[1]+1])
+
+    # Polygon vierkant (nodig voor berekening slib)
+    # Bereken vanaf het 22 punt de bounding box met daarbij de meters vanaf de kant
+    afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
+    afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
+    waterlijn = min(bk_in[ind_22_in[0]],bk_uit[ind_22_in[0]]) - 0.01 # Zorg dat het vierkant onder de waterlijn ligt
+    onderlijn = min(bk_uit) - 0.5 # Zorg dat het vierkant onder de onderlijn ligt
+
+    poly_square = Polygon([(afstand_begin,waterlijn), (afstand_begin,onderlijn), (afstand_eind, onderlijn),(afstand_eind, waterlijn)])
+
+    # # ------- Bereken hoeveelheid slib binnen box van interest -------------
+    # Slib in de inpeiling
+    slib_in = poly_square.difference(poly_in).area
+    # Slib in de uitpeiling
+    slib_uit = poly_square.difference(poly_uit).area
+
+    # Hoeveelheid slib in m2 in het hele profiel
+    slibaanwas_totaal = slib_in - slib_uit
+    # Hoeveelheid slib in m per lengte-eenheid
+    box_lengte = afstand_eind - afstand_begin
+    slibaanwas_lengte = slibaanwas_totaal/((box_lengte))
+
+    # # ------- Test figures om de dataset te bekijken
+    # x_in, y_in = poly_in.exterior.xy
+    # x_uit, y_uit = poly_uit.exterior.xy
+    # x_square, y_square = poly_square.exterior.xy
+    # plt.figure()
+    # plt.plot(x_in, y_in,'r')
+    # plt.hold(True)
+    # plt.plot(x_uit, y_uit,)
+    # plt.plot(x_square,y_square,'g')
+    # plt.hold(False)
+    # plt.show()
+    return slibaanwas_lengte, box_lengte, meter_factor
+
 def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, meter_factor=1):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
     input:
-    memcollection van de inpeiling
-    memcollection van de uitpeiling
-    memcollection van de middenpunten van de uitpeiling
-    list met bufferpolygons en profielnamen inpeiling
+    memcollection van de inpeilingen
+    memcollection van de uitpeilingen
+    memcollection van de middenpunten van de uitpeilingen
+    list met bufferpolygons en profielnamen inpeilingen
     meter_factor
 
-    result: memcollection lines met bij elke lijn een slibaanwas en de meter_factor vermeld.'''
+    result: memcollection lines met bij elke inpeilingprofiellijn een slibaanwas en de meter_factor vermeld.'''
 
     in_uit_combi = []
     slibaanwas_all = []
@@ -235,7 +309,7 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, me
     for prof_in, prof_uit in in_uit_combi:
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
-        slibaanwas_profiel, box_lengte, meter_factor = CalcSlibaanwas(prof_list_in, prof_list_uit)
+        slibaanwas_profiel, box_lengte, meter_factor = CalcSlibaanwas_polygons(prof_list_in, prof_list_uit)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
         meter_factor_all.append(meter_factor)
@@ -253,11 +327,16 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, me
 
     return in_uit_combi, info_list
 
-
 def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     '''Hierin wordt de memcollectie gevuld met de resultaten uit de Getslibaanwas tool
+    Er wordt een shapefile gemaakt en in GIS toegevoegd.
     input: output_dir (path van de folder waar de output wordt opgeslagen),
-    output: shapefile met de informatie weggeschreven in outputfolder'''
+    in_uit_combi
+    info_list
+    output: shapefile met de informatie weggeschreven in outputfolder, met devolgende kolommen:
+    p_ids_in = profielnaam inpeiling, p_ids_uit = profielnaam uitpeiling, slibaanwas = m slibaanwas per m breedte,
+    ps_breedte = breedte die mee is genomen voor het berekenen van het slib (m), datum_in, datum_uit,
+    m_factor = aantal meters dat van de kant niet is meegenomen'''
 
     # specific file name and data
     output_name = 'Test{0}.shp'.format(np.random.random_integers(1,100))
@@ -265,6 +344,8 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     print('Outputname: ', output_name)
 
     # op volgorde fields toevoegen en typeren
+
+
     arcpy.AddField_management(output_file, 'p_ids_in', "TEXT")
     arcpy.AddField_management(output_file, 'p_ids_uit', "TEXT")
     arcpy.AddField_management(output_file, 'slibaanwas', "DOUBLE")
@@ -307,6 +388,3 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
         dataset.insertRow(row)
     print('weggeschreven als file')
     #add_result_to_display(output_file, output_name)
-
-
-
