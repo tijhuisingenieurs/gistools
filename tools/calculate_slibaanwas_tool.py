@@ -5,11 +5,9 @@ import logging
 import os.path
 import sys
 import numpy as np
-from numpy.core.umath import add
 from shapely.geometry import Point, MultiLineString, LineString, Polygon
 import matplotlib.pyplot as plt
 import arcpy
-
 from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
 
@@ -133,7 +131,7 @@ def Createbuffer(point_col, radius=5):
 
     return records
 
-def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
+def CalcSlibaanwas_interpolatie(point_list_in,point_list_uit, meter_factor=1):
     '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij wordt gebruik gemaakt van lineaire interpolatie
     tussen de meetpunten.
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
@@ -203,101 +201,6 @@ def CalcSlibaanwas(point_list_in,point_list_uit, meter_factor=1):
 
     return slibaanwas_lengte, box_lengte, meter_factor
 
-def CalcSlibaanwas_polygons_beginpuntgetekent(point_list_in,point_list_uit, meter_factor=1, tolerantie_breedte = 1, tolerantie_wp = 0.5):
-    '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij worden polygonen gebruikt.
-    Het heeft de inpeiling als basis. De profielen worden beide vanzelfde beginpunt getekend
-    input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
-    de eerste meting, welke mee wordt genomen in de slibaanwas berekening (dus meters vanaf kant))
-    return: waarde van de hoeveelheid slibaanwas'''
-
-    # parameters om de gegevens in op te slaan
-    afstand_in = []
-    afstand_uit = []
-    bk_in = []
-    bk_uit = []
-    ind_22_in = []
-    ind_22_uit = []
-    coor_in = []
-    coor_uit = []
-
-    # Parameters voor de output
-    slibaanwas_lengte = 999
-    box_lengte = 999
-    breedte_verschil = 999
-
-    # ------- Inlezen van de gegegens
-    # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
-    for ind, meetpunt in enumerate(point_list_in):
-        afstand_in.append(meetpunt['properties']['afstand'])
-        bk_in.append(meetpunt['properties']['_bk_nap'])
-        coor_in.append((meetpunt['properties']['afstand'],meetpunt['properties']['_bk_nap']))
-        if meetpunt['properties']['code'] == '22':
-            ind_22_in.append(ind)
-
-    # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
-    for ind, meetpunt in enumerate(point_list_uit):
-        afstand_uit.append(meetpunt['properties']['afstand'])
-        bk_uit.append(meetpunt['properties']['_bk_nap'])
-        coor_uit.append((meetpunt['properties']['afstand'], meetpunt['properties']['_bk_nap']))
-        if meetpunt['properties']['code'] == '22':
-            ind_22_uit.append(ind)
-
-    # Check of er twee 22-codes zijn -> zo niet stop de berekening
-    if len(ind_22_uit) < 2 or len(ind_22_in) < 2:
-            return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil
-
-    # Check of de profielbreedtes niet te veel verschillen -> teveel verschil stop de berekening
-    breedte_verschil = abs(afstand_in[ind_22_in[1]] - afstand_uit[ind_22_uit[1]])
-    if breedte_verschil > tolerantie_breedte:
-        return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil
-
-    # Check of de waterpeil veel verschilt -> teveel verschil stop de berekening
-    wp_verschil_22L = abs(bk_in[ind_22_in[0]] - bk_uit[ind_22_uit[0]])
-    wp_verschil_22R = abs(bk_in[ind_22_in[1]] - bk_uit[ind_22_uit[1]])
-    if wp_verschil_22L > tolerantie_wp or wp_verschil_22R > tolerantie_wp:
-        return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil
-
-    # -------- Maak polygons -------------------
-    # Polygons van de in- en uitpeiling
-    poly_in = Polygon(coor_in[ind_22_in[0]:ind_22_in[1]+1])
-    poly_uit = Polygon(coor_uit[ind_22_uit[0]:ind_22_uit[1]+1])
-
-    # Polygon vierkant (nodig voor berekening slib)
-    # Bereken vanaf het 22 punt de bounding box met daarbij de meters vanaf de kant
-    afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
-    afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
-    waterlijn = min(bk_in[ind_22_in[0]],bk_uit[ind_22_in[0]]) - 0.01 # Zorg dat het vierkant onder de waterlijn ligt
-    onderlijn = min(bk_uit) - 0.5 # Zorg dat het vierkant onder de onderlijn ligt
-
-    poly_square = Polygon([(afstand_begin,waterlijn), (afstand_begin,onderlijn), (afstand_eind, onderlijn),(afstand_eind, waterlijn)])
-
-    # # ------- Bereken hoeveelheid slib binnen box van interest -------------
-    # Slib in de inpeiling
-    slib_in = poly_square.difference(poly_in).area
-    # Slib in de uitpeiling
-    slib_uit = poly_square.difference(poly_uit).area
-
-    # Hoeveelheid slib in m2 in het hele profiel
-    slibaanwas_totaal = slib_in - slib_uit
-    # Hoeveelheid slib in m per lengte-eenheid
-    box_lengte = afstand_eind - afstand_begin
-    slibaanwas_lengte = slibaanwas_totaal/((box_lengte))
-
-    # # ------- Test figures om de dataset te bekijken
-    print(point_list_in[0]['properties']['prof_ids'])
-    x_in, y_in = poly_in.exterior.xy
-    x_uit, y_uit = poly_uit.exterior.xy
-    x_square, y_square = poly_square.exterior.xy
-    plt.figure()
-    plt.title('{0}'.format(point_list_in[0]['properties']['prof_ids']))
-    plt.plot(x_in, y_in,'r')
-    plt.hold(True)
-    plt.plot(x_uit, y_uit,)
-    plt.plot(x_square,y_square,'g')
-    plt.hold(False)
-    plt.show()
-    return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil
-
 def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, tolerantie_breedte=0.7, tolerantie_wp=0.15):
     '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij worden polygonen gebruikt.
     Het heeft de inpeiling als basis. De profielen worden beide vanaf het middelpunt getekend.
@@ -344,14 +247,12 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, toler
     # ------- Check of de gegevens goed zijn ------
     # Check of er twee 22-codes zijn -> zo niet stop de berekening
     if len(ind_22_uit) < 2 or len(ind_22_in) < 2:
-        #print('fout 22 code', point_list_in[0]['properties']['prof_ids'])
         errorwaarde = '22code'
         return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
     # Check of de profielbreedtes niet te veel verschillen -> teveel verschil stop de berekening
     breedte_verschil = abs(afstand_in[ind_22_in[1]] - afstand_uit[ind_22_uit[1]])
     if breedte_verschil > tolerantie_breedte:
-        #print('fout breedte_verschil code', point_list_in[0]['properties']['prof_ids'])
         errorwaarde = 'breedteverschil'
         return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
@@ -359,7 +260,6 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, toler
     wp_verschil_22L = abs(bk_in[ind_22_in[0]] - bk_uit[ind_22_uit[0]])
     wp_verschil_22R = abs(bk_in[ind_22_in[1]] - bk_uit[ind_22_uit[1]])
     if wp_verschil_22L > tolerantie_wp or wp_verschil_22R > tolerantie_wp:
-        #print('fout waterpeil code', point_list_in[0]['properties']['prof_ids'])
         errorwaarde = 'waterpeilverschil'
         return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
@@ -398,7 +298,6 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, toler
         if poly_in.is_valid is False:
             poly_in = poly_in.buffer(0.00001)
         if (poly_square.is_valid and poly_in.is_valid and poly_uit.is_valid) is False:
-            #print('fout: Invalid polygons')
             errorwaarde = 'invalid polygon'
             return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
@@ -436,7 +335,7 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
     memcollection van de uitpeilingen
     memcollection van de middenpunten van de uitpeilingen
     list met bufferpolygons en profielnamen inpeilingen
-    meter_factor
+    meter_factor (nog in aanmaak)
 
     result: memcollection lines met bij elke inpeilingprofiellijn een slibaanwas en de meter_factor vermeld.'''
     in_uit_combi = []
@@ -453,17 +352,16 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
     for profiel_naam, buffer_p in buffer_list:
         for p in point_col_mid_uit.filter():
             punt_uit = Point(p['geometry']['coordinates'])
-            coordinates_in_all.append(p['geometry']['coordinates'])
+            # coordinates_in_all.append(p['geometry']['coordinates'])
             if punt_uit.within(buffer_p):
                 in_uit_combi.append([profiel_naam,p['properties']['prof_ids']])
-    #print in_uit_combi
 
     # Ga elk profiel af en bereken de slibaanwas en verzamel info voor de output
     for prof_in, prof_uit in in_uit_combi:
-        #print(prof_in)
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
-        slibaanwas_profiel, box_lengte, meter_factor, breedte_verschil, errorwaarde = CalcSlibaanwas_polygons(prof_list_in, prof_list_uit)
+        slibaanwas_profiel, box_lengte, meter_factor, breedte_verschil, errorwaarde = \
+            CalcSlibaanwas_polygons(prof_list_in, prof_list_uit)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
         meter_factor_all.append(meter_factor)
@@ -471,8 +369,15 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
         datum_in_all.append(prof_list_in[0]['properties']['datum'])
         datum_uit_all.append(prof_list_uit[0]['properties']['datum'])
         errorwaarde_all.append(errorwaarde)
-    #plt.show()
 
+        # berekenen nogmaals het middelpunt om straks alle waardes aan op te hangen
+        profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
+        middelpunt_nr = int(round(len(profiel_punten)/2,0))
+        middelpunt = profiel_punten[middelpunt_nr]
+        coordinates_in_mid = middelpunt['geometry']['coordinates']
+        coordinates_in_all.append(middelpunt['geometry']['coordinates'])
+
+    # sla de gegevens op in een dict om straks op te slaan in een shapefile
     info_list = {}
     info_list['geometrie'] = coordinates_in_all
     info_list['slibaanwas'] = slibaanwas_all
@@ -506,7 +411,8 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     # specific file name and data
     output_name = 'Test{0}.shp'.format(np.random.random_integers(1,100))
     output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
-    print('Outputname: ', output_name)
+    # print('Outputname: ', output_name)
+    arcpy.AddMessage('Outputname: ' + output_name)
 
     # op volgorde fields toevoegen en typeren
     arcpy.AddField_management(output_file, 'p_ids_in', "TEXT")
@@ -547,5 +453,6 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
         row.setValue('error', info_list['errorwaarde'][ind])
 
         dataset.insertRow(row)
-    print('weggeschreven als file')
-    #add_result_to_display(output_file, output_name)
+    # print('weggeschreven als file')
+    arcpy.AddMessage('weggeschreven als file')
+    add_result_to_display(output_file, output_name)
