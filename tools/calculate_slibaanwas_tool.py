@@ -1,15 +1,10 @@
 import os
-import csv
-import pandas as pd
-import logging
 import os.path
-import sys
 import numpy as np
-from shapely.geometry import Point, MultiLineString, LineString, Polygon
+from shapely.geometry import Point, Polygon
 import matplotlib.pyplot as plt
 import arcpy
 from utils.addresulttodisplay import add_result_to_display
-from utils.arcgis_logging import setup_logging
 
 from gistools.utils.collection import MemCollection
 
@@ -131,77 +126,7 @@ def Createbuffer(point_col, radius=5):
 
     return records
 
-def CalcSlibaanwas_interpolatie(point_list_in,point_list_uit, meter_factor=1):
-    '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij wordt gebruik gemaakt van lineaire interpolatie
-    tussen de meetpunten.
-    input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
-    de eerste meting, welke mee wordt genomen in de slibaanwas berekening (dus meters vanaf kant))
-    return: waarde van de hoeveelheid slibaanwas'''
-
-    # parameters om de gegevens in op te slaan
-    afstand_in = []
-    afstand_uit = []
-    bk_in = []
-    bk_uit = []
-    ind_22_in = []
-    ind_22_uit = []
-
-    # ------- Inlezen van de gegegens
-    # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
-    for ind, meetpunt in enumerate(point_list_in):
-        afstand_in.append(meetpunt['properties']['afstand'])
-        bk_in.append(meetpunt['properties']['_bk_nap'])
-        if meetpunt['properties']['code'] == '22':
-            ind_22_in.append(ind)
-
-    # Get de meetpuntgegevens van de uitpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
-    for ind, meetpunt in enumerate(point_list_uit):
-        afstand_uit.append(meetpunt['properties']['afstand'])
-        bk_uit.append(meetpunt['properties']['_bk_nap'])
-        if meetpunt['properties']['code'] == '22':
-            ind_22_uit.append(ind)
-
-    # -------- Berekenen interpolatie
-    # Reeks waarop de interpolatie plaatsvindt
-    # Maak een vanaf de eerste t/m de laatste meting punten om de 10 cm
-    minimale_afstand = min(min(afstand_in),min(afstand_in))
-    maximale_afstand = max(max(afstand_in),max(afstand_in))
-    aantal_punten = (abs(minimale_afstand) +maximale_afstand)*10
-
-    reeks_10cm = np.linspace(minimale_afstand,maximale_afstand,aantal_punten)
-
-    # Interpolatie van de meetpunten
-    intp_bk_in = np.interp(reeks_10cm,afstand_in,bk_in)
-    intp_bk_uit = np.interp(reeks_10cm, afstand_uit, bk_uit)
-
-    # Bereken vanaf het 22 punt de bounding box met daarbij de meters vanaf de kant
-    afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
-    afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
-    box_lengte = afstand_eind-afstand_begin
-
-    # Vind hier de bijbehorende waarde van de reeks_10cm.
-    for ind, value in enumerate(reeks_10cm):
-        if round(value*10) == round(afstand_begin*10):
-            ind_begin = ind
-        if round(value*10) == round(afstand_eind*10):
-            ind_eind = ind
-
-    # ------- Bereken hoeveelheid slib binnen box van interesse
-    # Hoeveelheid slib in m2 in het hele profiel
-    slibaanwas_totaal = np.sum((intp_bk_in[ind_begin:ind_eind]-intp_bk_uit[ind_begin:ind_eind]))*0.1
-    # Hoeveelheid slib in m per lengte-eenheid
-    slibaanwas_lengte = slibaanwas_totaal/((box_lengte))
-
-    # ------- Test figures om de dataset te bekijken
-    # plt.figure()
-    # plt.plot(reeks_10cm,intp_bk_uit,'ro')
-    # plt.hold(True)
-    # plt.plot(reeks_10cm, intp_bk_in,'.')
-    # plt.hold(False)
-
-    return slibaanwas_lengte, box_lengte, meter_factor
-
-def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, tolerantie_breedte=0.7, tolerantie_wp=0.15):
+def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7, tolerantie_wp=0.15, meter_factor=-1):
     '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij worden polygonen gebruikt.
     Het heeft de inpeiling als basis. De profielen worden beide vanaf het middelpunt getekend.
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
@@ -328,7 +253,7 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, meter_factor=-1, toler
     # plt.show()
     return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
-def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
+def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, tolerantie_breedte, tolerantie_wp):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
     input:
     memcollection van de inpeilingen
@@ -346,22 +271,32 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
     datum_uit_all = []
     breedte_verschil_all = []
     coordinates_in_all = []
+    afstand_all = []
     errorwaarde_all = []
 
-    # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt
+    # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt, en check welke het dichstbijzijnde is
     for profiel_naam, buffer_p in buffer_list:
+        afstand_temp = 1000
+        uitpeiling_aanwezig = False
         for p in point_col_mid_uit.filter():
             punt_uit = Point(p['geometry']['coordinates'])
-            # coordinates_in_all.append(p['geometry']['coordinates'])
             if punt_uit.within(buffer_p):
-                in_uit_combi.append([profiel_naam,p['properties']['prof_ids']])
+                uitpeiling_aanwezig = True
+                if buffer_p.centroid.distance(punt_uit) < afstand_temp: # check of het de dichtstbijzijnde is
+                    profiel_naam_temp = profiel_naam
+                    properties_temp = p['properties']['prof_ids']
+                    afstand_temp = buffer_p.centroid.distance(punt_uit)
+        if uitpeiling_aanwezig:  # check of er inderdaad een profiel is gevonden, dan sla de dichtstbijzijnde info op
+            in_uit_combi.append([profiel_naam_temp,properties_temp])
+            coordinates_in_all.append(buffer_p.centroid.coords[0])
+            afstand_all.append(afstand_temp)
 
     # Ga elk profiel af en bereken de slibaanwas en verzamel info voor de output
     for prof_in, prof_uit in in_uit_combi:
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
         slibaanwas_profiel, box_lengte, meter_factor, breedte_verschil, errorwaarde = \
-            CalcSlibaanwas_polygons(prof_list_in, prof_list_uit)
+            CalcSlibaanwas_polygons(prof_list_in, prof_list_uit, tolerantie_breedte, tolerantie_wp)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
         meter_factor_all.append(meter_factor)
@@ -369,13 +304,6 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
         datum_in_all.append(prof_list_in[0]['properties']['datum'])
         datum_uit_all.append(prof_list_uit[0]['properties']['datum'])
         errorwaarde_all.append(errorwaarde)
-
-        # berekenen nogmaals het middelpunt om straks alle waardes aan op te hangen
-        profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
-        middelpunt_nr = int(round(len(profiel_punten)/2,0))
-        middelpunt = profiel_punten[middelpunt_nr]
-        coordinates_in_mid = middelpunt['geometry']['coordinates']
-        coordinates_in_all.append(middelpunt['geometry']['coordinates'])
 
     # sla de gegevens op in een dict om straks op te slaan in een shapefile
     info_list = {}
@@ -387,10 +315,11 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list):
     info_list['meter_factor'] = meter_factor_all
     info_list['breedte_verschil'] = breedte_verschil_all
     info_list['errorwaarde'] = errorwaarde_all
+    info_list['afstand'] = afstand_all
 
     return in_uit_combi, info_list
 
-def WriteListtoCollection(output_dir, in_uit_combi, info_list):
+def WriteListtoCollection(output_file, in_uit_combi, info_list):
     '''Hierin wordt de memcollectie (points) gevuld met de resultaten uit de Getslibaanwas tool
     Er wordt een shapefile gemaakt met per profiel het middelpunt en in GIS toegevoegd.
     input: output_dir (path van de folder waar de output wordt opgeslagen),
@@ -404,14 +333,16 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     ver_breed = verschil in breedte absoluut (inpeiling-uitpeiling) (m)
     datum_in,
     datum_uit,
+    afstand =  deafstand tussen de middelpunten van de in- en uitpeiling,
     m_factor = aantal meters dat van de kant niet is meegenomen,
     error = geeft aan door welke error er geen berekening heeft plaatsgevonden. Null wanneer alles goed ging.
     '''
 
     # specific file name and data
-    output_name = 'Test{0}.shp'.format(np.random.random_integers(1,100))
+    # output_name = 'slibaanwas_{0}.shp'.format(np.random.random_integers(1,100))
+    output_name = os.path.basename(output_file).split('.')[0]
+    output_dir = os.path.dirname(output_file)
     output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
-    # print('Outputname: ', output_name)
     arcpy.AddMessage('Outputname: ' + output_name)
 
     # op volgorde fields toevoegen en typeren
@@ -422,6 +353,7 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
     arcpy.AddField_management(output_file, 'ver_breed', "DOUBLE")
     arcpy.AddField_management(output_file, 'datum_in', "TEXT")
     arcpy.AddField_management(output_file, 'datum_uit', "TEXT")
+    arcpy.AddField_management(output_file, 'afstand',"DOUBLE")
     arcpy.AddField_management(output_file, 'm_factor', "DOUBLE")
     arcpy.AddField_management(output_file, 'error', "TEXT")
 
@@ -449,6 +381,7 @@ def WriteListtoCollection(output_dir, in_uit_combi, info_list):
         row.setValue('ver_breed', info_list['breedte_verschil'][ind])
         row.setValue('datum_in', info_list['datum_in'][ind])
         row.setValue('datum_uit', info_list['datum_uit'][ind])
+        row.setValue('afstand', info_list['afstand'][ind])
         row.setValue('m_factor', info_list['meter_factor'][ind])
         row.setValue('error', info_list['errorwaarde'][ind])
 
