@@ -1,16 +1,59 @@
 import os
 import os.path
-import numpy as np
+
 from shapely.geometry import Point, Polygon
-import matplotlib.pyplot as plt
-import arcpy
-from utils.addresulttodisplay import add_result_to_display
 
 from gistools.utils.collection import MemCollection
 
-def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
+def get_profiel_middelpunt(point_col_in, point_col_uit):
+    ''' Deze functie maakt van de metingen een overzicht van de profielen en een middelpunt.
+         Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
+         input: point_col_in(memcollection punten inpeiling), point_col_uit(memcollection punten uitpeiling)
+         return:
+         pointcollection middelpunten van de inpeilingen, pointcollection middelpunten van de uitpeilingen,
+         list van de profielnamen van de inpeilingen, list van de profielnamen van de uitpeilingen'''
+
+    # ---------- Get unieke waardes van profielnamen en hun middelpunt----------------
+    # --- Van de inpeilingen
+    profiel_namen_in = set(p['properties']['prof_ids'] for p in point_col_in.filter())
+
+    # Initialize point collection -> middelpunten (inpeilingen)
+    point_col_mid_in = MemCollection(geometry_type='MultiPoint')
+    records_mid_in = []
+
+    # Vindt voor elk profiel het middelste meetpunt
+    for profiel in profiel_namen_in:
+        profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [profiel]}))
+        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
+        middelpunt = profiel_punten[middelpunt_nr]
+        records_mid_in.append(middelpunt)
+
+    # sla deze middelpunten op in een memcollection
+    point_col_mid_in.writerecords(records_mid_in)
+
+    # --- Van de uitpeilingen
+    profiel_namen_uit = set(p['properties']['prof_ids'] for p in point_col_uit.filter())
+
+    # Initialize point collection -> middelpunten (inpeilingen)
+    point_col_mid_uit = MemCollection(geometry_type='MultiPoint')
+    records_mid_uit = []
+
+    # Vindt voor elk profiel het middelste meetpunt
+    for profiel in profiel_namen_uit:
+        profiel_punten = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [profiel]}))
+        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
+        middelpunt = profiel_punten[middelpunt_nr]
+        records_mid_uit.append(middelpunt)
+
+    # sla deze middelpunten op in een memcollection
+    point_col_mid_uit.writerecords(records_mid_uit)
+
+    return point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit
+
+
+def get_profiel_middelpunt_oud(input_inpeil, input_uitpeil):
     ''' Deze functie maakt van de metingen een overzicht van de profielen in deze shape en een middelpunt.
-      Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
+     Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
      input: input_inpeil(shapefile), input_uitpeil(shapefile)
      return:
      pointcollection input inpeilingen, pointcollection input uitpeilingen,
@@ -19,6 +62,8 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
 
     # ---------- Omzetten van shapefile input naar memcollection----------------
     # --- Initialize point collection -> inpeilingen
+    import arcpy
+
     point_col_in = MemCollection(geometry_type='MultiPoint')
     records_in = []
     rows_in = arcpy.SearchCursor(input_inpeil)
@@ -40,8 +85,8 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
                 properties[key] = value
 
         records_in.append({'geometry': {'type': 'Point',
-                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                         'properties': properties})
+                                        'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                           'properties': properties})
     # Schrijf de gegegevens naar de collection
     point_col_in.writerecords(records_in)
 
@@ -67,8 +112,8 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
                 properties[key] = value
 
         records_uit.append({'geometry': {'type': 'Point',
-                                     'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                        'properties': properties})
+                                         'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                            'properties': properties})
     # Schrijf de gegegevens naar de collection
     point_col_uit.writerecords(records_uit)
 
@@ -83,7 +128,7 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
     # Vindt voor elk profiel het middelste meetpunt
     for profiel in profiel_namen_in:
         profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [profiel]}))
-        middelpunt_nr = int(round(len(profiel_punten)/2,0))
+        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
         middelpunt = profiel_punten[middelpunt_nr]
         records_mid_in.append(middelpunt)
 
@@ -109,7 +154,8 @@ def GetProfielMiddelpunt(input_inpeil, input_uitpeil):
 
     return point_col_in, point_col_uit, point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit
 
-def Createbuffer(point_col, radius=5):
+
+def create_buffer(point_col, radius=5):
     ''' Maakt van elk punt een polgon, door middel van een buffer met de ingegeven radius (default=5).
     input: pointcollection
     result: list met profielnaam en de shapelypolygon'''
@@ -122,11 +168,12 @@ def Createbuffer(point_col, radius=5):
         profielnaam = meetpunt['properties']['prof_ids']
         punt = Point(meetpunt['geometry']['coordinates'])
         buffered = punt.buffer(radius)
-        records.append([profielnaam,buffered])
+        records.append([profielnaam, buffered])
 
     return records
 
-def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7, tolerantie_wp=0.15, meter_factor=-1):
+
+def calc_slibaanwas_polygons(point_list_in, point_list_uit, tolerantie_breedte, tolerantie_wp, meter_factor=-1):
     '''Deze functie berekent de slibaanwas tussen 2 profielen. Hierbij worden polygonen gebruikt.
     Het heeft de inpeiling als basis. De profielen worden beide vanaf het middelpunt getekend.
     input: list van 1 profiel inpeiling, list van 1 profiel uitpeiling, meter_factor(aantal meters vanaf
@@ -150,14 +197,14 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7
     slibaanwas_lengte = 999
     box_lengte = 999
     breedte_verschil = 999
-    errorwaarde = 'Null'
+    errorwaarde = None
 
     # ------- Inlezen van de gegegens
     # Get de meetpuntgegevens van de inpeiling: de meetafstand en de bovenkant slip in NAP en de index van het 22 punt
     for ind, meetpunt in enumerate(point_list_in):
         afstand_in.append(meetpunt['properties']['afstand'])
         bk_in.append(meetpunt['properties']['_bk_nap'])
-        coor_in.append((meetpunt['properties']['afstand'],meetpunt['properties']['_bk_nap']))
+        coor_in.append((meetpunt['properties']['afstand'], meetpunt['properties']['_bk_nap']))
         if meetpunt['properties']['code'] == '22':
             ind_22_in.append(ind)
 
@@ -191,27 +238,27 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7
     # Pas de meter_factor aan als percentage van de breedte
     # Als er geen positieve meters wordt meegegeven, neem 10% van de breedte
     if meter_factor == -1:
-        meter_factor = afstand_in[ind_22_in[1]]*0.1
+        meter_factor = afstand_in[ind_22_in[1]] * 0.1
 
     # -------- Maak polygons -------------------
     # Om de middelpunten van de polygonen gelijkt te hebben, verschuif de uitpeiling naar de inpeiling
-    verschuif = (afstand_in[ind_22_in[1]]/2) - (afstand_uit[ind_22_uit[1]]/2)
+    verschuif = (afstand_in[ind_22_in[1]] / 2) - (afstand_uit[ind_22_uit[1]] / 2)
     for ind, coordinate in enumerate(coor_uit):
         afstand, waarde = coordinate
         coor_uit[ind] = (afstand + verschuif, waarde)
 
     # Polygons van de in- en uitpeiling
-    poly_in = Polygon(coor_in[ind_22_in[0]:ind_22_in[1]+1])
-    poly_uit = Polygon(coor_uit[ind_22_uit[0]:ind_22_uit[1]+1])
+    poly_in = Polygon(coor_in[ind_22_in[0]:ind_22_in[1] + 1])
+    poly_uit = Polygon(coor_uit[ind_22_uit[0]:ind_22_uit[1] + 1])
 
     # Polygon vierkant (nodig voor berekening slib)
     # Bereken vanaf het 22 punt de bounding box met daarbij de meters vanaf de kant
     afstand_begin = afstand_in[ind_22_in[0]] + meter_factor
     afstand_eind = afstand_in[ind_22_in[1]] - meter_factor
-    waterlijn = min(bk_in[ind_22_in[0]],bk_uit[ind_22_in[0]]) - 0.01 # Zorg dat het vierkant onder de waterlijn ligt
-    onderlijn = min(bk_uit) - 0.5 # Zorg dat het vierkant onder de onderlijn ligt
+    waterlijn = min(bk_in[ind_22_in[0]], bk_uit[ind_22_in[0]]) - 0.01  # Zorg dat het vierkant onder de waterlijn ligt
+    onderlijn = min(bk_uit) - 0.5  # Zorg dat het vierkant onder de onderlijn ligt
 
-    poly_square = Polygon([(afstand_begin,waterlijn), (afstand_begin,onderlijn), (afstand_eind, onderlijn),
+    poly_square = Polygon([(afstand_begin, waterlijn), (afstand_begin, onderlijn), (afstand_eind, onderlijn),
                            (afstand_eind, waterlijn)])
 
     # Check of de polygons geen dubbele lijnen hebben/valid zijn ( anders kan de difference niet berekend worden)
@@ -236,7 +283,7 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7
     slibaanwas_totaal = slib_in - slib_uit
     # Hoeveelheid slib in m per lengte-eenheid
     box_lengte = afstand_eind - afstand_begin
-    slibaanwas_lengte = slibaanwas_totaal/((box_lengte))
+    slibaanwas_lengte = slibaanwas_totaal / ((box_lengte))
 
     # # ------- Test figures om de dataset te bekijken
     # print(point_list_in[0]['properties']['prof_ids'])
@@ -253,7 +300,8 @@ def CalcSlibaanwas_polygons(point_list_in,point_list_uit, tolerantie_breedte=0.7
     # plt.show()
     return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
-def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, tolerantie_breedte, tolerantie_wp):
+
+def get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_list, tolerantie_breedte, tolerantie_wp):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
     input:
     memcollection van de inpeilingen
@@ -274,20 +322,21 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, to
     afstand_all = []
     errorwaarde_all = []
 
-    # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt, en check welke het dichstbijzijnde is
+    # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt,
+    # en check welke het dichstbijzijnde is
     for profiel_naam, buffer_p in buffer_list:
         afstand_temp = 1000
         uitpeiling_aanwezig = False
-        for p in point_col_mid_uit.filter():
+        for p in point_col_mid_uit.filter(bbox=buffer_p.bounds):#hier wordt spatial indexing van memcollection gebruikt
             punt_uit = Point(p['geometry']['coordinates'])
             if punt_uit.within(buffer_p):
                 uitpeiling_aanwezig = True
-                if buffer_p.centroid.distance(punt_uit) < afstand_temp: # check of het de dichtstbijzijnde is
+                if buffer_p.centroid.distance(punt_uit) < afstand_temp:  # check of het de dichtstbijzijnde is
                     profiel_naam_temp = profiel_naam
                     properties_temp = p['properties']['prof_ids']
                     afstand_temp = buffer_p.centroid.distance(punt_uit)
         if uitpeiling_aanwezig:  # check of er inderdaad een profiel is gevonden, dan sla de dichtstbijzijnde info op
-            in_uit_combi.append([profiel_naam_temp,properties_temp])
+            in_uit_combi.append([profiel_naam_temp, properties_temp])
             coordinates_in_all.append(buffer_p.centroid.coords[0])
             afstand_all.append(afstand_temp)
 
@@ -296,7 +345,7 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, to
         prof_list_in = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [prof_in]}))
         prof_list_uit = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [prof_uit]}))
         slibaanwas_profiel, box_lengte, meter_factor, breedte_verschil, errorwaarde = \
-            CalcSlibaanwas_polygons(prof_list_in, prof_list_uit, tolerantie_breedte, tolerantie_wp)
+            calc_slibaanwas_polygons(prof_list_in, prof_list_uit, tolerantie_breedte, tolerantie_wp)
         slibaanwas_all.append(slibaanwas_profiel)
         box_lengte_all.append(box_lengte)
         meter_factor_all.append(meter_factor)
@@ -318,74 +367,3 @@ def GetSlibaanwas(point_col_in,point_col_uit, point_col_mid_uit, buffer_list, to
     info_list['afstand'] = afstand_all
 
     return in_uit_combi, info_list
-
-def WriteListtoCollection(output_file, in_uit_combi, info_list):
-    '''Hierin wordt de memcollectie (points) gevuld met de resultaten uit de Getslibaanwas tool
-    Er wordt een shapefile gemaakt met per profiel het middelpunt en in GIS toegevoegd.
-    input: output_dir (path van de folder waar de output wordt opgeslagen),
-    in_uit_combi
-    info_list
-    output: shapefile (points) met de informatie weggeschreven in outputfolder, met de volgende kolommen:
-    p_ids_in = profielnaam inpeiling,
-    p_ids_uit = profielnaam uitpeiling,
-    slibaanwas = m slibaanwas per m breedte,
-    ps_breedte = breedte die mee is genomen voor het berekenen van het slib (m),
-    ver_breed = verschil in breedte absoluut (inpeiling-uitpeiling) (m)
-    datum_in,
-    datum_uit,
-    afstand =  deafstand tussen de middelpunten van de in- en uitpeiling,
-    m_factor = aantal meters dat van de kant niet is meegenomen,
-    error = geeft aan door welke error er geen berekening heeft plaatsgevonden. Null wanneer alles goed ging.
-    '''
-
-    # specific file name and data
-    # output_name = 'slibaanwas_{0}.shp'.format(np.random.random_integers(1,100))
-    output_name = os.path.basename(output_file).split('.')[0]
-    output_dir = os.path.dirname(output_file)
-    output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
-    arcpy.AddMessage('Outputname: ' + output_name)
-
-    # op volgorde fields toevoegen en typeren
-    arcpy.AddField_management(output_file, 'p_ids_in', "TEXT")
-    arcpy.AddField_management(output_file, 'p_ids_uit', "TEXT")
-    arcpy.AddField_management(output_file, 'slibaanwas', "DOUBLE")
-    arcpy.AddField_management(output_file, 'ps_breed', "DOUBLE")
-    arcpy.AddField_management(output_file, 'ver_breed', "DOUBLE")
-    arcpy.AddField_management(output_file, 'datum_in', "TEXT")
-    arcpy.AddField_management(output_file, 'datum_uit', "TEXT")
-    arcpy.AddField_management(output_file, 'afstand',"DOUBLE")
-    arcpy.AddField_management(output_file, 'm_factor', "DOUBLE")
-    arcpy.AddField_management(output_file, 'error', "TEXT")
-
-    dataset = arcpy.InsertCursor(output_file)
-
-    # Geef de velden weer die aan de keys van de properties zijn
-    fields = info_list.keys()
-    fields.remove('geometrie')
-
-    # Vul de shapefile in met de waardes
-    for ind, p in enumerate(in_uit_combi):
-        row = dataset.newRow()
-        # Voeg de coordinaten toe aan het punt
-        point = arcpy.Point()
-        point.X = info_list['geometrie'][ind][0]
-        point.Y = info_list['geometrie'][ind][1]
-
-        # Voeg de properties toe aan de attribuuttable
-        row.Shape = point
-        row.setValue('p_ids_in', p[0])
-        row.setValue('p_ids_uit', p[1])
-
-        row.setValue('slibaanwas', info_list['slibaanwas'][ind])
-        row.setValue('ps_breed', info_list['box_lengte'][ind])
-        row.setValue('ver_breed', info_list['breedte_verschil'][ind])
-        row.setValue('datum_in', info_list['datum_in'][ind])
-        row.setValue('datum_uit', info_list['datum_uit'][ind])
-        row.setValue('afstand', info_list['afstand'][ind])
-        row.setValue('m_factor', info_list['meter_factor'][ind])
-        row.setValue('error', info_list['errorwaarde'][ind])
-
-        dataset.insertRow(row)
-    # print('weggeschreven als file')
-    arcpy.AddMessage('weggeschreven als file')
-    add_result_to_display(output_file, output_name)
