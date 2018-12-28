@@ -1,9 +1,7 @@
-import os
-import os.path
-
 from shapely.geometry import Point, Polygon
 
 from gistools.utils.collection import MemCollection
+
 
 def get_profiel_middelpunt(point_col_in, point_col_uit):
     ''' Deze functie maakt van de metingen een overzicht van de profielen en een middelpunt.
@@ -49,110 +47,6 @@ def get_profiel_middelpunt(point_col_in, point_col_uit):
     point_col_mid_uit.writerecords(records_mid_uit)
 
     return point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit
-
-
-def get_profiel_middelpunt_oud(input_inpeil, input_uitpeil):
-    ''' Deze functie maakt van de metingen een overzicht van de profielen in deze shape en een middelpunt.
-     Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
-     input: input_inpeil(shapefile), input_uitpeil(shapefile)
-     return:
-     pointcollection input inpeilingen, pointcollection input uitpeilingen,
-     pointcollection middelpunten van de inpeilingen, pointcollection middelpunten van de uitpeilingen,
-     list van de profielnamen van de inpeilingen, list van de profielnamen van de uitpeilingen'''
-
-    # ---------- Omzetten van shapefile input naar memcollection----------------
-    # --- Initialize point collection -> inpeilingen
-    import arcpy
-
-    point_col_in = MemCollection(geometry_type='MultiPoint')
-    records_in = []
-    rows_in = arcpy.SearchCursor(input_inpeil)
-    fields_in = arcpy.ListFields(input_inpeil)
-    # Fill the point collection
-    for row in rows_in:
-        geom = row.getValue('SHAPE')
-        properties = {}
-        for field in fields_in:
-            if field.name.lower() != 'shape':
-                if isinstance(field.name, unicode):
-                    key = field.name.encode('utf-8')
-                else:
-                    key = field.name
-                if isinstance(row.getValue(field.name), unicode):
-                    value = row.getValue(field.name).encode('utf-8')
-                else:
-                    value = row.getValue(field.name)
-                properties[key] = value
-
-        records_in.append({'geometry': {'type': 'Point',
-                                        'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                           'properties': properties})
-    # Schrijf de gegegevens naar de collection
-    point_col_in.writerecords(records_in)
-
-    # --- Initialize point collection -> uitpeilingen
-    point_col_uit = MemCollection(geometry_type='MultiPoint')
-    records_uit = []
-    rows_uit = arcpy.SearchCursor(input_uitpeil)
-    fields_uit = arcpy.ListFields(input_uitpeil)
-    # Fill the point collection
-    for row in rows_uit:
-        geom = row.getValue('SHAPE')
-        properties = {}
-        for field in fields_uit:
-            if field.name.lower() != 'shape':
-                if isinstance(field.name, unicode):
-                    key = field.name.encode('utf-8')
-                else:
-                    key = field.name
-                if isinstance(row.getValue(field.name), unicode):
-                    value = row.getValue(field.name).encode('utf-8')
-                else:
-                    value = row.getValue(field.name)
-                properties[key] = value
-
-        records_uit.append({'geometry': {'type': 'Point',
-                                         'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                            'properties': properties})
-    # Schrijf de gegegevens naar de collection
-    point_col_uit.writerecords(records_uit)
-
-    # ---------- Get unieke waardes van profielnamen en hun middelpunt----------------
-    # --- Van de inpeilingen
-    profiel_namen_in = set(p['properties']['prof_ids'] for p in point_col_in.filter())
-
-    # Initialize point collection -> middelpunten (inpeilingen)
-    point_col_mid_in = MemCollection(geometry_type='MultiPoint')
-    records_mid_in = []
-
-    # Vindt voor elk profiel het middelste meetpunt
-    for profiel in profiel_namen_in:
-        profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [profiel]}))
-        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
-        middelpunt = profiel_punten[middelpunt_nr]
-        records_mid_in.append(middelpunt)
-
-    # sla deze middelpunten op in een memcollection
-    point_col_mid_in.writerecords(records_mid_in)
-
-    # --- Van de uitpeilingen
-    profiel_namen_uit = set(p['properties']['prof_ids'] for p in point_col_uit.filter())
-
-    # Initialize point collection -> middelpunten (inpeilingen)
-    point_col_mid_uit = MemCollection(geometry_type='MultiPoint')
-    records_mid_uit = []
-
-    # Vindt voor elk profiel het middelste meetpunt
-    for profiel in profiel_namen_uit:
-        profiel_punten = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [profiel]}))
-        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
-        middelpunt = profiel_punten[middelpunt_nr]
-        records_mid_uit.append(middelpunt)
-
-    # sla deze middelpunten op in een memcollection
-    point_col_mid_uit.writerecords(records_mid_uit)
-
-    return point_col_in, point_col_uit, point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit
 
 
 def create_buffer(point_col, radius=5):
@@ -217,15 +111,15 @@ def calc_slibaanwas_polygons(point_list_in, point_list_uit, tolerantie_breedte, 
             ind_22_uit.append(ind)
 
     # ------- Check of de gegevens goed zijn ------
-    # Check of er twee 22-codes zijn -> zo niet stop de berekening
-    if len(ind_22_uit) < 2 or len(ind_22_in) < 2:
-        errorwaarde = '22code'
-        return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
-
     # Check of de profielbreedtes niet te veel verschillen -> teveel verschil stop de berekening
     breedte_verschil = abs(afstand_in[ind_22_in[1]] - afstand_uit[ind_22_uit[1]])
     if breedte_verschil > tolerantie_breedte:
         errorwaarde = 'breedteverschil'
+        return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
+
+    # Check of er twee 22-codes zijn -> zo niet stop de berekening
+    if len(ind_22_uit) < 2 or len(ind_22_in) < 2:
+        errorwaarde = '22code'
         return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
     # Check of de waterpeil veel verschilt -> teveel verschil stop de berekening
@@ -327,7 +221,8 @@ def get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_list, 
     for profiel_naam, buffer_p in buffer_list:
         afstand_temp = 1000
         uitpeiling_aanwezig = False
-        for p in point_col_mid_uit.filter(bbox=buffer_p.bounds):#hier wordt spatial indexing van memcollection gebruikt
+        for p in point_col_mid_uit.filter(
+                bbox=buffer_p.bounds):  # hier wordt spatial indexing van memcollection gebruikt
             punt_uit = Point(p['geometry']['coordinates'])
             if punt_uit.within(buffer_p):
                 uitpeiling_aanwezig = True

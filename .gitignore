@@ -8,3 +8,4 @@
 .pydevproject
 *.stackdump
 tools/test_klad.py
+test/data/calc_slibaanwas/Inpeiling.shp.LT-ETENNER.26264.26260.sr.lock

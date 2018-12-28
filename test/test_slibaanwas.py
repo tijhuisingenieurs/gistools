@@ -1,21 +1,21 @@
-import unittest
-import numpy as np
-from shapely.geometry import Point
-from gistools.utils.geometry import TLine, TMultiLineString
-from math import sqrt
 import os.path
+import unittest
+
+import numpy as np
+
 # from generatepointsfromlines import percentage
 from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, \
-    get_slibaanwas, calc_slibaanwas_polygons
+    get_slibaanwas
 # from calculate_slibaanwas import from_shape_to_memcollection_points
 from gistools.utils.collection import MemCollection
 
 test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
+
 def from_shape_to_memcollection_points(input_shape):
     """Deze functie zet de shape met informatie om naar een punten collectie
     input: shapefile met meetpunten erin (het kan elke puntenshape zijn. De kolominfo wordt overgezet
-    naar de properties en de coordinaten naar coordinates
+    naar de properties en de coordinaten naar coordinates)
     output: memcollection met deze punten erin"""
 
     # ---------- Omzetten van shapefile input naar memcollection----------------
@@ -47,6 +47,7 @@ def from_shape_to_memcollection_points(input_shape):
     # Schrijf de gegegevens naar de collection
     point_col.writerecords(records_in)
     return point_col
+
 
 class TestSlibaanwas(unittest.TestCase):
 
@@ -138,15 +139,16 @@ class TestSlibaanwas(unittest.TestCase):
                                                  tolerantie_breedte, tolerantie_wp)
 
         # Test dat het middelste punt juist is
-        self.assertEqual(np.round(point_col_mid_in[0]['properties']['afstand'],2),5.00)
+        self.assertEqual(np.round(point_col_mid_in[0]['properties']['afstand'], 2), 5.00)
         # Test  dat de juiste combinatie worden gevonden
-        not_in_uit_combi_expected = [['in_2_uitmidden','uit_2_uitmidden'],['in_5_ver','uit_5_ver']]
-        in_uit_combi_expected = [['in_4_korter','uit_4_langer'],['in_6_goed','uit_6_goed'],['in_7_goed','uit_7_goed'],
-                                 ['in_1_goed','uit_1_goed'],['in_3_langer','uit_3_korter']]
+        not_in_uit_combi_expected = [['in_2_uitmidden', 'uit_2_uitmidden'], ['in_5_ver', 'uit_5_ver']]
+        in_uit_combi_expected = [['in_4_korter', 'uit_4_langer'], ['in_6_goed', 'uit_6_goed'],
+                                 ['in_7_goed', 'uit_7_goed'],
+                                 ['in_1_goed', 'uit_1_goed'], ['in_3_langer', 'uit_3_korter']]
         for combi in in_uit_combi:
             self.assertTrue(combi in in_uit_combi_expected)
         # Test dat de juiste errorwaardes worden gegegevn
-        errorwaarde_expected = [None,'waterpeilverschil',None, None,'breedteverschil']
-        self.assertEqual(info_list['errorwaarde'] ,errorwaarde_expected)
+        errorwaarde_expected = [None, 'waterpeilverschil', None, None, 'breedteverschil']
+        self.assertEqual(info_list['errorwaarde'], errorwaarde_expected)
         # Test dat de juiste slibaanwas wordt berekend (voor de normale case 1)
-        self.assertEqual(np.round(info_list['slibaanwas'][3],2),0.75)
+        self.assertEqual(np.round(info_list['slibaanwas'][3], 2), 0.75)
