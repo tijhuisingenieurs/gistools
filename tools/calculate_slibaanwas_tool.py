@@ -1,70 +1,53 @@
 from shapely.geometry import Point, Polygon
 
-from gistools.utils.collection import MemCollection
-
 
 def get_profiel_middelpunt(point_col_in, point_col_uit):
     ''' Deze functie maakt van de metingen een overzicht van de profielen en een middelpunt.
          Het middelpunt kan later gebruikt worden voor het vinden van het dichtsbijzijnde profiel.
          input: point_col_in(memcollection punten inpeiling), point_col_uit(memcollection punten uitpeiling)
          return:
-         pointcollection middelpunten van de inpeilingen, pointcollection middelpunten van de uitpeilingen,
-         list van de profielnamen van de inpeilingen, list van de profielnamen van de uitpeilingen'''
+         list met de profielnaam en de middelpunten (points) van de inpeilingen,
+         list met de profielnaam en de middelpunten (points) van de uitpeilingen.'''
 
     # ---------- Get unieke waardes van profielnamen en hun middelpunt----------------
     # --- Van de inpeilingen
     profiel_namen_in = set(p['properties']['prof_ids'] for p in point_col_in.filter())
 
-    # Initialize point collection -> middelpunten (inpeilingen)
-    point_col_mid_in = MemCollection(geometry_type='MultiPoint')
-    records_mid_in = []
+    # Initialize point list -> middelpunten (inpeilingen)
+    point_mid_in = []
 
-    # Vindt voor elk profiel het middelste meetpunt
+    # Bereken voor elk profiel het middelpunt op de profiellijn (=lijn tussen 22 punten)
     for profiel in profiel_namen_in:
+        coordinates_in = []
         profiel_punten = list(point_col_in.filter(property={'key': 'prof_ids', 'values': [profiel]}))
-        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
-        middelpunt = profiel_punten[middelpunt_nr]
-        records_mid_in.append(middelpunt)
-
-    # sla deze middelpunten op in een memcollection
-    point_col_mid_in.writerecords(records_mid_in)
+        # Vindt de 22-codes en hun coordinaten
+        for ind, meetpunt in enumerate(profiel_punten):
+            if meetpunt['properties']['code'] == '22':
+                coordinates_in.append((meetpunt['geometry']['coordinates']))
+        # bereken het middelpunt op de profiellijn en sla deze met de profielnaam op
+        middelpunt = Point((coordinates_in[0][0]+coordinates_in[1][0])/2, (coordinates_in[0][1]+coordinates_in[1][1])/2)
+        point_mid_in.append([profiel,middelpunt])
 
     # --- Van de uitpeilingen
     profiel_namen_uit = set(p['properties']['prof_ids'] for p in point_col_uit.filter())
 
-    # Initialize point collection -> middelpunten (inpeilingen)
-    point_col_mid_uit = MemCollection(geometry_type='MultiPoint')
-    records_mid_uit = []
+    # Initialize point list -> middelpunten (uitpeilingen)
+    point_mid_uit = []
 
-    # Vindt voor elk profiel het middelste meetpunt
+    # Bereken voor elk profiel het middelpunt op de profiellijn (=lijn tussen 22 punten)
     for profiel in profiel_namen_uit:
+        coordinates_uit = []
         profiel_punten = list(point_col_uit.filter(property={'key': 'prof_ids', 'values': [profiel]}))
-        middelpunt_nr = int(round(len(profiel_punten) / 2, 0))
-        middelpunt = profiel_punten[middelpunt_nr]
-        records_mid_uit.append(middelpunt)
+        # Vindt de 22-codes en hun coordinaten
+        for ind, meetpunt in enumerate(profiel_punten):
+            if meetpunt['properties']['code'] == '22':
+                coordinates_uit.append((meetpunt['geometry']['coordinates']))
+        # bereken het middelpunt op de profiellijn en sla deze met de profielnaam op
+        middelpunt = Point((coordinates_uit[0][0]+coordinates_uit[1][0])/2,
+                           (coordinates_uit[0][1]+coordinates_uit[1][1])/2)
+        point_mid_uit.append([profiel,middelpunt])
 
-    # sla deze middelpunten op in een memcollection
-    point_col_mid_uit.writerecords(records_mid_uit)
-
-    return point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit
-
-
-def create_buffer(point_col, radius=5):
-    ''' Maakt van elk punt een polgon, door middel van een buffer met de ingegeven radius (default=5).
-    input: pointcollection
-    result: list met profielnaam en de shapelypolygon'''
-
-    # Initialize voor opslag polygonen
-    records = []
-
-    # Ga elk meetpunt langs en create een polygon. Sla de polygon op in records
-    for meetpunt in point_col.filter():
-        profielnaam = meetpunt['properties']['prof_ids']
-        punt = Point(meetpunt['geometry']['coordinates'])
-        buffered = punt.buffer(radius)
-        records.append([profielnaam, buffered])
-
-    return records
+    return point_mid_in, point_mid_uit
 
 
 def calc_slibaanwas_polygons(point_list_in, point_list_uit, tolerantie_breedte, tolerantie_wp, meter_factor=-1):
@@ -195,13 +178,13 @@ def calc_slibaanwas_polygons(point_list_in, point_list_uit, tolerantie_breedte, 
     return slibaanwas_lengte, box_lengte, meter_factor, breedte_verschil, errorwaarde
 
 
-def get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_list, tolerantie_breedte, tolerantie_wp):
+def get_slibaanwas(point_col_in, point_col_uit, point_mid_in, point_mid_uit, radius, tolerantie_breedte, tolerantie_wp):
     '''Deze funtie zoekt bij elke inpeiling een uitpeiling en berekent dan het verschil in slib (de slibaanwas)
     input:
     memcollection van de inpeilingen
     memcollection van de uitpeilingen
-    memcollection van de middenpunten van de uitpeilingen
-    list met bufferpolygons en profielnamen inpeilingen
+    list van de middenpunten van de inpeilingen
+    list van de middenpunten van de uitpeilingen
     meter_factor (nog in aanmaak)
 
     result: memcollection lines met bij elke inpeilingprofiellijn een slibaanwas en de meter_factor vermeld.'''
@@ -218,22 +201,22 @@ def get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_list, 
 
     # Vind bij elk profiel van de inpeilingen de uitpeiling die binnen de buffer valt,
     # en check welke het dichstbijzijnde is
-    for profiel_naam, buffer_p in buffer_list:
+    for profiel_naam_in, punt_in in point_mid_in:
+        buffered_in = punt_in.buffer(radius)
         afstand_temp = 1000
         uitpeiling_aanwezig = False
-        for p in point_col_mid_uit.filter(
-                bbox=buffer_p.bounds):  # hier wordt spatial indexing van memcollection gebruikt
-            punt_uit = Point(p['geometry']['coordinates'])
-            if punt_uit.within(buffer_p):
+        for profiel_naam_uit, punt_uit in point_mid_uit:
+            if punt_uit.within(buffered_in):
                 uitpeiling_aanwezig = True
-                if buffer_p.centroid.distance(punt_uit) < afstand_temp:  # check of het de dichtstbijzijnde is
-                    profiel_naam_temp = profiel_naam
-                    properties_temp = p['properties']['prof_ids']
-                    afstand_temp = buffer_p.centroid.distance(punt_uit)
+                if buffered_in.centroid.distance(punt_uit) < afstand_temp:  # check of het de dichtstbijzijnde is
+                    profiel_naam_in_temp = profiel_naam_in
+                    profiel_naam_uit_temp = profiel_naam_uit
+                    afstand_temp = buffered_in.centroid.distance(punt_uit)
         if uitpeiling_aanwezig:  # check of er inderdaad een profiel is gevonden, dan sla de dichtstbijzijnde info op
-            in_uit_combi.append([profiel_naam_temp, properties_temp])
-            coordinates_in_all.append(buffer_p.centroid.coords[0])
+            in_uit_combi.append([profiel_naam_in_temp, profiel_naam_uit_temp])
+            coordinates_in_all.append(buffered_in.centroid.coords[0])
             afstand_all.append(afstand_temp)
+
 
     # Ga elk profiel af en bereken de slibaanwas en verzamel info voor de output
     for prof_in, prof_uit in in_uit_combi:
