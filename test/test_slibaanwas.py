@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 # from generatepointsfromlines import percentage
-from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, \
-    get_slibaanwas
+from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, get_slibaanwas
 # from calculate_slibaanwas import from_shape_to_memcollection_points
 from gistools.utils.collection import MemCollection
 
@@ -130,16 +129,15 @@ class TestSlibaanwas(unittest.TestCase):
         point_col_in = from_shape_to_memcollection_points(input_inpeil)
         point_col_uit = from_shape_to_memcollection_points(input_uitpeil)
         # Bepaal het middelpunt
-        point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit = \
-            get_profiel_middelpunt(point_col_in, point_col_uit)
-        # Maak een buffer
-        buffer_mid_in = create_buffer(point_col_mid_in, zoekafstand)
+        point_col_mid_in, point_col_mid_uit = get_profiel_middelpunt(point_col_in, point_col_uit)
         # Bepaal ahv buffer welke in en uitpeilingen bij elkaar horen en bereken de slibaanwas
-        in_uit_combi, info_list = get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_mid_in,
-                                                 tolerantie_breedte, tolerantie_wp)
+        in_uit_combi, info_list = get_slibaanwas(point_col_in, point_col_uit, point_col_mid_in, point_col_mid_uit,
+                                                 zoekafstand, tolerantie_breedte, tolerantie_wp)
 
-        # Test dat het middelste punt juist is
-        self.assertEqual(np.round(point_col_mid_in[0]['properties']['afstand'], 2), 5.00)
+        # Test dat het middelste punt juist is: check voor 1 profiel de x en y coordinaat: in_4_korter
+        self.assertEqual(np.round(point_col_mid_in[1][1].coords.xy[0], 6), 103467.154873)
+        self.assertEqual(np.round(point_col_mid_in[1][1].coords.xy[1], 6), 444571.347084)
+
         # Test  dat de juiste combinatie worden gevonden
         not_in_uit_combi_expected = [['in_2_uitmidden', 'uit_2_uitmidden'], ['in_5_ver', 'uit_5_ver']]
         in_uit_combi_expected = [['in_4_korter', 'uit_4_langer'], ['in_6_goed', 'uit_6_goed'],
