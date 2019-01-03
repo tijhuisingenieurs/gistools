@@ -203,9 +203,11 @@ def elec_punt_to_profiel(lijn, points_col, naam, zoekafstand):
 # Tool 2: het maken van een puntenprofiel ahv lijn door electronische datawolk
 input_lijnen = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\profiellijn_2.shp'
 input_punten = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\Meetpunten_elektronisch_test.shp'
-output_file =  'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata'
+output_file =  'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata_zoek_1'
 output_number = str(np.random.random_integers(1,100))
 print('output nummer: ',output_number)
+
+zoekafstand = 1
 
 # Zet de elektronische meetpunten om naar een memcollection
 elek_punten_col = from_shape_to_memcollection_points(input_punten)
@@ -241,7 +243,7 @@ for gegevens in lijn_list:
     lijn_buffer = lijn.buffer(0.1)
     # Zoek welke elektronische meetpunten binnen de zoekafstand vallen,
     # Cluster deze punten en neem de gemiddelde z waarde. Ze komen terug in memcollection op 1 gezamelijk punt
-    gemiddeld_punt_deel = elec_punt_to_profiel(lijn, elek_punten_col, prof_ids, zoekafstand=0.5)
+    gemiddeld_punt_deel = elec_punt_to_profiel(lijn, elek_punten_col, prof_ids, zoekafstand)
     # Voeg alle punten toe aan 1 list
     gemiddeld_punt_all += gemiddeld_punt_deel
 
