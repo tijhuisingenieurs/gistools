@@ -43,13 +43,14 @@ def from_shape_to_memcollection_points(input_shape):
 
 
 def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, output_folder, output_name, output_number):
-    '''functie om de lijst met punten naar arcgis te halen'''
+    '''functie om de grid met punten naar arcgis te halen'''
 
     # Initializatie van het path en naam output en shapefile
     output_dir = os.path.dirname(output_folder)
     output_file = arcpy.CreateFeatureclass_management(output_dir, output_number + '_' + output_name, 'POINT',
                                                       spatial_reference=28992)
     arcpy.AddMessage('Outputname: ' + output_name)
+    arcpy.AddMessage('Output: ' + output_file)
 
     # Toevoegen van Fields aan output shape
     arcpy.AddField_management(output_file, '_bk_nap', "DOUBLE")
@@ -57,21 +58,21 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
     arcpy.AddField_management(output_file, 'y_coord', "DOUBLE")
     # arcpy.AddField_management(output_file, 'datum', "TEXT")
     dataset = arcpy.InsertCursor(output_file)
-    # gebruik numpy.ndenumerate¶
+    # gebruik numpy.ndenumerate
     # De punten en de gegevens van de punten overbrengen naar de shapefile
-    for ind, p in enumerate(z_waardes):
+    for ind, p in np.ndenumerate(z_waardes):
+        # uitgaande van eregular grid van z-waardes
+        x_waarde = x_coordinaten[ind[1]]
+        y_waarde = y_coordinaten[ind[0]]
+
         row = dataset.newRow()
-        point = arcpy.Point()
+        point = arcpy.Point(x_waarde,y_waarde)
         row.Shape = point
 
         # Voeg de properties toe aan de attribuuttable
-        row.setValue('_bk_nap', p['properties']['z'])
-        row.setValue('x_coord', p['geometry']['coordinates'][0])
-        row.setValue('y_coord', p['geometry']['coordinates'][1])
-        row.setValue('afstand', p['properties']['afstand'])
-        row.setValue('aantal', p['properties']['aantal'])
-        row.setValue('prof_ids', p['properties']['prof_ids'])
-        row.setValue('code', p['properties']['code'])
+        row.setValue('_bk_nap', p)
+        row.setValue('x_coord', x_waarde)
+        row.setValue('y_coord', y_waarde)
         # row.setValue('datum')
 
         dataset.insertRow(row)
@@ -79,6 +80,9 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
 
 input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar1_test.shp'
 input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar2_test.shp'
+output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata'
+output_name = 'Test_grid_interpolatie'
+output_number = str(np.random.random_integers(1, 100))
 gridcel = 0.5
 
 # Deze tool gaat de slibaanwas van de elektronische data berekenen.
@@ -177,18 +181,21 @@ jr_1_interpol = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,gr
 plt.figure()
 plt.contourf(grid_x,grid_y, jr_1_interpol)
 
+plt.figure()
+plt.scatter(jr_1_x,jr_1_y, c=jr_1_z)
+
 plt.show()
 
 k = 2
 
+
+# Opslaan van interpolatie naar shapefile
+from_grid_to_shapefile_points(jr_1_x, jr_1_y, jr_1_interpol,output_folder,output_name,output_number)
+
+k=3
 # Interpolatie deel 2
 
 # Berkenen van slibaanwas (jaar2-jaar1)
-
-# Wil je uiteindelijk een soort gemiddelde van de binnenkant van de watergang?
-# Dan handig om in een nieuwe tool een dwarsdoorsnede te kunnen maken van het grid, en deze als profielpunten te
-# genereren. Dan kan je de andere tool gebruiken om per watergang de aanwas te berekenen.
-# Zou dat niet sowieso handiger zijn eerst te maken?
 
 # Output:
 # Shape van het grid met de slibaanwas
