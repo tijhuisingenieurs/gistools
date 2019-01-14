@@ -163,8 +163,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
     for i, in_uit in enumerate(link_list):
         # ID inpeiling
         prof_id = in_uit[0]
-        if prof_id == "07CE06":
-            a=1
+
         # ID uitpeiling
         prof_id_uit = in_uit[1]
         # ID uiteindelijke punt in metfile
