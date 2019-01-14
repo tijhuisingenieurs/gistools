@@ -50,7 +50,7 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
     output_file = arcpy.CreateFeatureclass_management(output_dir, output_number + '_' + output_name, 'POINT',
                                                       spatial_reference=28992)
     arcpy.AddMessage('Outputname: ' + output_name)
-    arcpy.AddMessage('Output: ' + output_file)
+    arcpy.AddMessage('Output: ' + output_folder)
 
     # Toevoegen van Fields aan output shape
     arcpy.AddField_management(output_file, '_bk_nap', "DOUBLE")
@@ -62,8 +62,8 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
     # De punten en de gegevens van de punten overbrengen naar de shapefile
     for ind, p in np.ndenumerate(z_waardes):
         # uitgaande van eregular grid van z-waardes
-        x_waarde = x_coordinaten[ind[1]]
-        y_waarde = y_coordinaten[ind[0]]
+        x_waarde = x_coordinaten[ind]
+        y_waarde = y_coordinaten[ind]
 
         row = dataset.newRow()
         point = arcpy.Point(x_waarde,y_waarde)
@@ -79,11 +79,18 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
 
 
 input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar1_test.shp'
+# input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_elec.shp'
 input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar2_test.shp'
 output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata'
-output_name = 'Test_grid_interpolatie'
+output_name = 'Test_grid_real'#'Test_grid_interpolatie'
+
+output_name_jr1 = 'Test_grid_jr_1'
+output_name_jr2 = 'Test_grid_jr_2'
+output_name_verschil = 'Test_grid_verschil'
 output_number = str(np.random.random_integers(1, 100))
 gridcel = 0.5
+
+# input_jaar_2 = input_jaar_1
 
 # Deze tool gaat de slibaanwas van de elektronische data berekenen.
 # Hiervoor wordt eerts de data geinterpoleerd op een grid.
@@ -113,6 +120,8 @@ jr_1_z = []
 jr_2_z = []
 jr_1_x = []
 jr_1_y = []
+jr_2_x = []
+jr_2_y = []
 
 
 # Zet de gegevens om in een array
@@ -121,7 +130,7 @@ for p in jr_1_point_col.filter():
     coordinaten = p['geometry']['coordinates']
     z_waarde = p['properties']['z']
     jr_1_point_list.append(coordinaten)
-    jr_1_z.append(z_waarde)
+    jr_1_z.append(float(z_waarde))
     jr_1_x.append(coordinaten[0])
     jr_1_y.append(coordinaten[1])
 
@@ -131,16 +140,13 @@ for p in jr_2_point_col.filter():
     z_waarde = p['properties']['z']
     jr_2_point_list.append(coordinaten)
     jr_2_z.append(z_waarde)
+    jr_2_x.append(coordinaten[0])
+    jr_2_y.append(coordinaten[1])
 
 # Krijg de coordinaten van de boundingbox van beide jaren. Neem de uiterste coordinaten voor de interpolatie grid
 # col.bounds geeft list(minx, miny, maxx, maxy)
 jr_1_bbox = jr_1_point_col.bounds
 jr_2_bbox = jr_2_point_col.bounds
-#
-# x_max_coor = int(round(max(jr_1_bbox[2], jr_2_bbox[2])*100))
-# x_min_coor = int(round(min(jr_1_bbox[0], jr_2_bbox[0])*100))
-# y_max_coor = int(round(max(jr_1_bbox[3], jr_2_bbox[3])*100))
-# y_min_coor = int(round(min(jr_1_bbox[1], jr_2_bbox[1])*100))
 
 x_max_coor = max(jr_1_bbox[2], jr_2_bbox[2])
 x_min_coor = min(jr_1_bbox[0], jr_2_bbox[0])
@@ -151,16 +157,22 @@ y_min_coor = min(jr_1_bbox[1], jr_2_bbox[1])
 aantal_punten_x = int((x_max_coor-x_min_coor)/gridcel)
 x_waarde = x_min_coor
 x_values = []
-for punten in range(1,aantal_punten_x+1,1):
-    x_waarde += gridcel
-    x_values.append(x_waarde)
+for punten in range(0, aantal_punten_x+1,1):
+    if punten == 0:
+        x_values.append(x_waarde)
+    else:
+        x_waarde += gridcel
+        x_values.append(x_waarde)
 
 aantal_punten_y = int((y_max_coor - y_min_coor) / gridcel)
 y_waarde = y_min_coor
 y_values = []
-for punten in range(1, aantal_punten_y + 1, 1):
-    y_waarde += gridcel
-    y_values.append(y_waarde)
+for punten in range(0, aantal_punten_y + 1, 1):
+    if punten == 0:
+        y_values.append(y_waarde)
+    else:
+        y_waarde += gridcel
+        y_values.append(y_waarde)
 
 k = 0
 
@@ -173,13 +185,13 @@ k = 0
 grid_x, grid_y = np.meshgrid(x_values,y_values)
 
 # Interpolatie jaar 1
-jr_1_interpol = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,grid_y), method='cubic', fill_value=999)
+jr_1_grid_z = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,grid_y), method='cubic', fill_value=999)
 
-# write outcome interpolation to shapfile
-
+# Interpolatie jaar 2
+jr_2_grid_z = griddata(np.array(jr_2_point_list), np.array(jr_2_z), (grid_x,grid_y), method='cubic', fill_value=999)
 
 plt.figure()
-plt.contourf(grid_x,grid_y, jr_1_interpol)
+plt.contourf(grid_x,grid_y, jr_1_grid_z)
 
 plt.figure()
 plt.scatter(jr_1_x,jr_1_y, c=jr_1_z)
@@ -188,14 +200,21 @@ plt.show()
 
 k = 2
 
+# https://nl.mathworks.com/matlabcentral/answers/17775-gridding-and-interpolate-data
 
 # Opslaan van interpolatie naar shapefile
-from_grid_to_shapefile_points(jr_1_x, jr_1_y, jr_1_interpol,output_folder,output_name,output_number)
-
+from_grid_to_shapefile_points(grid_x, grid_y, jr_1_grid_z,output_folder,output_name_jr1,output_number)
+from_grid_to_shapefile_points(grid_x, grid_y, jr_2_grid_z,output_folder,output_name_jr2,output_number)
+print output_number
 k=3
 # Interpolatie deel 2
 
 # Berkenen van slibaanwas (jaar2-jaar1)
+# Hier wil je nog wat doen met de 999 waardes, die moeten eigenlijk blijven staan! Uitzoeken of dat met een andere waarde kan
+verschil_grid = jr_2_grid_z - jr_1_grid_z
+
+# Opslaan van de interpolatie verschil (slibaanwas)
+from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid,output_folder,output_name_verschil,output_number)
 
 # Output:
 # Shape van het grid met de slibaanwas
