@@ -78,9 +78,12 @@ def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, outpu
         dataset.insertRow(row)
 
 
-input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar1_test.shp'
-# input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_elec.shp'
-input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar2_test.shp'
+# Inpur data voor in PYCHARM
+# input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar1_test.shp'
+input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_elec.shp'
+# input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar2_test.shp'
+input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_jr2.shp'
+
 output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata'
 output_name = 'Test_grid_real'#'Test_grid_interpolatie'
 
@@ -96,15 +99,7 @@ gridcel = 0.5
 # Hiervoor wordt eerts de data geinterpoleerd op een grid.
 # Vervolgens kan dan de slibaanwas worden berekend.
 
-# Vragen:
-# Wil je vooraf de verschillende jaren bij elkaar zoeken en dan hetzelfde grid interpoleren?
-# dat is wel handig... Ze staan per locatie opgeslagen in 1 shape!!! Dus inderdaad per meetlocatie doen.
-# Wellicht handig om het zo te maken dat ie zelf de shapefiles uit een map kan lezen en tegelijk kan uitvoeren,
-# dus dat je niet voor elke locatie de tool zelf moet aanzetten.
-
-# Moeten de gemeten punten op het interpolatiegrid liggen?
-# Grid afstand 50 cm. (of kan het nog kleiner? Daarmee testen)
-
+# ---------------- START CODE -----------------------------
 # Van GIS shape naar memcollection
 # --------- Inlezen jaar 1
 jr_1_point_col = from_shape_to_memcollection_points(input_jaar_1)
@@ -125,7 +120,7 @@ jr_2_y = []
 
 
 # Zet de gegevens om in een array
-# ---------- Jaar 1
+# ---------- Jaar 1 --------------
 for p in jr_1_point_col.filter():
     coordinaten = p['geometry']['coordinates']
     z_waarde = p['properties']['z']
@@ -134,7 +129,7 @@ for p in jr_1_point_col.filter():
     jr_1_x.append(coordinaten[0])
     jr_1_y.append(coordinaten[1])
 
-# ---------- Jaar 2
+# ---------- Jaar 2 ---------------
 for p in jr_2_point_col.filter():
     coordinaten = p['geometry']['coordinates']
     z_waarde = p['properties']['z']
@@ -154,6 +149,7 @@ y_max_coor = max(jr_1_bbox[3], jr_2_bbox[3])
 y_min_coor = min(jr_1_bbox[1], jr_2_bbox[1])
 
 # Je wilt een list maken met de waardes voor het grid, in x en y richting
+# Waardes voor het x-grid
 aantal_punten_x = int((x_max_coor-x_min_coor)/gridcel)
 x_waarde = x_min_coor
 x_values = []
@@ -164,6 +160,7 @@ for punten in range(0, aantal_punten_x+1,1):
         x_waarde += gridcel
         x_values.append(x_waarde)
 
+# Waardes voor het y-grid
 aantal_punten_y = int((y_max_coor - y_min_coor) / gridcel)
 y_waarde = y_min_coor
 y_values = []
@@ -174,14 +171,7 @@ for punten in range(0, aantal_punten_y + 1, 1):
         y_waarde += gridcel
         y_values.append(y_waarde)
 
-k = 0
-
-# Maken van groot grid, waarin beide jaren invallen - gridafstand mee kunnen geven
-# Voor de functie range is een integer nodig, maar het grid wil ik wel met een float
-# x_values = np.array(range(x_min_coor,x_max_coor, gridcel))/100
-# y_values = np.array(range(y_min_coor,y_max_coor, gridcel))/100
-
-# Maken van grid ahv max en min coodrinates
+# Maken van grid
 grid_x, grid_y = np.meshgrid(x_values,y_values)
 
 # Interpolatie jaar 1
@@ -190,55 +180,23 @@ jr_1_grid_z = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,grid
 # Interpolatie jaar 2
 jr_2_grid_z = griddata(np.array(jr_2_point_list), np.array(jr_2_z), (grid_x,grid_y), method='cubic', fill_value=999)
 
-plt.figure()
-plt.contourf(grid_x,grid_y, jr_1_grid_z)
-
-plt.figure()
-plt.scatter(jr_1_x,jr_1_y, c=jr_1_z)
-
-plt.show()
-
-k = 2
-
-# https://nl.mathworks.com/matlabcentral/answers/17775-gridding-and-interpolate-data
+# Berkenen van slibaanwas (jaar2-jaar1)
+# Hier wil je nog wat doen met de 999 waardes, die moeten eigenlijk blijven staan!
+# Kan dat ook op een andere manier dan met een loop?
+# Anders doe het niet en laat het achteraf zelf in GIS doen, dan kan je selecteren op de lijnen zonder 999 en alleen
+# die meenemen in de analyse van het berekenen van het slib.
+verschil_grid = jr_2_grid_z - jr_1_grid_z
 
 # Opslaan van interpolatie naar shapefile
 from_grid_to_shapefile_points(grid_x, grid_y, jr_1_grid_z,output_folder,output_name_jr1,output_number)
 from_grid_to_shapefile_points(grid_x, grid_y, jr_2_grid_z,output_folder,output_name_jr2,output_number)
-print output_number
-k=3
-# Interpolatie deel 2
-
-# Berkenen van slibaanwas (jaar2-jaar1)
-# Hier wil je nog wat doen met de 999 waardes, die moeten eigenlijk blijven staan! Uitzoeken of dat met een andere waarde kan
-verschil_grid = jr_2_grid_z - jr_1_grid_z
 
 # Opslaan van de interpolatie verschil (slibaanwas)
 from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid,output_folder,output_name_verschil,output_number)
 
-# Output:
-# Shape van het grid met de slibaanwas
-# shape van de interpolatie jaar1
-# shape van de interpolatie jaar2
 
+print output_number
+k=3
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Vraag: zou je de tool niet zo kunnen maken dat je een grid meegeeft? Dan kan je voor jaar 1 en 2 een grid maken
+# en deze toepassen op jaar 3. Dat is wel een idee! Straks uitvoeren wanneer je arcgistool boorpunten is gemerged,
