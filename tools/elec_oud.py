@@ -135,141 +135,125 @@ gridcel = 0.5
 
 # ---------------- START CODE -----------------------------
 
-def interpol_elec_data(jr_1_point_col, jr_2_point_col, gridcel):
-    '''Deze functie maakt een interpolatie van de ingegeven data. Deze input data zijn point collections van
-    electronische data. Waarbij beide datasets hetzelfde gebied weergeven. De interpolatie wordt voor beide
-    uitgevoerd over hetzelfde grid.
-    Dit grid is ofwel nieuw:
-    Er wordt een grid gemaakt ahv de grootst mogelijke bounding box van de input data en een
-    grid afstand.
-    ofwel gebasseerd op een grid die door deze tool al is gemaakt (dus wanneer deze tool meerdere keren wordt gerund.
-     In dit laatste geval wordt alleen jr_1_point_col geinterpoleerd, de gegevens van jr_2_point_col worden gebruikt
-     voor het grid.
+# ---------------- START CODE -----------------------------
+# Van GIS shape naar memcollection
+# --------- Inlezen jaar 1
+jr_1_point_col = from_shape_to_memcollection_points(input_jaar_1)
 
-    Het resultaat is een shapefile (punten) op het grid geinterpoleerd. Punten zonder interpolatie hebben de waarde
-    999. Dit zijn de punten buiten de exterior van de point_col.'''
+# --------- Inlezen jaar 2
+jr_2_point_col = from_shape_to_memcollection_points(input_jaar_2)
 
-    # Initializatie
-    jr_1_point_list = []
-    jr_2_point_list = []
-    jr_1_z = []
-    jr_2_z = []
-    jr_1_x = []
-    jr_1_y = []
-    jr_2_x = []
-    jr_2_y = []
+# Initializatie
+jr_1_point_list = []
+jr_2_point_list = []
+jr_1_z = []
+jr_2_z = []
+jr_1_x = []
+jr_1_y = []
+jr_2_x = []
+jr_2_y = []
 
 
-    # Zet de gegevens om in een array
-    # ---------- Jaar 1 --------------
-    for p in jr_1_point_col.filter():
-        coordinaten = p['geometry']['coordinates']
-        z_waarde = p['properties']['z']
-        jr_1_point_list.append(coordinaten)
-        jr_1_z.append(float(z_waarde))
-        jr_1_x.append(coordinaten[0])
-        jr_1_y.append(coordinaten[1])
+# Zet de gegevens om in een array
+# ---------- Jaar 1 --------------
+for p in jr_1_point_col.filter():
+    coordinaten = p['geometry']['coordinates']
+    z_waarde = p['properties']['z']
+    jr_1_point_list.append(coordinaten)
+    jr_1_z.append(float(z_waarde))
+    jr_1_x.append(coordinaten[0])
+    jr_1_y.append(coordinaten[1])
 
-    # ---------- Jaar 2 ---------------
-    for p in jr_2_point_col.filter():
-        coordinaten = p['geometry']['coordinates']
-        z_waarde = p['properties']['z']
-        jr_2_point_list.append(coordinaten)
-        jr_2_z.append(z_waarde)
-        jr_2_x.append(coordinaten[0])
-        jr_2_y.append(coordinaten[1])
+# ---------- Jaar 2 ---------------
+for p in jr_2_point_col.filter():
+    coordinaten = p['geometry']['coordinates']
+    z_waarde = p['properties']['z']
+    jr_2_point_list.append(coordinaten)
+    jr_2_z.append(z_waarde)
+    jr_2_x.append(coordinaten[0])
+    jr_2_y.append(coordinaten[1])
 
-    # Bepaal of er een nieuw grid moet worden aangemaakt.
-    if gridcel != -1:
-        # Krijg de coordinaten van de boundingbox van beide jaren. Neem de uiterste coordinaten voor het grid
-        # col.bounds geeft list(minx, miny, maxx, maxy)
-        jr_1_bbox = jr_1_point_col.bounds
-        jr_2_bbox = jr_2_point_col.bounds
+# Bepaal of er een nieuw grid moet worden aangemaakt.
 
-        x_max_coor = max(jr_1_bbox[2], jr_2_bbox[2])
-        x_min_coor = min(jr_1_bbox[0], jr_2_bbox[0])
-        y_max_coor = max(jr_1_bbox[3], jr_2_bbox[3])
-        y_min_coor = min(jr_1_bbox[1], jr_2_bbox[1])
+# Krijg de coordinaten van de boundingbox van beide jaren. Neem de uiterste coordinaten voor het grid
+# col.bounds geeft list(minx, miny, maxx, maxy)
+jr_1_bbox = jr_1_point_col.bounds
+jr_2_bbox = jr_2_point_col.bounds
 
-        # Je wilt een list maken met de waardes voor het grid, in x en y richting
-        # Waardes voor het x-grid
-        aantal_punten_x = int((x_max_coor-x_min_coor)/gridcel)
-        x_waarde = x_min_coor
-        x_values = []
-        for punten in range(0, aantal_punten_x+1,1):
-            if punten == 0:
-                x_values.append(x_waarde)
-            else:
-                x_waarde += gridcel
-                x_values.append(x_waarde)
+x_max_coor = max(jr_1_bbox[2], jr_2_bbox[2])
+x_min_coor = min(jr_1_bbox[0], jr_2_bbox[0])
+y_max_coor = max(jr_1_bbox[3], jr_2_bbox[3])
+y_min_coor = min(jr_1_bbox[1], jr_2_bbox[1])
 
-        # Waardes voor het y-grid
-        aantal_punten_y = int((y_max_coor - y_min_coor) / gridcel)
-        y_waarde = y_min_coor
-        y_values = []
-        for punten in range(0, aantal_punten_y + 1, 1):
-            if punten == 0:
-                y_values.append(y_waarde)
-            else:
-                y_waarde += gridcel
-                y_values.append(y_waarde)
-
-        # Maken van grid
-        grid_x, grid_y = np.meshgrid(x_values,y_values)
-
-        # Interpolatie jaar 1
-        jr_1_grid_z = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,grid_y), method='cubic', fill_value=999)
-
-        # Interpolatie jaar 2
-        jr_2_grid_z = griddata(np.array(jr_2_point_list), np.array(jr_2_z), (grid_x,grid_y), method='cubic', fill_value=999)
-
-        return [jr_1_grid_z, jr_2_grid_z, grid_x, grid_y]
-
+# Je wilt een list maken met de waardes voor het grid, in x en y richting
+# Waardes voor het x-grid
+aantal_punten_x = int((x_max_coor-x_min_coor)/gridcel)
+x_waarde = x_min_coor
+x_values = []
+for punten in range(0, aantal_punten_x+1,1):
+    if punten == 0:
+        x_values.append(x_waarde)
     else:
-        # Interpolatie jaar 1 ahv het grid van jaar 2
-        jr_1_grid_z = griddata(np.array(jr_1_point_list), np.array(jr_1_z), jr_2_point_list, method='cubic',
-                               fill_value=999)
-        return [jr_1_grid_z, jr_2_point_list]
+        x_waarde += gridcel
+        x_values.append(x_waarde)
 
+# Waardes voor het y-grid
+aantal_punten_y = int((y_max_coor - y_min_coor) / gridcel)
+y_waarde = y_min_coor
+y_values = []
+for punten in range(0, aantal_punten_y + 1, 1):
+    if punten == 0:
+        y_values.append(y_waarde)
+    else:
+        y_waarde += gridcel
+        y_values.append(y_waarde)
 
+# Maken van grid
+grid_x, grid_y = np.meshgrid(x_values,y_values)
 
+# Interpolatie jaar 1
+jr_1_grid_z = griddata(np.array(jr_1_point_list), np.array(jr_1_z), (grid_x,grid_y), method='cubic', fill_value=999)
 
-    # # Berkenen van slibaanwas (jaar2-jaar1)
-    # # Hier wil je nog wat doen met de 999 waardes, die moeten eigenlijk blijven staan!
-    # # Kan dat ook op een andere manier dan met een loop?
-    # # Anders doe het niet en laat het achteraf zelf in GIS doen, dan kan je selecteren op de lijnen zonder 999 en alleen
-    # # die meenemen in de analyse van het berekenen van het slib.
-    # verschil_grid_m = jr_2_grid_z - jr_1_grid_z
-    #
-    # verschil_grid = np.empty(jr_1_grid_z.shape)
-    #
-    # for ind, value_jr2 in np.ndenumerate(jr_2_grid_z):
-    #     value_jr1 = jr_1_grid_z[ind]
-    #     if value_jr1 == 999 or value_jr2 == 999:
-    #         verschil_grid[ind] = 999
-    #     else:
-    #         verschil_grid[ind] = value_jr2 - value_jr1
-    #
-    #
-    #
-    # # Opslaan van de interpolatie verschil (slibaanwas)
-    # from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid,output_folder,output_name_verschil,output_number)
-    # from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid_m,output_folder,output_name_verschil + '_m',output_number)
-    #
+# Interpolatie jaar 2
+jr_2_grid_z = griddata(np.array(jr_2_point_list), np.array(jr_2_z), (grid_x,grid_y), method='cubic', fill_value=999)
 
-    print output_number
-    k=3
+# # Berkenen van slibaanwas (jaar2-jaar1)
+# # Hier wil je nog wat doen met de 999 waardes, die moeten eigenlijk blijven staan!
+# # Kan dat ook op een andere manier dan met een loop?
+# # Anders doe het niet en laat het achteraf zelf in GIS doen, dan kan je selecteren op de lijnen zonder 999 en alleen
+# # die meenemen in de analyse van het berekenen van het slib.
+# verschil_grid_m = jr_2_grid_z - jr_1_grid_z
+#
+# verschil_grid = np.empty(jr_1_grid_z.shape)
+#
+# for ind, value_jr2 in np.ndenumerate(jr_2_grid_z):
+#     value_jr1 = jr_1_grid_z[ind]
+#     if value_jr1 == 999 or value_jr2 == 999:
+#         verschil_grid[ind] = 999
+#     else:
+#         verschil_grid[ind] = value_jr2 - value_jr1
+#
+#
+#
+# # Opslaan van de interpolatie verschil (slibaanwas)
+# from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid,output_folder,output_name_verschil,output_number)
+# from_grid_to_shapefile_points(grid_x, grid_y, verschil_grid_m,output_folder,output_name_verschil + '_m',output_number)
+#
+from_grid_to_shapefile_points(grid_x, grid_y, jr_1_grid_z, output_folder, output_name_jr1, output_number)
+from_grid_to_shapefile_points(grid_x, grid_y, jr_2_grid_z, output_folder, output_name_jr2, output_number)
+print output_number
+k=3
 
     # Vraag: zou je de tool niet zo kunnen maken dat je een grid meegeeft? Dan kan je voor jaar 1 en 2 een grid maken
     # en deze toepassen op jaar 3. Dat is wel een idee! Straks uitvoeren wanneer je arcgistool boorpunten is gemerged,
 
 
-    def check_orient(x):
-        if x >= 45 and x < 135:
-            return 'NZ'
-        elif x >= 135 and x < 225:
-            return 'WO'
-        elif x >= 225 and x > 315:
-            return 'ZN'
-        else:
-            return 'OW'
+    # def check_orient(x):
+    #     if x >= 45 and x < 135:
+    #         return 'NZ'
+    #     elif x >= 135 and x < 225:
+    #         return 'WO'
+    #     elif x >= 225 and x > 315:
+    #         return 'ZN'
+    #     else:
+    #         return 'OW'
