@@ -173,7 +173,10 @@ def interpol_elec_data(jr_1_point_col, jr_2_point_col, gridcel):
     # ---------- Jaar 2 ---------------
     for p in jr_2_point_col.filter():
         coordinaten = p['geometry']['coordinates']
-        z_waarde = p['properties']['z']
+        if gridcel != -1:
+            z_waarde = p['properties']['z']
+        else:
+            z_waarde = p['properties']['_bk_nap']
         jr_2_point_list.append(coordinaten)
         jr_2_z.append(z_waarde)
         jr_2_x.append(coordinaten[0])
@@ -263,13 +266,3 @@ def interpol_elec_data(jr_1_point_col, jr_2_point_col, gridcel):
     # Vraag: zou je de tool niet zo kunnen maken dat je een grid meegeeft? Dan kan je voor jaar 1 en 2 een grid maken
     # en deze toepassen op jaar 3. Dat is wel een idee! Straks uitvoeren wanneer je arcgistool boorpunten is gemerged,
 
-
-    def check_orient(x):
-        if x >= 45 and x < 135:
-            return 'NZ'
-        elif x >= 135 and x < 225:
-            return 'WO'
-        elif x >= 225 and x > 315:
-            return 'ZN'
-        else:
-            return 'OW'

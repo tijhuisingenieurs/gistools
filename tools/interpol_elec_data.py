@@ -45,41 +45,6 @@ def from_shape_to_memcollection_points(input_shape):
     point_col.writerecords(records_in)
     return point_col
 
-# def from_grid_to_shapefile_points(x_coordinaten, y_coordinaten, z_waardes, output_folder, output_name, output_number):
-#     '''functie om de grid met punten naar arcgis te halen'''
-#
-#     # Initializatie van het path en naam output en shapefile
-#     output_dir = os.path.dirname(output_folder)
-#     output_file = arcpy.CreateFeatureclass_management(output_dir, output_number + '_' + output_name, 'POINT',
-#                                                       spatial_reference=28992)
-#     arcpy.AddMessage('Outputname: ' + output_name)
-#     arcpy.AddMessage('Output: ' + output_folder)
-#
-#     # Toevoegen van Fields aan output shape
-#     arcpy.AddField_management(output_file, '_bk_nap', "DOUBLE")
-#     arcpy.AddField_management(output_file, 'x_coord', "DOUBLE")
-#     arcpy.AddField_management(output_file, 'y_coord', "DOUBLE")
-#     # arcpy.AddField_management(output_file, 'datum', "TEXT")
-#     dataset = arcpy.InsertCursor(output_file)
-#     # gebruik numpy.ndenumerate
-#     # De punten en de gegevens van de punten overbrengen naar de shapefile
-#     for ind, p in np.ndenumerate(z_waardes):
-#         # uitgaande van eregular grid van z-waardes
-#         x_waarde = x_coordinaten[ind]
-#         y_waarde = y_coordinaten[ind]
-#
-#         row = dataset.newRow()
-#         point = arcpy.Point(x_waarde,y_waarde)
-#         row.Shape = point
-#
-#         # Voeg de properties toe aan de attribuuttable
-#         row.setValue('_bk_nap', p)
-#         row.setValue('x_coord', x_waarde)
-#         row.setValue('y_coord', y_waarde)
-#         # row.setValue('datum')
-#
-#         dataset.insertRow(row)
-
 def from_grid_to_shapefile_points(grid, z_waardes, output_folder, output_name, output_number):
     '''functie om de grid met punten naar arcgis te halen'''
 
@@ -102,19 +67,20 @@ def from_grid_to_shapefile_points(grid, z_waardes, output_folder, output_name, o
     arcpy.AddField_management(output_file, '_bk_nap', "DOUBLE")
     arcpy.AddField_management(output_file, 'x_coord', "DOUBLE")
     arcpy.AddField_management(output_file, 'y_coord', "DOUBLE")
-    # arcpy.AddField_management(output_file, 'datum', "TEXT")
+
     dataset = arcpy.InsertCursor(output_file)
-    # gebruik numpy.ndenumerate
+
     # De punten en de gegevens van de punten overbrengen naar de shapefile
     for ind, p in np.ndenumerate(z_waardes):
         # uitgaande van regular grid van z-waardes
         if array:
+            # Grid als array
             x_waarde = grid[0][ind]
             y_waarde = grid[1][ind]
         else:
-            x_waarde = 1
-            y_waarde = 2
-
+            # Grid als list
+            x_waarde = grid[0][ind[0]][0]
+            y_waarde = grid[0][ind[0]][1]
 
         row = dataset.newRow()
         point = arcpy.Point(x_waarde,y_waarde)
@@ -124,7 +90,6 @@ def from_grid_to_shapefile_points(grid, z_waardes, output_folder, output_name, o
         row.setValue('_bk_nap', p)
         row.setValue('x_coord', x_waarde)
         row.setValue('y_coord', y_waarde)
-        # row.setValue('datum')
 
         dataset.insertRow(row)
 
@@ -148,18 +113,21 @@ def from_grid_to_shapefile_points(grid, z_waardes, output_folder, output_name, o
 # input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar1_test.shp'
 input_jaar_1 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_elec.shp'
 # input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\elec_jaar2_test.shp'
-input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_jr2.shp'
-
-output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata'
+# input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\Testdata\simple_grid_jr2.shp'
+input_jaar_2 = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\\resultaat_tool\\01_Test_grid_jr_2_interpolatie.shp'
+output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Elektronische_data_interpolatie\\resultaat_tool\\'
 output_name = 'Test_grid_real'#'Test_grid_interpolatie'
 
-output_name_jr1 = 'Test_grid_jr_1_n'
-output_name_jr2 = 'Test_grid_jr_2_n'
-output_name_verschil = 'Test_grid_verschil_n'
-output_number = str(np.random.random_integers(1, 100))
-gridcel = 0.5
+output_name_jr1 = 'Test_grid_jr_1_interpolatie'
+output_name_jr2 = 'Test_grid_jr_2_interpolatie'
 
-grid_overnemen = False
+output_name_jr1 = 'Test_grid_jr_1_interpolatie_gridovernemen'
+output_name_jr2 = 'Test_grid_jr_2_interpolatie'
+# output_number = str(np.random.random_integers(1, 100))
+gridcel = 0.5
+output_number = '01'
+print output_number
+grid_overnemen = True
 
 # ---------------- START CODE -----------------------------
 # Van GIS shape naar memcollection
@@ -173,7 +141,8 @@ jr_2_point_col = from_shape_to_memcollection_points(input_jaar_2)
 # Wanneer het grid kan worden overgenomen:
 if grid_overnemen:
     gridcel = -1
-    jr_1_grid_z, grid_list = interpol_elec_data(jr_1_point_col, jr_2_point_col, gridcel)
+    grid_data_overnemen = jr_2_point_col
+    jr_1_grid_z, grid_list = interpol_elec_data(jr_1_point_col, grid_data_overnemen, gridcel)
     from_grid_to_shapefile_points([grid_list], jr_1_grid_z, output_folder, output_name_jr1, output_number)
 
 # Wanneer het grid nieuw moet worden gemaakt:
