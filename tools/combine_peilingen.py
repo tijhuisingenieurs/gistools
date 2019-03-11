@@ -252,7 +252,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
 
 
 def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2z1", level_peiling="Inpeiling",
-                       shore_peiling="Inpeiling"):
+                       shore_peiling="Inpeiling", vaste_bodem_aanpassen=True):
 
     with open(metfile_name, 'wb') as csvfile:
 
@@ -342,11 +342,16 @@ def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2
                         continue
             else:
                 upper_level = sorted_points[i]['properties'].get('uit_bk_nap')
-                lower_level = min(sorted_points[i]['properties'].get('uit_ok_nap'),
-                                  sorted_points[i]['properties'].get('_ok_nap'))
+                if vaste_bodem_aanpassen:
+                    # Wanneer er ook vaste bodem is gebaggerd, dan is de vaste bodem van de inpeiling niet meer actueel
+                    # De waarde van de uitpeiling wordt dan de vaste bodem. Nieuwe situatie.
+                    lower_level = min(sorted_points[i]['properties'].get('uit_ok_nap'),
+                                      sorted_points[i]['properties'].get('_ok_nap'))
 
-                if upper_level < lower_level:
-                    lower_level = upper_level
+                    if upper_level < lower_level:
+                        lower_level = upper_level
+                else:
+                    lower_level = sorted_points[i]['properties'].get('_ok_nap')
 
             # check nieuw profiel
             if current_profile != profile:
