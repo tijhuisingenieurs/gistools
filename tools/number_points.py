@@ -69,8 +69,6 @@ def number_points_on_line_boorpunten(lines,
     points (collection of Point): points which will be renumbered
     line_number_field (string): property name of line with order number. The order is ascending and the 0 will be
             ignored. preferably use a integer property/ field
-    line_direction_field (string): optional - property/ field indicate of the points must be numbered in
-            the direction of the shape (for values >= 0) or in opposite direction (for values < 0)
     point_number_field (string): output property/ field of the new (renumbered) index
     start_number (int): first number in index range
     :return: memcollection from hernummered points
@@ -105,8 +103,10 @@ def number_points_on_line_boorpunten(lines,
                 point['properties'][point_number_field] = i
                 i += 1
                 pnts_on_line_total.append(point)
+
      #Op een of andere manier zouden deze point_number_fields al aan de point_col moeten zijn toegevoged,
      #  maar dat gebeurt niet. Daarom een extra list (pnts_on_line_total) en een nieuwe memcollection.
     hernummered_points = MemCollection(geometry_type='MultiPoint')
     hernummered_points.writerecords(pnts_on_line_total)
+
     return hernummered_points
