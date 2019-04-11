@@ -3,7 +3,6 @@ import numpy
 from shapely.geometry import MultiLineString, LineString
 from shapely.geometry import MultiPoint
 from shapely.ops import split
-import arcpy
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine, TMultiLineString
 
@@ -138,22 +137,17 @@ def representative_length(line_col, profile_col, id_field):
                 props = feature['properties'].copy()
                 props[id_field] = sorted_points[j]['profile']['properties'][id_field]
                 props['tot_leng'] = segment.length
-                arcpy.AddMessage('Profielnaam: '+props[id_field])
                 # This can cause an error.
                 if segment._is_empty:
                     continue
 
-                # if props[id_field] == 'w1034_p184':
-                #     raw_input()
-                # if props[id_field] == 'w1020_p125':
-                #     raw_input()
                 try:
                     rep_lines_col.writerecords([
                     {'geometry': {'type': 'MultiLineString',
                                   'coordinates': [[p for p in l.coords] for l in segment]},
                      'properties': props}])
                 except:
-                    arcpy.AddMessage('Fout in coordinaten bij profiel. Profiel wordt niet meegenomen: '+ str(props[id_field]))
+                    #'Fout in coordinaten bij profiel. Profiel wordt niet meegenomen: '+ str(props[id_field]))
                     continue
 
                 # If the split point was the last to be treated, also add the remaining part of the line to the
