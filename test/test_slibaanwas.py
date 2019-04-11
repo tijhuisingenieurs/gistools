@@ -49,7 +49,6 @@ def from_shape_to_memcollection_points(input_shape):
 
 
 class TestSlibaanwas(unittest.TestCase):
-
     def setUp(self):
         self.point_list_in = [{
             'properties': {
