@@ -36,6 +36,7 @@ class TLine(LineString):
         """ add vertex at point on the line
 
         point (Point): Shapely point on a position on the line which will be added
+        point (Point): Shapely point on a position on the line which will be added
         returns: new TLine with vertex
         """
 
@@ -373,16 +374,15 @@ class TLine(LineString):
             # richting is dx en dy -> omrekenen naar dx en dy per 1 eenheid lengte
             # let op: als richting negatieve component heeft, corrigeren bij
             # horizontale en verticale lijnen!
-            
             if richting[0] == 0:
                 new_x = x
-                if richting[1] > 0:
+                if richting[1] >= 0:
                     new_y = y + extensie
                 if richting[1] < 0:
                     new_y = y - extensie
             elif richting[1] == 0:
                 new_y = y
-                if richting[0] > 0:
+                if richting[0] >= 0:
                     new_x = x + extensie
                 if richting[0] < 0:
                     new_x = x - extensie
@@ -612,3 +612,16 @@ class TMultiLineString(MultiLineString, TLine):
                 for p in l.coords:
                     self._vertexes.append(p)
         return self._vertexes
+
+
+def create_polygon(list_x, list_y):
+    """
+    Function to create a tuple polygon based on two lists with x and y coordinates.
+
+    list_x: list with x coordinates
+    list_y: list with y coordinates
+    """
+
+    polygon = list(zip(list_x, list_y))
+
+    return polygon
