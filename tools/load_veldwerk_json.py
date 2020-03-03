@@ -92,6 +92,8 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
             code = p.get('code', '')
             method_list.append(p['metadata'].get('method', ''))
             date = p.get('created', '')
+            if date == '':
+                date = None
             if date is not None:
                 date_list.append(parse_date(date))
             pole_list.append(get_float(p['location']['metadata'].get('pole_length', None)))
