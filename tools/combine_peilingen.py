@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import datetime
 import dateutil.parser as parser
+import io
 
 from gistools.utils.xml_handler import import_xml_to_memcollection
 from gistools.utils.collection import MemCollection
@@ -14,7 +15,7 @@ log = logging.getLogger(__name__)
 
 def link_table_to_dict(link_table, id_peiling):
     with open(link_table, mode='r') as infile:
-        dialect = csv.Sniffer().sniff(infile.read(1024), delimiters=';,')
+        dialect = csv.Sniffer().sniff(infile.read(1024), delimiters=';')
         infile.seek(0)
         reader = csv.reader(infile, dialect)
         link_list = [[rows[0], rows[1]] for rows in reader]
@@ -173,7 +174,9 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
 
         if len(in_lines) != 1:
             if len(in_lines) == 0:
-                log.warning('kan opgegeven inpeiling met id %s niet vinden',
+                log.warning('kan opgegeven inpeiling met id %s niet vinden. Mogelijke oorzaak mits dit het eerste '
+                            'profiel is: UTF-8-BOM encoding in '
+                            'csv bestand. Verander naar UTF-8 zonder BOM',
                             prof_id)
                 results_list.append([prof_id, "", "Kan opgegeven inpeiling niet vinden"])
             else:
