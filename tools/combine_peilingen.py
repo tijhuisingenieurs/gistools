@@ -103,7 +103,7 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
             else:
                 point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
     else:
-        scale_factor = 1/scale_factor
+        scale_factor = 1 / scale_factor
         for point in in_points:
             if point['properties']['code'] in ['22', '22R', '22r', '22L', '22l']:
                 point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
@@ -121,7 +121,8 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
                     if scale_bank_distance:
                         point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
                     else:
-                        point['properties']['afstand'] = float(point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
+                        point['properties']['afstand'] = float(
+                            point['properties']['afstand']) - dist_ttr_uit + dist_ttr_in
                 else:
                     point['properties']['afstand'] = float(point['properties']['afstand']) * scale_factor
                 new_coords = in_line.get_projected_point_at_distance(point['properties']['afstand'])
@@ -134,7 +135,7 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
         array_dist = np.array([point['properties']['afstand']
                                for point in out_points if point['properties'].get(key) is not None])
         array_level = np.array([point['properties'][key]
-                               for point in out_points if point['properties'].get(key) is not None])
+                                for point in out_points if point['properties'].get(key) is not None])
 
         left = round(out_points[0]['properties']['afstand'], 8)
         right = round(out_points[-1]['properties']['afstand'], 8)
@@ -142,14 +143,15 @@ def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line
         for point in in_points:
             if left <= round(point['properties']['afstand'], 8) <= right:
                 point['properties']['uit' + key] = round(np.interp(point['properties']['afstand'], array_dist,
-                                                                  array_level), 2)
+                                                                   array_level), 2)
 
     return in_points
 
 
 def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeiling, loc_inpeiling, loc_uitpeiling,
-                      link_table, width_peilingen="Inpeiling", id_peiling=1, scale_threshold=0.05, scale_bank_distance=False):
-
+                      link_table, width_peilingen="Inpeiling", id_peiling=1, scale_threshold=0.05,
+                      scale_bank_distance=False,
+                      in_geometry=False):
     in_point_col, in_line_col, in_tt_col, in_errors = import_xml_to_memcollection(inpeil_file, order_inpeiling,
                                                                                   loc_inpeiling)
 
@@ -216,7 +218,7 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
                         prof_id_uit,
                         scale_threshold * 100
                         )
-            message = "Inpeiling en uitpeiling verschillen {0}% in breedte".format(round(abs(perc_change*100), 2))
+            message = "Inpeiling en uitpeiling verschillen {0}% in breedte".format(round(abs(perc_change * 100), 2))
             results_list.append([prof_id, prof_id_uit, message])
 
             uit_points = list(uit_point_col.filter(property={'key': 'prof_ids', 'values': [prof_id_uit]}))
@@ -229,9 +231,10 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
         combined_points = combine_profiles(
             uit_points,
             in_points,
-            scale_factor=prof_width/uit_width,
+            scale_factor=prof_width / uit_width,
             width_peiling=width_peilingen,
-            in_line=TLine(in_line['geometry']['coordinates']),
+            in_line=TLine(in_line['geometry']['coordinates']) if in_geometry
+            else TLine(uit_line['geometry']['coordinates']),
             scale_bank_distance=scale_bank_distance
         )
 
@@ -256,7 +259,6 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
 
 def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2z1", level_peiling="Inpeiling",
                        shore_peiling="Inpeiling", vaste_bodem_aanpassen=True):
-
     with open(metfile_name, 'wb') as csvfile:
 
         fieldnames = ['regel']
