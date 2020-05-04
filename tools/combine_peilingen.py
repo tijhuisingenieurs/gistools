@@ -302,7 +302,7 @@ def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2
                 profile
             )
 
-            profile_2 = "Profiel_{0}".format(profile)
+            profile_2 = "{0}".format(profile)
 
             datum = (str(sorted_points[i]['properties']['datum']))
 
