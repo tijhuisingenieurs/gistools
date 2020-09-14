@@ -7,7 +7,8 @@ def number_points_on_line(lines,
                           line_number_field='nr',
                           line_direction_field=None,
                           point_number_field='nr',
-                          start_number=1):
+                          start_number=1,
+                          point_precision=None):
     """ Renumber the points on a set of numbered lines
 
     lines (collection of LineString of MultiLineString): lines with a number
@@ -32,10 +33,13 @@ def number_points_on_line(lines,
         line_shape = tshape(line['geometry'])
         pnts_on_line = []
 
-        for point in points.filter(bbox=line_shape.bounds, precision=10**-6):
+        if not point_precision:
+            point_precision = 10**-6
+
+        for point in points.filter(bbox=line_shape.bounds, precision=point_precision):
             pnt = Point(point['geometry']['coordinates'])
 
-            if line_shape.almost_intersect_with_point(pnt, decimals=2):
+            if line_shape.almost_intersect_with_point(pnt, decimals=2, point_precision=point_precision):
                 point['dist'] = line_shape.project(pnt)
                 pnts_on_line.append(point)
 

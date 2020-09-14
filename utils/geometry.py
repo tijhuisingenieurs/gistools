@@ -76,7 +76,7 @@ class TLine(LineString):
         """representation in the format of ((x, y),(x, y))"""
         return tuple([pnt for pnt in self.coords])
 
-    def almost_intersect_with_point(self, other, decimals=6):
+    def almost_intersect_with_point(self, other, decimals=6, point_precision=None):
         """Test intersection taking an small possible error in account
 
         other (shapely geometry): other geometry to test intersection
@@ -85,12 +85,18 @@ class TLine(LineString):
         """
 
         log.warning(self.distance(other))
-        if self.intersects(other):
-            return True
-        elif self.distance(other) < 10**-decimals:
-            return True
+        if point_precision:
+            if self.distance(other) < point_precision:
+                return True
+            else:
+                return False
         else:
-            return False
+            if self.intersects(other):
+                return True
+            elif self.distance(other) < 10**-decimals:
+                return True
+            else:
+                return False
 
     @property
     def vertexes(self):

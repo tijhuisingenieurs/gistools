@@ -125,6 +125,7 @@ def get_end_points(lines,
 
 
 def connect_lines(lines,
+                  buffer_value=0,
                   line_id_field='id',
                   correct_overshoot_units=None,
                   correct_with_extend_units=None,
@@ -196,7 +197,7 @@ def connect_lines(lines,
 
             # check if endpoint is on other line
 
-            if cand_line.intersects(start_pnt):
+            if cand_line.intersects(start_pnt.buffer(buffer_value)):
                 # on line
                 feature['properties']['link_start'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(start_pnt.coords[0])
@@ -208,7 +209,7 @@ def connect_lines(lines,
                     cand_line = cand_line.add_vertex_at_point(start_pnt)
                     candidate['geometry']['coordinates'] = cand_line.coordinates
 
-            if cand_line.intersects(end_pnt):
+            if cand_line.intersects(end_pnt.buffer(buffer_value)):
                 feature['properties']['link_end'].append(candidate['id'])
                 candidate['properties']['link_loc'].append(end_pnt.coords[0])
 
@@ -216,6 +217,7 @@ def connect_lines(lines,
                     # add vertex to line
                     cand_line = cand_line.add_vertex_at_point(end_pnt)
                     candidate['geometry']['coordinates'] = cand_line.coordinates
+
 
     # del cand_line, candidate, start_line, start_pnt
 
@@ -241,6 +243,7 @@ def connect_lines(lines,
                         'coordinates': first_line_part.coordinates},
                     'properties': copy(feature['properties'])
                 }
+
                 line_part['properties']['part'] = i
                 output_lines.write(line_part)
                 nr = i + 1
@@ -252,10 +255,17 @@ def connect_lines(lines,
                     'coordinates': line.coordinates},
                 'properties': copy(feature['properties'])
             }
+            #if line_part['geometry']['coordinates'][0][0] != line_part['geometry']['coordinates'][0][-1]:
             line_part['properties']['part'] = nr
             output_lines.write(line_part)
 
-        return output_lines
+        # check if lines only consist of a point instead of a line
+        final_output_lines = MemCollection()
+        for line in output_lines:
+            if line['geometry']['coordinates'][0][0] != line['geometry']['coordinates'][0][-1]:
+                final_output_lines.write(line)
+
+        return final_output_lines
 
     return lines
 

@@ -2,6 +2,7 @@ import os
 import csv
 import pandas as pd
 
+
 # ------------ Part1: Check the metfile
 def check_metfile(input_file, output_file):
     ''' Functie die een metfile leest en dan checkt of de profielinformatie en de metingen genoeg elementen hebben. En

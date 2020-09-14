@@ -167,7 +167,7 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
     """
      
     records = []
-              
+
     for feature in poly_col:
         if type(feature['geometry']['coordinates'][0][0]) != tuple: 
             line = TLine(feature['geometry']['coordinates'])
@@ -175,7 +175,8 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
             line = TLine(feature['geometry']['coordinates'][0])
         
         contour_buffer = line.buffer(2.0)
-        
+
+
         for p in point_col.filter(bbox=contour_buffer.bounds, precision=10**-6):
         
             if p in point_col.filter(bbox=line.bounds, precision=10**-6):
@@ -214,9 +215,8 @@ def get_distance_point_to_contour(poly_col, point_col, poly_id_field):
                 records.append({'geometry': {'type': pnt.type,
                                              'coordinates': pnt.coords[0]},
                                              'properties': props})
-            
-            
-    point_dist_col = MemCollection(geometry_type=pnt.type) 
+
+    point_dist_col = MemCollection()
     point_dist_col.writerecords(records)
             
     return point_dist_col

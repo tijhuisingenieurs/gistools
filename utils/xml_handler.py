@@ -116,16 +116,16 @@ def import_xml_to_memcollection(xml_file, zvalues, id_location):
                 properties_p['y_coord'] = get_float(point_list[3])
                 properties_p['zvalues'] = zvalues
                 
-                if zvalues == 'z1z2':
+                if zvalues == 'z2z1':
                     properties_p['_ok_nap'] = get_float(point_list[4])
                     properties_p['_bk_nap'] = get_float(point_list[5])                  
-                elif zvalues == 'z2z1':                   
+                elif zvalues == 'z1z2':
                     properties_p['_ok_nap'] = get_float(point_list[5])
                     properties_p['_bk_nap'] = get_float(point_list[4])
-                elif zvalues == 'z1':               
+                elif zvalues == 'z2':
                     properties_p['_ok_nap'] = get_float(point_list[4])
                     properties_p['_bk_nap'] = get_float(point_list[4])
-                elif zvalues == 'z2':                 
+                elif zvalues == 'z1':
                     properties_p['_ok_nap'] = get_float(point_list[5])
                     properties_p['_bk_nap'] = get_float(point_list[5])   
                 
