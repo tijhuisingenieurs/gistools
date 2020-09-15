@@ -128,9 +128,19 @@ def export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_le
         remarks = ""
 
         try:
-            prof_id = int(line_col[j]['properties']['ids'])
+            if 'ids' in line_col[j]['properties']:
+                prof_id = int(line_col[j]['properties']['ids'])
+            elif 'Id' in line_col[j]['properties']:
+                prof_id = int(line_col[j]['properties']['Id'])
+            elif 'FID' in line_col[j]['properties']:
+                prof_id = int(line_col[j]['properties']['FID'])
         except ValueError:
-            prof_id = line_col[j]['properties']['ids']
+            if 'ids' in line_col[j]['properties']:
+                prof_id = line_col[j]['properties']['ids']
+            elif 'Id' in line_col[j]['properties']:
+                prof_id = line_col[j]['properties']['Id']
+            elif 'FID' in line_col[j]['properties']:
+                prof_id = line_col[j]['properties']['FID']
 
         prof_points = list(point_col.filter(property={'key': 'prof_ids', 'values': [str(prof_id)]}))
         for point in prof_points:
