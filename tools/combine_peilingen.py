@@ -68,7 +68,7 @@ def results_dict_to_csv(results_list, results_file):
     return
 
 
-def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line, scale_bank_distance=False, in_geometry=False):
+def combine_profiles(out_points, in_points, scale_factor, width_peiling, in_line, scale_bank_distance=False):
     date = out_points[0]['properties']['datum']
     dist_ttr_in = float([point for point in in_points if point['properties']['code'] in
                          ('22', '22R', '22r')][-1]['properties']['afstand'])
@@ -233,10 +233,8 @@ def combine_peilingen(inpeil_file, uitpeil_file, order_inpeiling, order_uitpeili
             in_points,
             scale_factor=prof_width / uit_width,
             width_peiling=width_peilingen,
-            in_line=TLine(in_line['geometry']['coordinates']) if in_geometry
-            else TLine(uit_line['geometry']['coordinates']),
+            in_line=TLine(in_line['geometry']['coordinates']),
             scale_bank_distance=scale_bank_distance,
-            in_geometry=in_geometry
         )
 
         for combined_point in combined_points:
@@ -380,7 +378,7 @@ def convert_to_metfile(point_col, project, metfile_name, results_list, order="z2
                 current_profile = profile
 
             # wegschrijven meting regels
-            if order == "z2z1":
+            if order == "z1z2":
                 meting_tekst = "<METING>{0},{1},{2},{3},{4},{5},</METING>".format(
                     code,
                     tekencode,
