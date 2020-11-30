@@ -456,6 +456,34 @@ class TLine(LineString):
                            
         return line_angle
 
+    def get_line_angle_with_negatives(self):
+        """ get angle of line in degrees, between start and endpoint of line
+        North = 0 degrees, East = 90 degrees
+
+        return: value of angel
+        """
+
+        coords = []
+        if hasattr(self, 'geoms'):
+            for p in self.geoms:
+                coords.extend(p.coords)
+        else:
+            coords = self.coords
+
+        start_x = coords[0][0]
+        start_y = coords[0][1]
+        end_x = coords[-1][0]
+        end_y = coords[-1][1]
+
+        if start_x == end_x:
+            line_angle = 0
+        elif start_y == end_y:
+            line_angle = 90
+        else:
+            line_angle = round(degrees(atan2((end_x - start_x), (end_y - start_y))), 1)
+
+        return line_angle
+
     def get_scaled_line_with_length(self, target_length, scale_point_perc=0):
         """ get line with given line, with same direction and scaled
         around the scale point
