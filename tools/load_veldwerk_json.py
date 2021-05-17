@@ -64,7 +64,7 @@ def fielddata_to_memcollections(filename, profile_plan_col=None, profile_id_fiel
         prof = OrderedDict()
 
         prof['pk'] = pro_pk
-        prof['ids'] = profile.get('ids', '')
+        prof['ids'] = profile.get('ids', '').replace('#i0', '')
         prof['project_id'] = project_id
         prof['proj_name'] = proj_name
         prof['opm'] = profile.get('remarks', '').replace('\n', '')
@@ -521,6 +521,11 @@ def calc_profile_distance(point, ttl, ttr, manual_width):
         distance = sqrt((point_one['rd_coordinates'][0] - point_two['rd_coordinates'][0]) ** 2 +
                         (point_one['rd_coordinates'][1] - point_two['rd_coordinates'][1]) ** 2)
         return distance
+
+    try:
+        point['rd_coordinates'] = (point['location']['x'], point['location']['y'], point['location']['z'])
+    except:
+        point['rd_coordinates'] = None
 
     if point['code'] == '22L':
         return 0.0
